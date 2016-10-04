@@ -54,30 +54,6 @@ var data = {
               nodesDown: 0
             }
           }
-        },
-        "HKM" : {
-          environments: {
-            "d1euw1": {
-              nodesUp: 2,
-              nodesDown: 0
-            },
-            "ueuw1": {
-              nodesUp: 2,
-              nodesDown: 0
-            },
-            "u3euw1": {
-              nodesUp: 2,
-              nodesDown: 0
-            },
-            "s1euw1": {
-              nodesUp: 2,
-              nodesDown: 0
-            },
-            "peuw1": {
-              nodesUp: 2,
-              nodesDown: 0
-            }
-          }
         }
       }
     },
