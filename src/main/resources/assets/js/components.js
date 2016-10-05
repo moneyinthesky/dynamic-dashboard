@@ -1,72 +1,6 @@
 var staticData = {
   title: "Dynamic Dashboard"
 }
-var data = {
-  dataCenters: {
-    "AWS" : {
-      primary: true,
-      environments: ["d1euw1", "ueuw1", "u3euw1", "s1euw1", "peuw1"],
-      applications: {
-        "DCM" : {
-          environments: {
-            "d1euw1": {
-              nodesUp: 2,
-              nodesDown: 2
-            },
-            "ueuw1": {
-              nodesUp: 2,
-              nodesDown: 0
-            },
-            "u3euw1": {
-              nodesUp: 20,
-              nodesDown: 0
-            },
-            "s1euw1": {
-              nodesUp: 15,
-              nodesDown: 5
-            },
-            "peuw1": {
-              nodesUp: 20,
-              nodesDown: 0
-            }
-          }
-        },
-        "CRM" : {
-          environments: {
-            "d1euw1": {
-              nodesUp: 2,
-              nodesDown: 0
-            },
-            "ueuw1": {
-              nodesUp: 2,
-              nodesDown: 0
-            },
-            "u3euw1": {
-              nodesUp: 10,
-              nodesDown: 0
-            },
-            "s1euw1": {
-              nodesUp: 10,
-              nodesDown: 0
-            },
-            "peuw1": {
-              nodesUp: 10,
-              nodesDown: 0
-            }
-          }
-        }
-      }
-    },
-    "M25 Hemel": {
-      primary: false,
-      environments: []
-    },
-    "M25 Slough": {
-      primary: false,
-      environments: []
-    }
-  }
-};
 
 var TitleBar = React.createClass({
   render: function() {
@@ -81,8 +15,28 @@ var TitleBar = React.createClass({
 });
 
 var DataCenterTabs = React.createClass({
+  getInitialState: function() {
+    return {data: []};
+  },
+  loadData: function() {
+    $.ajax({
+      url: this.props.url,
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        this.setState({data: data});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
+  },
+  componentDidMount: function() {
+    this.loadData();
+    setInterval(this.loadData, this.props.pollInterval);
+  },
   render: function() {
-    var dataCenterTabs = $.map(this.props.data.dataCenters, function(value, dataCenter) {
+    var dataCenterTabs = $.map(this.state.data.dataCenters, function(value, dataCenter) {
       return (
         <li key={dataCenter} className="nav-item">
           <a className={"nav-link" + (value.primary==true ? ' active' : '')} data-toggle="tab" href={'#' + dataCenter.replace(/\s+/g, '-').toLowerCase()} role="tab"><h5>{dataCenter}</h5></a>
@@ -96,8 +50,28 @@ var DataCenterTabs = React.createClass({
 });
 
 var DataCenterDashboards = React.createClass({
+  getInitialState: function() {
+    return {data: []};
+  },
+  loadData: function() {
+    $.ajax({
+      url: this.props.url,
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        this.setState({data: data});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
+  },
+  componentDidMount: function() {
+    this.loadData();
+    setInterval(this.loadData, this.props.pollInterval);
+  },
   render: function() {
-    var dataCenterDashboards = $.map(this.props.data.dataCenters, function(value, dataCenter) {
+    var dataCenterDashboards = $.map(this.state.data.dataCenters, function(value, dataCenter) {
       return (
         <div key={dataCenter} className={"tab-pane" + (value.primary==true ? ' active' : '')} id={dataCenter.replace(/\s+/g, '-').toLowerCase()} role="tabpanel">
           <DataCenterDashboard dataCenter={value} />
@@ -169,6 +143,7 @@ var ApplicationEnvironmentStatus = React.createClass({
   }
 });
 
+
 ReactDOM.render(<TitleBar title={staticData.title} />, document.getElementById('title-bar'));
-ReactDOM.render(<DataCenterTabs data={data} />, document.getElementById('data-center-tabs'));
-ReactDOM.render(<DataCenterDashboards data={data} />, document.getElementById('data-center-tab-content'));
+ReactDOM.render(<DataCenterTabs url="/api/data" pollInterval={2000} />, document.getElementById('data-center-tabs'));
+ReactDOM.render(<DataCenterDashboards url="/api/data" pollInterval={2000} />, document.getElementById('data-center-tab-content'));
