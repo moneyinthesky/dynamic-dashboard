@@ -15,31 +15,11 @@ var TitleBar = React.createClass({
 });
 
 var FooterBar = React.createClass({
-  getInitialState: function() {
-    return {data: []};
-  },
-  loadData: function() {
-    $.ajax({
-      url: this.props.url,
-      dataType: 'json',
-      cache: false,
-      success: function(data) {
-        this.setState({data: data});
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-      }.bind(this)
-    });
-  },
-  componentDidMount: function() {
-    this.loadData();
-    setInterval(this.loadData, this.props.pollInterval);
-  },
   render: function() {
     return (
       <footer className="footer">
           <div className="pull-xs-right container">
-              <p className="text-muted">{"Time generated: " + this.state.data.timeGenerated}</p>
+              <p className="text-muted">{"Time generated: " + this.props.data.timeGenerated}</p>
           </div>
       </footer>
     );
@@ -47,28 +27,8 @@ var FooterBar = React.createClass({
 });
 
 var DataCenterTabs = React.createClass({
-  getInitialState: function() {
-    return {data: []};
-  },
-  loadData: function() {
-    $.ajax({
-      url: this.props.url,
-      dataType: 'json',
-      cache: false,
-      success: function(data) {
-        this.setState({data: data});
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-      }.bind(this)
-    });
-  },
-  componentDidMount: function() {
-    this.loadData();
-    setInterval(this.loadData, this.props.pollInterval);
-  },
   render: function() {
-    var dataCenterTabs = $.map(this.state.data.dataCenters, function(value, dataCenter) {
+    var dataCenterTabs = $.map(this.props.data.dataCenters, function(value, dataCenter) {
       return (
         <li key={dataCenter} className="nav-item">
           <a className={"nav-link" + (value.primary==true ? ' active' : '')} data-toggle="tab" href={'#' + dataCenter.replace(/\s+/g, '-').toLowerCase()} role="tab"><h5>{dataCenter}</h5></a>
@@ -82,28 +42,8 @@ var DataCenterTabs = React.createClass({
 });
 
 var DataCenterDashboards = React.createClass({
-  getInitialState: function() {
-    return {data: []};
-  },
-  loadData: function() {
-    $.ajax({
-      url: this.props.url,
-      dataType: 'json',
-      cache: false,
-      success: function(data) {
-        this.setState({data: data});
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-      }.bind(this)
-    });
-  },
-  componentDidMount: function() {
-    this.loadData();
-    setInterval(this.loadData, this.props.pollInterval);
-  },
   render: function() {
-    var dataCenterDashboards = $.map(this.state.data.dataCenters, function(value, dataCenter) {
+    var dataCenterDashboards = $.map(this.props.data.dataCenters, function(value, dataCenter) {
       return (
         <div key={dataCenter} className={"tab-pane" + (value.primary==true ? ' active' : '')} id={dataCenter.replace(/\s+/g, '-').toLowerCase()} role="tabpanel">
           <DataCenterDashboard dataCenter={value} />
@@ -175,8 +115,43 @@ var ApplicationEnvironmentStatus = React.createClass({
   }
 });
 
+var Parent = React.createClass({
+  getInitialState: function() {
+    return {data: []};
+  },
+  loadData: function() {
+    $.ajax({
+      url: this.props.url,
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        this.setState({data: data});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
+  },
+  componentDidMount: function() {
+    this.loadData();
+    setInterval(this.loadData, this.props.pollInterval);
+  },
+  render: function() {
+    return (
+        <div>
+            <div id="title-bar" className="container-fluid">
+                <TitleBar title={this.props.staticData.title} />
+            </div>
 
-ReactDOM.render(<TitleBar title={staticData.title} />, document.getElementById('title-bar'));
-ReactDOM.render(<DataCenterTabs url="/api/data" pollInterval={2000} />, document.getElementById('data-center-tabs'));
-ReactDOM.render(<DataCenterDashboards url="/api/data" pollInterval={2000} />, document.getElementById('data-center-tab-content'));
-ReactDOM.render(<FooterBar url="/api/data" pollInterval={2000} />, document.getElementById('footer-bar'));
+            <div id="data-center-dashboard" className="container-fluid">
+                <div id="data-center-tabs"><DataCenterTabs data={this.state.data} /></div>
+                <div id="data-center-tab-content"><DataCenterDashboards data={this.state.data} /></div>
+            </div>
+
+            <div id="footer-bar"><FooterBar data={this.state.data} /></div>
+        </div>
+    );
+  }
+});
+
+ReactDOM.render(<Parent staticData={staticData} url="/api/data" pollInterval={2000} />, document.getElementById('parent'));
