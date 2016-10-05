@@ -1,15 +1,54 @@
-var staticData = {
-  title: "Dynamic Dashboard"
-}
 
 var TitleBar = React.createClass({
   render: function() {
     return (
       <h1>{this.props.title}
         <div className="pull-xs-right">
-          <button id="settings-button" type="button" className="btn btn-secondary btn-md active">Settings</button>
+          <button id="settings-button" type="button" className="btn btn-secondary btn-md active" data-toggle="modal" data-target="#settings-modal">Settings</button>
         </div>
       </h1>
+    );
+  }
+});
+
+var ModalSettings = React.createClass ({
+  getInitialState: function() {
+    return {title: ''};
+  },
+  handleChange(event) {
+    this.setState({title: event.target.value});
+  },
+  handleSave: function() {
+    this.props.onSave(this.refs.titleField.value);
+  },
+  render: function() {
+    return (
+        <div className="modal" id="settings-modal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <form>
+              <div className="modal-header">
+                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 className="modal-title" id="myModalLabel">Settings</h4>
+              </div>
+              <div className="modal-body">
+                <div className="form-group row">
+                  <label htmlFor="example-text-input" className="col-xs-4 col-form-label">Dashboard Title</label>
+                  <div className="col-xs-8">
+                    <input value={this.state.title} ref="titleField" className="form-control" type="text" onChange={this.handleChange} />
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" className="btn btn-primary" onClick={this.handleSave}>Save</button>
+              </div>
+              </form>
+            </div>
+          </div>
+        </div>
     );
   }
 });
@@ -117,7 +156,7 @@ var ApplicationEnvironmentStatus = React.createClass({
 
 var Parent = React.createClass({
   getInitialState: function() {
-    return {data: []};
+    return {data: [], settings: {}};
   },
   loadData: function() {
     $.ajax({
@@ -132,26 +171,44 @@ var Parent = React.createClass({
       }.bind(this)
     });
   },
+  loadSettings: function() {
+    $.ajax({
+      url: this.props.settingsUrl,
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        this.setState({settings: data});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.settingsUrl, status, err.toString());
+      }.bind(this)
+    });
+  },
   componentDidMount: function() {
+    this.loadSettings();
     this.loadData();
     setInterval(this.loadData, this.props.pollInterval);
+  },
+  handleSaveSettings: function(newTitle) {
+    var newSettings = _.extend({}, this.state.settings);
+    newSettings.title = newTitle;
+    this.setState({ settings: newSettings });
   },
   render: function() {
     return (
         <div>
             <div id="title-bar" className="container-fluid">
-                <TitleBar title={this.props.staticData.title} />
+                <TitleBar title={this.state.settings.title} />
             </div>
-
             <div id="data-center-dashboard" className="container-fluid">
                 <div id="data-center-tabs"><DataCenterTabs data={this.state.data} /></div>
                 <div id="data-center-tab-content"><DataCenterDashboards data={this.state.data} /></div>
             </div>
-
             <div id="footer-bar"><FooterBar data={this.state.data} /></div>
+            <ModalSettings settings={this.state.settings} onSave={this.handleSaveSettings} />
         </div>
     );
   }
 });
 
-ReactDOM.render(<Parent staticData={staticData} url="/api/data" pollInterval={2000} />, document.getElementById('parent'));
+ReactDOM.render(<Parent url="/api/data" settingsUrl="/api/data/settings" pollInterval={2000} />, document.getElementById('parent'));
