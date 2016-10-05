@@ -14,6 +14,38 @@ var TitleBar = React.createClass({
   }
 });
 
+var FooterBar = React.createClass({
+  getInitialState: function() {
+    return {data: []};
+  },
+  loadData: function() {
+    $.ajax({
+      url: this.props.url,
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        this.setState({data: data});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
+  },
+  componentDidMount: function() {
+    this.loadData();
+    setInterval(this.loadData, this.props.pollInterval);
+  },
+  render: function() {
+    return (
+      <footer className="footer">
+          <div className="pull-xs-right container">
+              <p className="text-muted">{"Time generated: " + this.state.data.timeGenerated}</p>
+          </div>
+      </footer>
+    );
+  }
+});
+
 var DataCenterTabs = React.createClass({
   getInitialState: function() {
     return {data: []};
@@ -147,3 +179,4 @@ var ApplicationEnvironmentStatus = React.createClass({
 ReactDOM.render(<TitleBar title={staticData.title} />, document.getElementById('title-bar'));
 ReactDOM.render(<DataCenterTabs url="/api/data" pollInterval={2000} />, document.getElementById('data-center-tabs'));
 ReactDOM.render(<DataCenterDashboards url="/api/data" pollInterval={2000} />, document.getElementById('data-center-tab-content'));
+ReactDOM.render(<FooterBar url="/api/data" pollInterval={2000} />, document.getElementById('footer-bar'));
