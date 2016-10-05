@@ -1,6 +1,6 @@
 html,body {
   background-color: #757575;
-  color: white;
+  color: #80CBC4;
 }
 .table th, td {
    text-align: center;
@@ -20,11 +20,14 @@ button {
   margin-right: 2px;
 }
 a:link {
-    color: white;
+    color: #80CBC4;
 }
 
 .nav-tabs {
     border-bottom: 0px;
+}
+.nav-tabs .nav-link {
+    border: 2px solid #80CBC4;
 }
 .nav-tabs .nav-link.active,
 .nav-tabs .nav-link.active:hover,
@@ -39,7 +42,7 @@ a:link {
 }
 .nav-tabs .nav-link:hover {
     border: 2px solid;
-        border-color: #80CBC4;
+    border-color: #80CBC4;
 }
 .btn-secondary.active {
     border: 2px solid;
