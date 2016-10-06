@@ -4,7 +4,9 @@ var TitleBar = React.createClass({
     return (
       <h1>{this.props.title}
         <div className="pull-xs-right">
-          <button id="settings-button" type="button" className="btn btn-secondary btn-md active" data-toggle="modal" data-target="#settings-modal">Settings</button>
+          <button id="settings-button" type="button" className="btn btn-secondary btn-md active" data-toggle="modal" data-target="#settings-modal">
+            <img src="images/gear.png" width="35" />
+          </button>
         </div>
       </h1>
     );
@@ -13,7 +15,12 @@ var TitleBar = React.createClass({
 
 var ModalSettings = React.createClass ({
   getInitialState: function() {
-    return {title: ''};
+    return {title: this.props.settings.title};
+  },
+  componentWillReceiveProps: function(nextProps) {
+    if(nextProps.settings.title != this.props.settings.title) {
+        this.setState({title: nextProps.settings.title});
+    }
   },
   handleChange(event) {
     this.setState({title: event.target.value});
@@ -23,7 +30,7 @@ var ModalSettings = React.createClass ({
   },
   render: function() {
     return (
-        <div className="modal" id="settings-modal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div className="modal fade" id="settings-modal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
           <div className="modal-dialog" role="document">
             <div className="modal-content">
               <form>
@@ -43,7 +50,7 @@ var ModalSettings = React.createClass ({
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" className="btn btn-primary" onClick={this.handleSave}>Save</button>
+                <button type="button" className="btn btn-primary" data-dismiss="modal" onClick={this.handleSave}>Save</button>
               </div>
               </form>
             </div>

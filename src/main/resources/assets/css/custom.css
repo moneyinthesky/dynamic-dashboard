@@ -74,6 +74,7 @@ a:link {
 }
 #settings-button {
   background-color: #212121; color: #80CBC4;
+  padding: 0;
 }
 #data-center-dashboard {
   padding-top: 10px;
