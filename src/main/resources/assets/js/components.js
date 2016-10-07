@@ -1,18 +1,3 @@
-
-var TitleBar = React.createClass({
-  render: function() {
-    return (
-      <h1>{this.props.title}
-        <div className="pull-xs-right">
-          <button id="settings-button" type="button" className="btn btn-secondary btn-md active" data-toggle="modal" data-target="#settings-modal">
-            <img src="images/gear.png" width="35" />
-          </button>
-        </div>
-      </h1>
-    );
-  }
-});
-
 var ModalSettings = React.createClass ({
   getInitialState: function() {
     return {title: this.props.settings.title};
@@ -26,7 +11,7 @@ var ModalSettings = React.createClass ({
     this.setState({title: event.target.value});
   },
   handleSave: function() {
-    this.props.onSave(this.refs.titleField.value);
+    this.props.onSave(this.state);
   },
   render: function() {
     return (
@@ -44,7 +29,7 @@ var ModalSettings = React.createClass ({
                 <div className="form-group row">
                   <label htmlFor="example-text-input" className="col-xs-4 col-form-label">Dashboard Title</label>
                   <div className="col-xs-8">
-                    <input value={this.state.title} ref="titleField" className="form-control" type="text" onChange={this.handleChange} />
+                    <input value={this.state.title} className="form-control" type="text" onChange={this.handleChange} />
                   </div>
                 </div>
               </div>
@@ -56,6 +41,20 @@ var ModalSettings = React.createClass ({
             </div>
           </div>
         </div>
+    );
+  }
+});
+
+var TitleBar = React.createClass({
+  render: function() {
+    return (
+      <h1>{this.props.title}
+        <div className="pull-xs-right">
+          <button id="settings-button" type="button" className="btn btn-secondary btn-md active" data-toggle="modal" data-target="#settings-modal">
+            <img src="images/gear.png" width="35" />
+          </button>
+        </div>
+      </h1>
     );
   }
 });
@@ -196,10 +195,19 @@ var Parent = React.createClass({
     this.loadData();
     setInterval(this.loadData, this.props.pollInterval);
   },
-  handleSaveSettings: function(newTitle) {
-    var newSettings = _.extend({}, this.state.settings);
-    newSettings.title = newTitle;
+  handleSaveSettings: function(newSettings) {
     this.setState({ settings: newSettings });
+
+    $.ajax({
+      url: this.props.settingsUrl,
+      contentType: "application/json",
+      dataType: 'json',
+      type: 'POST',
+      data: JSON.stringify(newSettings),
+      error: function(xhr, status, err) {
+        console.error(this.props.settingsUrl, status, err.toString());
+      }.bind(this)
+    });
   },
   render: function() {
     return (

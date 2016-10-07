@@ -4,10 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import io.moneyinthesky.dashboard.data.PersistedSettings;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -38,6 +37,13 @@ public class DashboardResource {
     @GET
     @Path("/settings")
     public PersistedSettings getSettings() throws IOException {
-        return objectMapper.readValue(Resources.toString(getResource("persisted-settings.json"), UTF_8), PersistedSettings.class);
+        return objectMapper.readValue(new File("persisted/settings.json"), PersistedSettings.class);
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/settings")
+    public void setSettings(PersistedSettings settings) throws IOException {
+        objectMapper.writeValue(new File("persisted/settings.json"), settings);
     }
 }
