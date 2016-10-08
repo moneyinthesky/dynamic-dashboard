@@ -1,19 +1,46 @@
 var ModalSettings = React.createClass ({
   getInitialState: function() {
-    return {title: this.props.settings.title};
+    return {
+        title: this.props.settings.title,
+        applications: [],
+        applicationToAdd: ""
+        };
   },
   componentWillReceiveProps: function(nextProps) {
     if(nextProps.settings.title != this.props.settings.title) {
         this.setState({title: nextProps.settings.title});
     }
   },
-  handleChange(event) {
+  handleTitleChange(event) {
     this.setState({title: event.target.value});
+  },
+  handleApplicationToAddChange(event) {
+    this.setState({applicationToAdd: event.target.value});
+  },
+  addApplication(event) {
+    if(this.state.applicationToAdd) {
+      this.state.applications.push(this.state.applicationToAdd);
+      this.setState({ applications: this.state.applications, applicationToAdd: '' });
+    }
+  },
+  removeApplication(event) {
+    this.state.applications.splice(event.target.dataset.index, 1);
+    this.setState({applications: this.state.applications});
   },
   handleSave: function() {
     this.props.onSave(this.state);
   },
   render: function() {
+    var applicationRows = this.state.applications.map(function(application, index) {
+          return (
+            <div key={application} className="input-group">
+              <input key={application} value={application} readOnly className="form-control" type="text" />
+              <span className="input-group-btn">
+                <button key={application} type="button" data-index={index} className="btn btn-danger mega-octicon octicon-dash" onClick={this.removeApplication}></button>
+              </span>
+            </div>
+          );
+        }.bind(this));
     return (
         <div className="modal fade" id="settings-modal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
           <div className="modal-dialog" role="document">
@@ -29,9 +56,21 @@ var ModalSettings = React.createClass ({
                 <div className="form-group row">
                   <label htmlFor="example-text-input" className="col-xs-4 col-form-label">Dashboard Title</label>
                   <div className="col-xs-8">
-                    <input value={this.state.title} className="form-control" type="text" onChange={this.handleChange} />
+                    <input value={this.state.title} className="form-control" type="text" onChange={this.handleTitleChange} />
                   </div>
                 </div>
+                <fieldset className="form-group row">
+                    <legend className="col-form-legend col-xs-4">Applications</legend>
+                    <div className="col-xs-8">
+                      {applicationRows}
+                      <div className="input-group">
+                        <input value={this.state.applicationToAdd} className="form-control" type="text" onChange={this.handleApplicationToAddChange} />
+                        <span className="input-group-btn">
+                          <button type="button" className="btn btn-success mega-octicon octicon-plus" onClick={this.addApplication}></button>
+                        </span>
+                      </div>
+                    </div>
+                </fieldset>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>

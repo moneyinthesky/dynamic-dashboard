@@ -25,7 +25,6 @@ h4 {
 }
 button {
   margin-left: 2px;
-  margin-right: 2px;
 }
 a:link {
     color: #80CBC4;
@@ -69,6 +68,13 @@ a:link {
     vertical-align: middle;
 }
 
+.modal-body .mega-octicon {
+    font-size: 20px;
+}
+.modal-body .mega-octicon.octicon-dash {
+    padding-left: 18.5px;
+    padding-right: 18.5px;
+}
 #title-bar {
   color: #80CBC4; padding-top: 8px; padding-bottom: 8px; background-color:#424242;
 }
