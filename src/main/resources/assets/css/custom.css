@@ -78,6 +78,10 @@ a:link {
     padding-left: 18.5px;
     padding-right: 18.5px;
 }
+.environment-datacenter-row {
+	padding-left: 50px;
+	padding-right: 50px;
+}
 .navbar-dark .navbar-brand,
 .navbar-dark .navbar-brand:hover,
 .navbar-dark .navbar-brand:focus {

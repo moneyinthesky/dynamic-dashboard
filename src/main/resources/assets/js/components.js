@@ -45,6 +45,11 @@ var ModalSettings = React.createClass ({
   handleDataCenterToAddChange(event) {
     this.setState({dataCenterToAdd: event.target.value, showEmptyDataCenterWarning: false});
   },
+  handleDataCenterEnvironmentChange(event) {
+	var dataCenter = event.target.dataset.datacenter;
+	this.state.dataCenters[dataCenter].environmentToAdd = event.target.value;
+	this.setState({dataCenters : this.state.dataCenters});
+  },
   addApplication(event) {
     if(this.state.applicationToAdd) {
       this.state.applications.push(this.state.applicationToAdd);
@@ -61,6 +66,14 @@ var ModalSettings = React.createClass ({
       this.setState({showEmptyDataCenterWarning : true})
     }
   },
+  addDataCenterEnvironment(event) {
+  	var dataCenter = event.target.dataset.datacenter;
+    if(this.state.dataCenters[dataCenter].environmentToAdd) {
+		this.state.dataCenters[dataCenter].environments.push(this.state.dataCenters[dataCenter].environmentToAdd);
+		this.state.dataCenters[dataCenter].environmentToAdd = "";
+		this.setState({ dataCenters: this.state.dataCenters });
+    }
+},
   handlePrimaryDataCenterSelect(event) {
     this.setState({primaryDataCenter : event.target.dataset.datacenter});
   },
@@ -72,19 +85,40 @@ var ModalSettings = React.createClass ({
     delete this.state.dataCenters[event.target.dataset.datacenter];
     this.setState({dataCenters: this.state.dataCenters});
   },
+  removeDataCenterEnvironment(event) {
+	var environmentToRemove = event.target.dataset.datacenterEnvironment.split("/");
+	this.state.dataCenters[environmentToRemove[0]].environments.splice(environmentToRemove[1],1);
+	this.setState({dataCenters : this.state.dataCenters});
+  },
   changeSettingsNav: function(event) {
     this.setState({activeTab: event.target.dataset.tab});
   },
   handleSave: function() {
-    this.props.onSave({ title : this.state.title,
-                        applications : this.state.applications,
-                        dataCenters : this.state.dataCenters,
-                        primaryDataCenter : this.state.primaryDataCenter
-                      });
+  	var copyOfState = this.state;
+  	delete copyOfState.applicationToAdd;
+  	delete copyOfState.dataCenterToAdd;
+  	delete copyOfState.showEmptyApplicationWarning;
+  	delete copyOfState.showEmptyDataCenterWarning;
+  	delete copyOfState.activeTab;
+  	$.map(copyOfState.dataCenters, function(value, dataCenter) {
+  		delete copyOfState.dataCenters[dataCenter].environmentToAdd;
+  	});
+
+    this.props.onSave(copyOfState);
     this.setState({activeTab: "generalSettings"});
   },
   handleClose: function() {
     this.setState({activeTab: "generalSettings"});
+  },
+  importSettings: function(event) {
+	var file = event.target.files[0];
+	var reader = new FileReader();
+
+	reader.onload = function(e) {
+      this.props.onSave(JSON.parse(reader.result));
+    }.bind(this);
+
+    reader.readAsText(file);
   },
   render: function() {
     var emptyApplicationWarning = this.state.showEmptyApplicationWarning ? <div className="form-control-feedback">Application name is required</div> : "";
@@ -117,6 +151,16 @@ var ModalSettings = React.createClass ({
     	);
     }.bind(this));
     var dataCenterEnvironmentRows = $.map(this.state.dataCenters, function(value, dataCenter) {
+    	var dataCenterEnvironmentRowsAlreadyAdded = this.state.dataCenters[dataCenter].environments.map(function(environment, index) {
+          return (
+			<div key={dataCenter + "-" + environment} className="input-group">
+			  <input key={dataCenter + "-" + environment} value={environment} readOnly className="form-control" type="text" />
+			  <span className="input-group-btn">
+				<button key={dataCenter + "-" + environment} type="button" data-datacenter-environment={dataCenter + "/" + index} className="btn btn-danger mega-octicon octicon-dash" onClick={this.removeDataCenterEnvironment}></button>
+			  </span>
+			</div>
+          );
+        }.bind(this));
     	return (
 			<div key={dataCenter} className="panel panel-default">
 			  <div className="panel-heading" role="tab" id={dataCenter}>
@@ -130,11 +174,14 @@ var ModalSettings = React.createClass ({
 				  </a>
 			  </div>
 			  <div id={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-enviornments"} className="panel-collapse collapse" role="tabpanel" aria-labelledby={dataCenter}>
-				<div className={"input-group"}>
-				  <input value={this.state.dataCenters[dataCenter].environmentToAdd} className={"form-control"} type="text" onChange={this.handleDataCenterEnvironmentChange} placeholder="Add an environment" />
-				  <span className="input-group-btn">
-					<button type="button" className="btn btn-success mega-octicon octicon-plus" onClick={this.addDataCenterEnvironment}></button>
-				  </span>
+				<div className={"input-group col-xs-6 environment-datacenter-row"}>
+				  {dataCenterEnvironmentRowsAlreadyAdded}
+				  <div key={dataCenter} className="input-group">
+					  <input value={this.state.dataCenters[dataCenter].environmentToAdd} data-datacenter={dataCenter} className={"form-control"} type="text" onChange={this.handleDataCenterEnvironmentChange} placeholder="Add an environment" />
+					  <span className="input-group-btn">
+						<button type="button" className="btn btn-success mega-octicon octicon-plus" data-datacenter={dataCenter} onClick={this.addDataCenterEnvironment}></button>
+					  </span>
+				  </div>
 				</div>
 			  </div>
 			</div>
@@ -144,7 +191,6 @@ var ModalSettings = React.createClass ({
         <div className="modal fade" id="settings-modal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
           <div className="modal-dialog modal-lg" role="document">
             <div className="modal-content">
-              <form>
               <div className="modal-header">
                 <nav className="navbar navbar-dark bg-inverse">
                   <a className="navbar-brand" href="#"><b>Settings</b></a>
@@ -165,6 +211,7 @@ var ModalSettings = React.createClass ({
                 </nav>
               </div>
               <div className="modal-body">
+              	<form>
                 <div style={(this.state.activeTab == "generalSettings" ? {display: 'inline'} : {display: 'none'})}>
                     <div className="form-group row">
                       <label htmlFor="example-text-input" className="col-xs-4 col-form-label">Dashboard Title</label>
@@ -221,13 +268,16 @@ var ModalSettings = React.createClass ({
                         </div>
                     </fieldset>
                 </div>
+                </form>
               </div>
               <div className="modal-footer">
               	<a href="/api/data/settingsJson" download="dashboard-settings.json"><button type="button" className="btn btn-secondary pull-xs-left mega-octicon octicon-cloud-download" data-toggle="tooltip" title="Export Settings" data-placement="bottom" /></a>
+              	<label className="btn btn-secondary pull-xs-left mega-octicon octicon-cloud-upload" data-toggle="tooltip" title="Import Settings" data-placement="bottom">
+                    <input type="file" style={{display: 'none'}} onChange={this.importSettings} />
+                </label>
                 <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.handleClose}>Close</button>
                 <button type="button" className="btn btn-primary" data-dismiss="modal" onClick={this.handleSave}>Save</button>
               </div>
-              </form>
             </div>
           </div>
         </div>
