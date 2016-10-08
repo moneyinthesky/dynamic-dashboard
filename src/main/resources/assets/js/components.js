@@ -55,7 +55,7 @@ var ModalSettings = React.createClass ({
   },
   addDataCenter(event) {
     if(this.state.dataCenterToAdd) {
-      this.state.dataCenters[this.state.dataCenterToAdd] = {environments:[]};
+      this.state.dataCenters[this.state.dataCenterToAdd] = {environments:[], environmentToAdd: ""};
       this.setState({ dataCenters: this.state.dataCenters, dataCenterToAdd: '' });
     } else {
       this.setState({showEmptyDataCenterWarning : true})
@@ -114,6 +114,30 @@ var ModalSettings = React.createClass ({
 			<label data-datacenter={dataCenter} key={dataCenter} className={"btn btn-primary" + (this.state.primaryDataCenter === dataCenter ? " active" : "")} onClick={this.handlePrimaryDataCenterSelect} >
 			  <input key={dataCenter} type="radio" name="primaryDataCenter" value={dataCenter} id={dataCenter} autoComplete="off"/> {dataCenter}
 			</label>
+    	);
+    }.bind(this));
+    var dataCenterEnvironmentRows = $.map(this.state.dataCenters, function(value, dataCenter) {
+    	return (
+			<div key={dataCenter} className="panel panel-default">
+			  <div className="panel-heading" role="tab" id={dataCenter}>
+				  <a className="collapsed" data-toggle="collapse" data-parent="#accordion" href={"#" + dataCenter.replace(/\s+/g, '-').toLowerCase() + "-enviornments"} aria-expanded="true" aria-controls={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-enviornments"}>
+				  	<div key={dataCenter} className="input-group">
+						<input key={dataCenter} value={dataCenter} readOnly className="form-control" type="text" />
+						<span className="input-group-btn">
+							<button key={dataCenter} type="button" className="btn btn-info mega-octicon octicon-triangle-down"></button>
+						</span>
+					</div>
+				  </a>
+			  </div>
+			  <div id={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-enviornments"} className="panel-collapse collapse" role="tabpanel" aria-labelledby={dataCenter}>
+				<div className={"input-group"}>
+				  <input value={this.state.dataCenters[dataCenter].environmentToAdd} className={"form-control"} type="text" onChange={this.handleDataCenterEnvironmentChange} placeholder="Add an environment" />
+				  <span className="input-group-btn">
+					<button type="button" className="btn btn-success mega-octicon octicon-plus" onClick={this.addDataCenterEnvironment}></button>
+				  </span>
+				</div>
+			  </div>
+			</div>
     	);
     }.bind(this));
     return (
@@ -192,26 +216,7 @@ var ModalSettings = React.createClass ({
                         <legend className="col-form-legend col-xs-4">Environments</legend>
                         <div className="col-xs-8">
                             <div id="accordion" role="tablist" aria-multiselectable="true">
-                                <div className="panel panel-default">
-                                  <div className="panel-heading" role="tab" id="headingOne">
-                                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                        <input key="AWS" value="AWS" readOnly className="form-control" type="text" />
-                                      </a>
-                                  </div>
-                                  <div id="collapseOne" className="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
-
-                                  </div>
-                                </div>
-                                <div className="panel panel-default">
-                                  <div className="panel-heading" role="tab" id="headingTwo">
-                                    <a className="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                      <input key="AWS" value="M25 Hemel" readOnly className="form-control" type="text" />
-                                    </a>
-                                  </div>
-                                  <div id="collapseTwo" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
-
-                                  </div>
-                                </div>
+								{dataCenterEnvironmentRows}
                             </div>
                         </div>
                     </fieldset>

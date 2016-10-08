@@ -22,7 +22,8 @@ import static java.time.format.DateTimeFormatter.ofLocalizedDateTime;
 @Produces(MediaType.APPLICATION_JSON)
 public class DashboardResource {
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+	private static final String PERSISTED_SETTINGS_JSON = "persisted/settings.json";
+	private ObjectMapper objectMapper = new ObjectMapper();
 
     @GET
     public String getData() throws IOException {
@@ -37,21 +38,21 @@ public class DashboardResource {
     @GET
     @Path("/settings")
     public PersistedSettings getSettings() throws IOException {
-        return objectMapper.readValue(new File("persisted/settings.json"), PersistedSettings.class);
+        return objectMapper.readValue(new File(PERSISTED_SETTINGS_JSON), PersistedSettings.class);
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/settings")
     public void setSettings(PersistedSettings settings) throws IOException {
-        objectMapper.writeValue(new File("persisted/settings.json"), settings);
+        objectMapper.writeValue(new File(PERSISTED_SETTINGS_JSON), settings);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/settingsJson")
     public String getSettingsJson() throws IOException {
-        PersistedSettings settings = objectMapper.readValue(new File("persisted/settings.json"), PersistedSettings.class);
+        PersistedSettings settings = objectMapper.readValue(new File(PERSISTED_SETTINGS_JSON), PersistedSettings.class);
         return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(settings);
     }
 }
