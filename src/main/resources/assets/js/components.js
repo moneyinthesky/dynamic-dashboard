@@ -10,6 +10,16 @@ var ModalSettings = React.createClass ({
     if(nextProps.settings.title != this.props.settings.title) {
         this.setState({title: nextProps.settings.title});
     }
+
+    var array1 = this.props.settings.applications;
+    var array2 = nextProps.settings.applications;
+    var applicationsEqual = (array1) && (array2) && (array1.length == array2.length) && array1.every(function(element, index) {
+        return element === array2[index];
+    });
+
+    if(array2 && !applicationsEqual) {
+        this.setState({ applications: array2});
+    }
   },
   handleTitleChange(event) {
     this.setState({title: event.target.value});
@@ -28,7 +38,9 @@ var ModalSettings = React.createClass ({
     this.setState({applications: this.state.applications});
   },
   handleSave: function() {
-    this.props.onSave(this.state);
+    this.props.onSave({ title : this.state.title,
+                        applications : this.state.applications
+                      });
   },
   render: function() {
     var applicationRows = this.state.applications.map(function(application, index) {
