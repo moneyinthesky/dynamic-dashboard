@@ -4,7 +4,8 @@ var ModalSettings = React.createClass ({
         title: this.props.settings.title,
         applications: [],
         applicationToAdd: "",
-        showEmptyApplicationWarning: false
+        showEmptyApplicationWarning: false,
+        activeTab: "generalSettings"
         };
   },
   componentWillReceiveProps: function(nextProps) {
@@ -40,10 +41,17 @@ var ModalSettings = React.createClass ({
     this.state.applications.splice(event.target.dataset.index, 1);
     this.setState({applications: this.state.applications});
   },
+  changeSettingsNav: function(event) {
+    this.setState({activeTab: event.target.dataset.tab});
+  },
   handleSave: function() {
     this.props.onSave({ title : this.state.title,
                         applications : this.state.applications
                       });
+    this.setState({activeTab: "generalSettings"});
+  },
+  handleClose: function() {
+    this.setState({activeTab: "generalSettings"});
   },
   render: function() {
     var emptyApplicationWarning = this.state.showEmptyApplicationWarning ? <div className="form-control-feedback">Application name is required</div> : "";
@@ -63,34 +71,45 @@ var ModalSettings = React.createClass ({
             <div className="modal-content">
               <form>
               <div className="modal-header">
-                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-                <h4 className="modal-title" id="myModalLabel">Settings</h4>
+                <nav className="navbar navbar-dark bg-inverse">
+                  <a className="navbar-brand" href="#">Settings</a>
+                  <ul className="nav navbar-nav">
+                    <li className={"nav-item" + (this.state.activeTab === "generalSettings" ? " active" : "")}>
+                      <a className="nav-link" href="#generalSettings" data-tab="generalSettings" onClick={this.changeSettingsNav}>General</a>
+                    </li>
+                    <li className={"nav-item" + (this.state.activeTab === "applicationSettings" ? " active" : "")}>
+                      <a className="nav-link" href="#applicationSettings" data-tab="applicationSettings" onClick={this.changeSettingsNav}>Applications</a>
+                    </li>
+                  </ul>
+                </nav>
               </div>
               <div className="modal-body">
-                <div className="form-group row">
-                  <label htmlFor="example-text-input" className="col-xs-4 col-form-label">Dashboard Title</label>
-                  <div className="col-xs-8">
-                    <input value={this.state.title} className="form-control" type="text" onChange={this.handleTitleChange} />
-                  </div>
-                </div>
-                <fieldset className="form-group row">
-                    <legend className="col-form-legend col-xs-4">Applications</legend>
-                    <div className="col-xs-8">
-                      {applicationRows}
-                      <div className={"input-group" + (this.state.showEmptyApplicationWarning ? " has-warning" : "")}>
-                        <input value={this.state.applicationToAdd} className={"form-control" + (this.state.showEmptyApplicationWarning ? " form-control-warning" : "")} type="text" onChange={this.handleApplicationToAddChange} />
-                        <span className="input-group-btn">
-                          <button type="button" className="btn btn-success mega-octicon octicon-plus" onClick={this.addApplication}></button>
-                        </span>
+                <div style={(this.state.activeTab == "generalSettings" ? {display: 'inline'} : {display: 'none'})}>
+                    <div className="form-group row">
+                      <label htmlFor="example-text-input" className="col-xs-4 col-form-label">Dashboard Title</label>
+                      <div className="col-xs-8">
+                        <input value={this.state.title} className="form-control" type="text" onChange={this.handleTitleChange} />
                       </div>
-                      {emptyApplicationWarning}
                     </div>
-                </fieldset>
+                </div>
+                <div style={(this.state.activeTab == "applicationSettings" ? {display: 'inline'} : {display: 'none'})}>
+                    <fieldset className="form-group row">
+                        <legend className="col-form-legend col-xs-4">Applications</legend>
+                        <div className="col-xs-8">
+                          {applicationRows}
+                          <div className={"input-group" + (this.state.showEmptyApplicationWarning ? " has-warning" : "")}>
+                            <input value={this.state.applicationToAdd} className={"form-control" + (this.state.showEmptyApplicationWarning ? " form-control-warning" : "")} type="text" onChange={this.handleApplicationToAddChange} />
+                            <span className="input-group-btn">
+                              <button type="button" className="btn btn-success mega-octicon octicon-plus" onClick={this.addApplication}></button>
+                            </span>
+                          </div>
+                          {emptyApplicationWarning}
+                        </div>
+                    </fieldset>
+                </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.handleClose}>Close</button>
                 <button type="button" className="btn btn-primary" data-dismiss="modal" onClick={this.handleSave}>Save</button>
               </div>
               </form>
@@ -282,4 +301,4 @@ var Parent = React.createClass({
   }
 });
 
-ReactDOM.render(<Parent url="/api/data" settingsUrl="/api/data/settings" pollInterval={2000} />, document.getElementById('parent'));
+ReactDOM.render(<Parent url="/api/data" settingsUrl="/api/data/settings" pollInterval={10000} />, document.getElementById('parent'));
