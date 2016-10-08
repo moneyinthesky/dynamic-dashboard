@@ -3,7 +3,8 @@ var ModalSettings = React.createClass ({
     return {
         title: this.props.settings.title,
         applications: [],
-        applicationToAdd: ""
+        applicationToAdd: "",
+        showEmptyApplicationWarning: false
         };
   },
   componentWillReceiveProps: function(nextProps) {
@@ -25,12 +26,14 @@ var ModalSettings = React.createClass ({
     this.setState({title: event.target.value});
   },
   handleApplicationToAddChange(event) {
-    this.setState({applicationToAdd: event.target.value});
+    this.setState({applicationToAdd: event.target.value, showEmptyApplicationWarning: false});
   },
   addApplication(event) {
     if(this.state.applicationToAdd) {
       this.state.applications.push(this.state.applicationToAdd);
       this.setState({ applications: this.state.applications, applicationToAdd: '' });
+    } else {
+      this.setState({showEmptyApplicationWarning : true})
     }
   },
   removeApplication(event) {
@@ -43,6 +46,7 @@ var ModalSettings = React.createClass ({
                       });
   },
   render: function() {
+    var emptyApplicationWarning = this.state.showEmptyApplicationWarning ? <div className="form-control-feedback">Application name is required</div> : "";
     var applicationRows = this.state.applications.map(function(application, index) {
           return (
             <div key={application} className="input-group">
@@ -55,7 +59,7 @@ var ModalSettings = React.createClass ({
         }.bind(this));
     return (
         <div className="modal fade" id="settings-modal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-          <div className="modal-dialog" role="document">
+          <div className="modal-dialog modal-lg" role="document">
             <div className="modal-content">
               <form>
               <div className="modal-header">
@@ -75,12 +79,13 @@ var ModalSettings = React.createClass ({
                     <legend className="col-form-legend col-xs-4">Applications</legend>
                     <div className="col-xs-8">
                       {applicationRows}
-                      <div className="input-group">
-                        <input value={this.state.applicationToAdd} className="form-control" type="text" onChange={this.handleApplicationToAddChange} />
+                      <div className={"input-group" + (this.state.showEmptyApplicationWarning ? " has-warning" : "")}>
+                        <input value={this.state.applicationToAdd} className={"form-control" + (this.state.showEmptyApplicationWarning ? " form-control-warning" : "")} type="text" onChange={this.handleApplicationToAddChange} />
                         <span className="input-group-btn">
                           <button type="button" className="btn btn-success mega-octicon octicon-plus" onClick={this.addApplication}></button>
                         </span>
                       </div>
+                      {emptyApplicationWarning}
                     </div>
                 </fieldset>
               </div>
