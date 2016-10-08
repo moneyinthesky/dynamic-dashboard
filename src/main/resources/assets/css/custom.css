@@ -75,6 +75,26 @@ a:link {
     padding-left: 18.5px;
     padding-right: 18.5px;
 }
+.navbar-dark .navbar-brand,
+.navbar-dark .navbar-brand:hover,
+.navbar-dark .navbar-brand:focus {
+    color: #80CBC4;
+}
+.navbar-dark .navbar-nav .active>.nav-link,
+.navbar-dark .navbar-nav .active>.nav-link:focus,
+.navbar-dark .navbar-nav .active>.nav-link:hover,
+.navbar-dark .navbar-nav .nav-link.active,
+.navbar-dark .navbar-nav .nav-link.active:focus,
+.navbar-dark .navbar-nav .nav-link.active:hover,
+.navbar-dark .navbar-nav .nav-link.open,
+.navbar-dark .navbar-nav .nav-link.open:focus,
+.navbar-dark .navbar-nav .nav-link.open:hover,
+.navbar-dark .navbar-nav .open>.nav-link,
+.navbar-dark .navbar-nav .open>.nav-link:focus,
+.navbar-dark .navbar-nav .open>.nav-link:hover {
+    color: #80CBC4;
+}
+
 #title-bar {
   color: #80CBC4; padding-top: 8px; padding-bottom: 8px; background-color:#424242;
 }

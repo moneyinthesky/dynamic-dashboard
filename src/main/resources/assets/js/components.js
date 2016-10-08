@@ -72,7 +72,7 @@ var ModalSettings = React.createClass ({
               <form>
               <div className="modal-header">
                 <nav className="navbar navbar-dark bg-inverse">
-                  <a className="navbar-brand" href="#">Settings</a>
+                  <a className="navbar-brand" href="#"><b>Settings</b></a>
                   <ul className="nav navbar-nav">
                     <li className={"nav-item" + (this.state.activeTab === "generalSettings" ? " active" : "")}>
                       <a className="nav-link" href="#generalSettings" data-tab="generalSettings" onClick={this.changeSettingsNav}>General</a>
