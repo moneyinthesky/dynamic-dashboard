@@ -46,4 +46,12 @@ public class DashboardResource {
     public void setSettings(PersistedSettings settings) throws IOException {
         objectMapper.writeValue(new File("persisted/settings.json"), settings);
     }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/settingsJson")
+    public String getSettingsJson() throws IOException {
+        PersistedSettings settings = objectMapper.readValue(new File("persisted/settings.json"), PersistedSettings.class);
+        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(settings);
+    }
 }

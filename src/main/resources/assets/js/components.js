@@ -182,7 +182,7 @@ var ModalSettings = React.createClass ({
 						</div>
 					</fieldset>
 					<fieldset className="form-group row">
-						<legend className="col-form-legend col-xs-4">Select Primary</legend>
+						<legend className="col-form-legend col-xs-4">Select Primary <span data-toggle="tooltip" title="Selected data center will appear by default when dashboard loads" data-placement="bottom" className="mega-octicon octicon-question"></span></legend>
 						<div className="col-xs-8">
 						  <div className="btn-group" data-toggle="buttons">
 						  	{primaryDataCenterSelect}
@@ -192,6 +192,7 @@ var ModalSettings = React.createClass ({
 				</div>
               </div>
               <div className="modal-footer">
+              	<a href="/api/data/settingsJson" download="dashboard-settings.json"><button type="button" className="btn btn-secondary pull-xs-left mega-octicon octicon-cloud-download" data-toggle="tooltip" title="Export Settings" data-placement="bottom" /></a>
                 <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.handleClose}>Close</button>
                 <button type="button" className="btn btn-primary" data-dismiss="modal" onClick={this.handleSave}>Save</button>
               </div>
@@ -385,3 +386,6 @@ var Parent = React.createClass({
 });
 
 ReactDOM.render(<Parent url="/api/data" settingsUrl="/api/data/settings" pollInterval={10000} />, document.getElementById('parent'));
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+});
