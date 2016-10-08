@@ -1,10 +1,15 @@
+
 var ModalSettings = React.createClass ({
   getInitialState: function() {
     return {
         title: this.props.settings.title,
         applications: [],
+        dataCenters: [],
         applicationToAdd: "",
+        dataCenterToAdd: "",
+        primaryDataCenter: "",
         showEmptyApplicationWarning: false,
+        showEmptyDataCenterWarning: false,
         activeTab: "generalSettings"
         };
   },
@@ -20,7 +25,21 @@ var ModalSettings = React.createClass ({
     });
 
     if(array2 && !applicationsEqual) {
-        this.setState({ applications: array2});
+        this.setState({applications: array2});
+    }
+
+	var dcArray1 = this.props.settings.dataCenters;
+    var dcArray2 = nextProps.settings.dataCenters;
+    var dataCentersEqual = (dcArray1) && (dcArray2) && (dcArray1.length == dcArray2.length) && dcArray1.every(function(element, index) {
+        return element === dcArray2[index];
+    });
+
+    if(dcArray2 && !dataCentersEqual) {
+        this.setState({dataCenters: dcArray2});
+    }
+
+    if(nextProps.settings.primaryDataCenter != this.props.settings.primaryDataCenter) {
+        this.setState({primaryDataCenter: nextProps.settings.primaryDataCenter});
     }
   },
   handleTitleChange(event) {
@@ -28,6 +47,9 @@ var ModalSettings = React.createClass ({
   },
   handleApplicationToAddChange(event) {
     this.setState({applicationToAdd: event.target.value, showEmptyApplicationWarning: false});
+  },
+  handleDataCenterToAddChange(event) {
+    this.setState({dataCenterToAdd: event.target.value, showEmptyDataCenterWarning: false});
   },
   addApplication(event) {
     if(this.state.applicationToAdd) {
@@ -37,16 +59,33 @@ var ModalSettings = React.createClass ({
       this.setState({showEmptyApplicationWarning : true})
     }
   },
+  addDataCenter(event) {
+    if(this.state.dataCenterToAdd) {
+      this.state.dataCenters.push(this.state.dataCenterToAdd);
+      this.setState({ dataCenters: this.state.dataCenters, dataCenterToAdd: '' });
+    } else {
+      this.setState({showEmptyDataCenterWarning : true})
+    }
+  },
+  handlePrimaryDataCenterSelect(event) {
+    this.setState({primaryDataCenter : event.target.dataset.datacenter});
+  },
   removeApplication(event) {
     this.state.applications.splice(event.target.dataset.index, 1);
     this.setState({applications: this.state.applications});
+  },
+  removeDataCenter(event) {
+    this.state.dataCenters.splice(event.target.dataset.index, 1);
+    this.setState({dataCenters: this.state.dataCenters});
   },
   changeSettingsNav: function(event) {
     this.setState({activeTab: event.target.dataset.tab});
   },
   handleSave: function() {
     this.props.onSave({ title : this.state.title,
-                        applications : this.state.applications
+                        applications : this.state.applications,
+                        dataCenters : this.state.dataCenters,
+                        primaryDataCenter : this.state.primaryDataCenter
                       });
     this.setState({activeTab: "generalSettings"});
   },
@@ -55,16 +94,34 @@ var ModalSettings = React.createClass ({
   },
   render: function() {
     var emptyApplicationWarning = this.state.showEmptyApplicationWarning ? <div className="form-control-feedback">Application name is required</div> : "";
+    var emptyDataCenterWarning = this.state.showEmptyDataCenterWarning ? <div className="form-control-feedback">Data center name is required</div> : "";
     var applicationRows = this.state.applications.map(function(application, index) {
-          return (
-            <div key={application} className="input-group">
-              <input key={application} value={application} readOnly className="form-control" type="text" />
-              <span className="input-group-btn">
-                <button key={application} type="button" data-index={index} className="btn btn-danger mega-octicon octicon-dash" onClick={this.removeApplication}></button>
-              </span>
-            </div>
-          );
-        }.bind(this));
+	  return (
+		<div key={application} className="input-group">
+		  <input key={application} value={application} readOnly className="form-control" type="text" />
+		  <span className="input-group-btn">
+			<button key={application} type="button" data-index={index} className="btn btn-danger mega-octicon octicon-dash" onClick={this.removeApplication}></button>
+		  </span>
+		</div>
+	  );
+	}.bind(this));
+    var dataCenterRows = this.state.dataCenters.map(function(dataCenter, index) {
+	  return (
+		<div key={dataCenter} className="input-group">
+		  <input key={dataCenter} value={dataCenter} readOnly className="form-control" type="text" />
+		  <span className="input-group-btn">
+			<button key={dataCenter} type="button" data-index={index} className="btn btn-danger mega-octicon octicon-dash" onClick={this.removeDataCenter}></button>
+		  </span>
+		</div>
+	  );
+	}.bind(this));
+    var primaryDataCenterSelect = this.state.dataCenters.map(function(dataCenter, index) {
+    	return (
+			<label data-datacenter={dataCenter} key={dataCenter} className={"btn btn-primary" + (this.state.primaryDataCenter === dataCenter ? " active" : "")} onClick={this.handlePrimaryDataCenterSelect} >
+			  <input key={dataCenter} type="radio" name="primaryDataCenter" value={dataCenter} id={dataCenter} autoComplete="off"/> {dataCenter}
+			</label>
+    	);
+    }.bind(this));
     return (
         <div className="modal fade" id="settings-modal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
           <div className="modal-dialog modal-lg" role="document">
@@ -79,6 +136,9 @@ var ModalSettings = React.createClass ({
                     </li>
                     <li className={"nav-item" + (this.state.activeTab === "applicationSettings" ? " active" : "")}>
                       <a className="nav-link" href="#applicationSettings" data-tab="applicationSettings" onClick={this.changeSettingsNav}>Applications</a>
+                    </li>
+                    <li className={"nav-item" + (this.state.activeTab === "dataCenterSettings" ? " active" : "")}>
+                      <a className="nav-link" href="#dataCenterSettings" data-tab="dataCenterSettings" onClick={this.changeSettingsNav}>Data Centers</a>
                     </li>
                   </ul>
                 </nav>
@@ -98,7 +158,7 @@ var ModalSettings = React.createClass ({
                         <div className="col-xs-8">
                           {applicationRows}
                           <div className={"input-group" + (this.state.showEmptyApplicationWarning ? " has-warning" : "")}>
-                            <input value={this.state.applicationToAdd} className={"form-control" + (this.state.showEmptyApplicationWarning ? " form-control-warning" : "")} type="text" onChange={this.handleApplicationToAddChange} />
+                            <input value={this.state.applicationToAdd} className={"form-control" + (this.state.showEmptyApplicationWarning ? " form-control-warning" : "")} type="text" onChange={this.handleApplicationToAddChange} placeholder="Add an application" />
                             <span className="input-group-btn">
                               <button type="button" className="btn btn-success mega-octicon octicon-plus" onClick={this.addApplication}></button>
                             </span>
@@ -107,6 +167,29 @@ var ModalSettings = React.createClass ({
                         </div>
                     </fieldset>
                 </div>
+				<div style={(this.state.activeTab == "dataCenterSettings" ? {display: 'inline'} : {display: 'none'})}>
+					<fieldset className="form-group row">
+						<legend className="col-form-legend col-xs-4">Data Centers</legend>
+						<div className="col-xs-8">
+						  {dataCenterRows}
+						  <div className={"input-group" + (this.state.showEmptyDataCenterWarning ? " has-warning" : "")}>
+							<input value={this.state.dataCenterToAdd} className={"form-control" + (this.state.showEmptyDataCenterWarning ? " form-control-warning" : "")} type="text" onChange={this.handleDataCenterToAddChange} placeholder="Add a data center" />
+							<span className="input-group-btn">
+							  <button type="button" className="btn btn-success mega-octicon octicon-plus" onClick={this.addDataCenter}></button>
+							</span>
+						  </div>
+						  {emptyDataCenterWarning}
+						</div>
+					</fieldset>
+					<fieldset className="form-group row">
+						<legend className="col-form-legend col-xs-4">Select Primary</legend>
+						<div className="col-xs-8">
+						  <div className="btn-group" data-toggle="buttons">
+						  	{primaryDataCenterSelect}
+                          </div>
+						</div>
+					</fieldset>
+				</div>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.handleClose}>Close</button>
@@ -151,10 +234,10 @@ var DataCenterTabs = React.createClass({
     var dataCenterTabs = $.map(this.props.data.dataCenters, function(value, dataCenter) {
       return (
         <li key={dataCenter} className="nav-item">
-          <a className={"nav-link" + (value.primary==true ? ' active' : '')} data-toggle="tab" href={'#' + dataCenter.replace(/\s+/g, '-').toLowerCase()} role="tab"><h5>{dataCenter}</h5></a>
+          <a className={"nav-link" + (dataCenter===this.props.primaryDataCenter ? ' active' : '')} data-toggle="tab" href={'#' + dataCenter.replace(/\s+/g, '-').toLowerCase()} role="tab"><h5>{dataCenter}</h5></a>
         </li>
       );
-    });
+    }.bind(this));
     return (
       <ul className="nav nav-tabs">{dataCenterTabs}</ul>
     );
@@ -165,11 +248,11 @@ var DataCenterDashboards = React.createClass({
   render: function() {
     var dataCenterDashboards = $.map(this.props.data.dataCenters, function(value, dataCenter) {
       return (
-        <div key={dataCenter} className={"tab-pane" + (value.primary==true ? ' active' : '')} id={dataCenter.replace(/\s+/g, '-').toLowerCase()} role="tabpanel">
+        <div key={dataCenter} className={"tab-pane" + (dataCenter===this.props.primaryDataCenter ? ' active' : '')} id={dataCenter.replace(/\s+/g, '-').toLowerCase()} role="tabpanel">
           <DataCenterDashboard dataCenter={value} />
         </div>
       );
-    });
+    }.bind(this));
     return (
       <div className="tab-content">{dataCenterDashboards}</div>
     );
@@ -237,7 +320,7 @@ var ApplicationEnvironmentStatus = React.createClass({
 
 var Parent = React.createClass({
   getInitialState: function() {
-    return {data: [], settings: {}};
+    return {data: {}, settings: {}};
   },
   loadData: function() {
     $.ajax({
@@ -291,8 +374,8 @@ var Parent = React.createClass({
                 <TitleBar title={this.state.settings.title} />
             </div>
             <div id="data-center-dashboard" className="container-fluid">
-                <div id="data-center-tabs"><DataCenterTabs data={this.state.data} /></div>
-                <div id="data-center-tab-content"><DataCenterDashboards data={this.state.data} /></div>
+                <div id="data-center-tabs"><DataCenterTabs data={this.state.data} primaryDataCenter={this.state.settings.primaryDataCenter} /></div>
+                <div id="data-center-tab-content"><DataCenterDashboards data={this.state.data} primaryDataCenter={this.state.settings.primaryDataCenter} /></div>
             </div>
             <div id="footer-bar"><FooterBar data={this.state.data} /></div>
             <ModalSettings settings={this.state.settings} onSave={this.handleSaveSettings} />
