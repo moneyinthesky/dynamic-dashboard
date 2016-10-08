@@ -27,7 +27,7 @@ button {
   margin-left: 2px;
 }
 a:link {
-    color: #80CBC4;
+  color: #80CBC4;
 }
 
 .nav-tabs {
@@ -68,6 +68,9 @@ a:link {
     vertical-align: middle;
 }
 
+.modal-body {
+    color: #424242;
+}
 .modal-body .mega-octicon {
     font-size: 20px;
 }

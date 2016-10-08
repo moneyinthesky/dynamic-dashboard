@@ -4,7 +4,7 @@ var ModalSettings = React.createClass ({
     return {
         title: this.props.settings.title,
         applications: [],
-        dataCenters: [],
+        dataCenters: {},
         applicationToAdd: "",
         dataCenterToAdd: "",
         primaryDataCenter: "",
@@ -28,14 +28,8 @@ var ModalSettings = React.createClass ({
         this.setState({applications: array2});
     }
 
-	var dcArray1 = this.props.settings.dataCenters;
-    var dcArray2 = nextProps.settings.dataCenters;
-    var dataCentersEqual = (dcArray1) && (dcArray2) && (dcArray1.length == dcArray2.length) && dcArray1.every(function(element, index) {
-        return element === dcArray2[index];
-    });
-
-    if(dcArray2 && !dataCentersEqual) {
-        this.setState({dataCenters: dcArray2});
+    if(!(JSON.stringify(this.props.settings.dataCenters) === JSON.stringify(nextProps.settings.dataCenters))) {
+        this.setState({dataCenters: nextProps.settings.dataCenters});
     }
 
     if(nextProps.settings.primaryDataCenter != this.props.settings.primaryDataCenter) {
@@ -61,7 +55,7 @@ var ModalSettings = React.createClass ({
   },
   addDataCenter(event) {
     if(this.state.dataCenterToAdd) {
-      this.state.dataCenters.push(this.state.dataCenterToAdd);
+      this.state.dataCenters[this.state.dataCenterToAdd] = {environments:[]};
       this.setState({ dataCenters: this.state.dataCenters, dataCenterToAdd: '' });
     } else {
       this.setState({showEmptyDataCenterWarning : true})
@@ -75,7 +69,7 @@ var ModalSettings = React.createClass ({
     this.setState({applications: this.state.applications});
   },
   removeDataCenter(event) {
-    this.state.dataCenters.splice(event.target.dataset.index, 1);
+    delete this.state.dataCenters[event.target.dataset.datacenter];
     this.setState({dataCenters: this.state.dataCenters});
   },
   changeSettingsNav: function(event) {
@@ -105,17 +99,17 @@ var ModalSettings = React.createClass ({
 		</div>
 	  );
 	}.bind(this));
-    var dataCenterRows = this.state.dataCenters.map(function(dataCenter, index) {
+    var dataCenterRows = $.map(this.state.dataCenters, function(value, dataCenter) {
 	  return (
 		<div key={dataCenter} className="input-group">
 		  <input key={dataCenter} value={dataCenter} readOnly className="form-control" type="text" />
 		  <span className="input-group-btn">
-			<button key={dataCenter} type="button" data-index={index} className="btn btn-danger mega-octicon octicon-dash" onClick={this.removeDataCenter}></button>
+			<button key={dataCenter} type="button" data-datacenter={dataCenter} className="btn btn-danger mega-octicon octicon-dash" onClick={this.removeDataCenter}></button>
 		  </span>
 		</div>
 	  );
 	}.bind(this));
-    var primaryDataCenterSelect = this.state.dataCenters.map(function(dataCenter, index) {
+    var primaryDataCenterSelect = $.map(this.state.dataCenters, function(value, dataCenter) {
     	return (
 			<label data-datacenter={dataCenter} key={dataCenter} className={"btn btn-primary" + (this.state.primaryDataCenter === dataCenter ? " active" : "")} onClick={this.handlePrimaryDataCenterSelect} >
 			  <input key={dataCenter} type="radio" name="primaryDataCenter" value={dataCenter} id={dataCenter} autoComplete="off"/> {dataCenter}
@@ -139,6 +133,9 @@ var ModalSettings = React.createClass ({
                     </li>
                     <li className={"nav-item" + (this.state.activeTab === "dataCenterSettings" ? " active" : "")}>
                       <a className="nav-link" href="#dataCenterSettings" data-tab="dataCenterSettings" onClick={this.changeSettingsNav}>Data Centers</a>
+                    </li>
+                    <li className={"nav-item" + (this.state.activeTab === "environmentSettings" ? " active" : "")}>
+                      <a className="nav-link" href="#environmentSettings" data-tab="environmentSettings" onClick={this.changeSettingsNav}>Environments</a>
                     </li>
                   </ul>
                 </nav>
@@ -190,6 +187,35 @@ var ModalSettings = React.createClass ({
 						</div>
 					</fieldset>
 				</div>
+                <div style={(this.state.activeTab == "environmentSettings" ? {display: 'inline'} : {display: 'none'})}>
+                    <fieldset className="form-group row">
+                        <legend className="col-form-legend col-xs-4">Environments</legend>
+                        <div className="col-xs-8">
+                            <div id="accordion" role="tablist" aria-multiselectable="true">
+                                <div className="panel panel-default">
+                                  <div className="panel-heading" role="tab" id="headingOne">
+                                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                        <input key="AWS" value="AWS" readOnly className="form-control" type="text" />
+                                      </a>
+                                  </div>
+                                  <div id="collapseOne" className="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+
+                                  </div>
+                                </div>
+                                <div className="panel panel-default">
+                                  <div className="panel-heading" role="tab" id="headingTwo">
+                                    <a className="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                      <input key="AWS" value="M25 Hemel" readOnly className="form-control" type="text" />
+                                    </a>
+                                  </div>
+                                  <div id="collapseTwo" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
               </div>
               <div className="modal-footer">
               	<a href="/api/data/settingsJson" download="dashboard-settings.json"><button type="button" className="btn btn-secondary pull-xs-left mega-octicon octicon-cloud-download" data-toggle="tooltip" title="Export Settings" data-placement="bottom" /></a>
@@ -208,7 +234,7 @@ var TitleBar = React.createClass({
   render: function() {
     return (
       <h1>{this.props.title}
-        <div className="pull-xs-right">
+        <div className="pull-xs-right" data-toggle="tooltip" data-placement="left" title="Settings">
           <button id="settings-button" type="button" className="btn btn-secondary btn-md active" data-toggle="modal" data-target="#settings-modal">
             <img src="images/gear.png" width="35" />
           </button>
