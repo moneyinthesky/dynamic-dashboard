@@ -198,6 +198,53 @@ var ModalSettings = React.createClass ({
 			</div>
     	);
     }.bind(this));
+    var nodeDiscoveryTabs = $.map(this.state.dataCenters, function(value, dataCenter) {
+    	return (
+	  		<li key={dataCenter} className="nav-item">
+				<a className={"nav-link" + (dataCenter===this.state.primaryDataCenter ? " active" : "")} data-toggle="pill" href={"#" + dataCenter.replace(/\s+/g, '-').toLowerCase() + "-node-discovery"}>{dataCenter}</a>
+		  	</li>
+    	);
+    }.bind(this));
+    var nodeDiscoveryPanes = $.map(this.state.dataCenters, function(value, dataCenter) {
+    	var nodeDiscoveryEnvironments = this.state.dataCenters[dataCenter].environments.map(function(environment, index) {
+    		var applicationNodeDiscoveryRows = this.state.applications.map(function(application, index) {
+    			return (
+					<div key={dataCenter + "-" + environment + "-" + application} className="form-group row">
+						<label htmlFor="example-text-input" className="col-xs-4 col-form-label">{application}</label>
+						<div className="col-xs-8">
+							{application}
+						</div>
+					</div>
+				);
+    		}.bind(this));
+    		return(
+				<div key={dataCenter + "-" + environment} className="panel panel-default">
+				  <div className="panel-heading" role="tab" id={dataCenter + "-" + environment}>
+					  <a className="collapsed" data-toggle="collapse" data-parent="#accordion" href={"#" + dataCenter.replace(/\s+/g, '-').toLowerCase() + "-" + environment} aria-expanded="true" aria-controls={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-" + environment}>
+						<div className="input-group">
+							<span className="input-group-btn">
+								<button key={dataCenter + "-" + environment} type="button" className="btn btn-info mega-octicon octicon-triangle-down"></button>
+							</span>
+							<input value={environment} readOnly className="form-control" type="text" />
+						</div>
+					  </a>
+				  </div>
+				  <div id={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-" + environment} className="panel-collapse collapse" role="tabpanel" aria-labelledby={dataCenter + "-" + environment}>
+					<div className={"input-group col-xs-6 environment-datacenter-row"}>
+						{applicationNodeDiscoveryRows}
+					</div>
+				  </div>
+				</div>
+			);
+    	}.bind(this));
+		return (
+			<div key={dataCenter} className={"tab-pane" + (dataCenter===this.state.primaryDataCenter ? " active" : "")} id={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-node-discovery"} role="tabpanel">
+				<div id="accordion" role="tablist" aria-multiselectable="true">
+					{nodeDiscoveryEnvironments}
+				</div>
+			</div>
+		);
+	}.bind(this));
     return (
         <div className="modal fade" id="settings-modal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
           <div className="modal-dialog modal-lg" role="document">
@@ -217,6 +264,9 @@ var ModalSettings = React.createClass ({
                     </li>
                     <li className={"nav-item" + (this.state.activeTab === "environmentSettings" ? " active" : "")}>
                       <a className="nav-link" href="#environmentSettings" data-tab="environmentSettings" onClick={this.changeSettingsNav}>Environments</a>
+                    </li>
+                    <li className={"nav-item" + (this.state.activeTab === "nodeDiscovery" ? " active" : "")}>
+                      <a className="nav-link" href="#nodeDiscovery" data-tab="nodeDiscovery" onClick={this.changeSettingsNav}>Node Discovery</a>
                     </li>
                   </ul>
                 </nav>
@@ -278,6 +328,14 @@ var ModalSettings = React.createClass ({
                             </div>
                         </div>
                     </fieldset>
+                </div>
+                <div style={(this.state.activeTab == "nodeDiscovery" ? {display: 'inline'} : {display: 'none'})}>
+					<ul className="nav nav-pills">
+					  {nodeDiscoveryTabs}
+					</ul>
+					<div className="tab-content">
+					  {nodeDiscoveryPanes}
+					</div>
                 </div>
                 </form>
               </div>
