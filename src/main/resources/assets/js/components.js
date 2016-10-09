@@ -1,3 +1,13 @@
+function getByName(object, name) {
+    return $.grep(object, function(e) { return e.name === name })[0];
+}
+
+function removeByName(object, name) {
+    return object.filter(function(e) {
+        return e.name !== name;
+    });
+}
+
 var ModalSettings = React.createClass ({
   getInitialState: function() {
     return {
@@ -42,8 +52,9 @@ var ModalSettings = React.createClass ({
   },
   handleDataCenterEnvironmentChange(event) {
 	var dataCenter = event.target.dataset.datacenter;
-	var dataCenterEnvironment = $.grep(this.state.dataCenters, function(e) { return e.name === dataCenter })[0];
-	dataCenterEnvironment.environmentToAdd = event.target.value;
+
+	var dataCenterObject = getByName(this.state.dataCenters, dataCenter);
+	dataCenterObject.environmentToAdd = event.target.value;
 	this.setState({dataCenters : this.state.dataCenters});
   },
   addApplication(event) {
@@ -62,7 +73,7 @@ var ModalSettings = React.createClass ({
         return;
     }
 
-    var existingDataCenter = $.grep(this.state.dataCenters, function(e) { return e.name === this.state.dataCenterToAdd }.bind(this))[0];
+    var existingDataCenter = getByName(this.state.dataCenters, this.state.dataCenterToAdd);
     if(existingDataCenter) {
         this.setState({dataCenterWarning : 'Data center already added'});
         return;
@@ -73,7 +84,7 @@ var ModalSettings = React.createClass ({
   },
   addDataCenterEnvironment(event) {
   	var dataCenter = event.target.dataset.datacenter;
-  	var dataCenterObject = $.grep(this.state.dataCenters, function(e) { return e.name === dataCenter})[0];
+  	var dataCenterObject = getByName(this.state.dataCenters, dataCenter);
     if(dataCenterObject.environmentToAdd) {
 		dataCenterObject.environments.push({name: dataCenterObject.environmentToAdd});
 		dataCenterObject.environmentToAdd = "";
@@ -88,19 +99,13 @@ var ModalSettings = React.createClass ({
     this.setState({applications: this.state.applications});
   },
   removeDataCenter(event) {
-    this.state.dataCenters = this.state.dataCenters.filter(function(e) {
-        return e.name !== event.target.dataset.datacenter;
-    })
+    this.state.dataCenters = removeByName(this.state.dataCenters, event.target.dataset.datacenter);
     this.setState({dataCenters: this.state.dataCenters});
   },
   removeDataCenterEnvironment(event) {
 	var environmentToRemove = event.target.dataset.datacenterEnvironment.split("/");
-
-	var dataCenterObject = $.grep(this.state.dataCenters, function(e) { return e.name === environmentToRemove[0]})[0];
-	dataCenterObject.environments = dataCenterObject.environments.filter(function(e) {
-	    return name !== environmentToRemove[1];
-	})
-
+    var dataCenterObject = getByName(this.state.dataCenters, environmentToRemove[0]);
+    dataCenterObject.environments = removeByName(dataCenterObject.environments, environmentToRemove[1]);
 	this.setState({dataCenters : this.state.dataCenters});
   },
   changeSettingsNav: function(event) {
