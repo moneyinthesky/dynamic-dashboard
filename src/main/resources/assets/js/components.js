@@ -8,8 +8,8 @@ var ModalSettings = React.createClass ({
         applicationToAdd: "",
         dataCenterToAdd: "",
         primaryDataCenter: "",
-        showEmptyApplicationWarning: false,
-        showEmptyDataCenterWarning: false,
+        applicationWarning: "",
+        dataCenterWarning: "",
         activeTab: "generalSettings"
         };
   },
@@ -40,10 +40,10 @@ var ModalSettings = React.createClass ({
     this.setState({title: event.target.value});
   },
   handleApplicationToAddChange(event) {
-    this.setState({applicationToAdd: event.target.value, showEmptyApplicationWarning: false});
+    this.setState({applicationToAdd: event.target.value, applicationWarning: ''});
   },
   handleDataCenterToAddChange(event) {
-    this.setState({dataCenterToAdd: event.target.value, showEmptyDataCenterWarning: false});
+    this.setState({dataCenterToAdd: event.target.value, dataCenterWarning: ''});
   },
   handleDataCenterEnvironmentChange(event) {
 	var dataCenter = event.target.dataset.datacenter;
@@ -51,19 +51,23 @@ var ModalSettings = React.createClass ({
 	this.setState({dataCenters : this.state.dataCenters});
   },
   addApplication(event) {
-    if(this.state.applicationToAdd) {
+    if(this.state.applicationToAdd && !this.state.applications.includes(this.state.applicationToAdd)) {
       this.state.applications.push(this.state.applicationToAdd);
       this.setState({ applications: this.state.applications, applicationToAdd: '' });
+    } else if(this.state.applications.includes(this.state.applicationToAdd)) {
+      this.setState({applicationWarning: 'Application already added'})
     } else {
-      this.setState({showEmptyApplicationWarning : true})
+      this.setState({applicationWarning: 'Application name is required'});
     }
   },
   addDataCenter(event) {
-    if(this.state.dataCenterToAdd) {
+    if(this.state.dataCenterToAdd && !this.state.dataCenters[this.state.dataCenterToAdd]) {
       this.state.dataCenters[this.state.dataCenterToAdd] = {environments:[], environmentToAdd: ""};
       this.setState({ dataCenters: this.state.dataCenters, dataCenterToAdd: '' });
+    } else if(this.state.dataCenters[this.state.dataCenterToAdd]) {
+      this.setState({dataCenterWarning : 'Data center already added'})
     } else {
-      this.setState({showEmptyDataCenterWarning : true})
+      this.setState({dataCenterWarning : 'Data center name is required'})
     }
   },
   addDataCenterEnvironment(event) {
@@ -97,8 +101,8 @@ var ModalSettings = React.createClass ({
   	var copyOfState = this.state;
   	delete copyOfState.applicationToAdd;
   	delete copyOfState.dataCenterToAdd;
-  	delete copyOfState.showEmptyApplicationWarning;
-  	delete copyOfState.showEmptyDataCenterWarning;
+  	delete copyOfState.applicationWarning;
+  	delete copyOfState.dataCenterWarning;
   	delete copyOfState.activeTab;
   	$.map(copyOfState.dataCenters, function(value, dataCenter) {
   		delete copyOfState.dataCenters[dataCenter].environmentToAdd;
@@ -121,8 +125,8 @@ var ModalSettings = React.createClass ({
     reader.readAsText(file);
   },
   render: function() {
-    var emptyApplicationWarning = this.state.showEmptyApplicationWarning ? <div className="form-control-feedback">Application name is required</div> : "";
-    var emptyDataCenterWarning = this.state.showEmptyDataCenterWarning ? <div className="form-control-feedback">Data center name is required</div> : "";
+    var applicationWarning = this.state.applicationWarning ? <div className="form-control-feedback alert alert-warning" role="alert">{this.state.applicationWarning}</div> : "";
+    var dataCenterWarning = this.state.dataCenterWarning ? <div className="form-control-feedback alert alert-warning" role="alert">{this.state.dataCenterWarning}</div> : "";
     var applicationRows = this.state.applications.map(function(application, index) {
 	  return (
 		<div key={application} className="input-group">
@@ -164,7 +168,7 @@ var ModalSettings = React.createClass ({
     	return (
 			<div key={dataCenter} className="panel panel-default">
 			  <div className="panel-heading" role="tab" id={dataCenter}>
-				  <a className="collapsed" data-toggle="collapse" data-parent="#accordion" href={"#" + dataCenter.replace(/\s+/g, '-').toLowerCase() + "-enviornments"} aria-expanded="true" aria-controls={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-enviornments"}>
+				  <a className={dataCenter===this.state.primaryDataCenter ? "" : "collapsed"} data-toggle="collapse" data-parent="#accordion" href={"#" + dataCenter.replace(/\s+/g, '-').toLowerCase() + "-enviornments"} aria-expanded="true" aria-controls={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-enviornments"}>
 				  	<div key={dataCenter} className="input-group">
 						<input key={dataCenter} value={dataCenter} readOnly className="form-control" type="text" />
 						<span className="input-group-btn">
@@ -173,7 +177,7 @@ var ModalSettings = React.createClass ({
 					</div>
 				  </a>
 			  </div>
-			  <div id={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-enviornments"} className="panel-collapse collapse" role="tabpanel" aria-labelledby={dataCenter}>
+			  <div id={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-enviornments"} className={"panel-collapse collapse" + (dataCenter===this.state.primaryDataCenter ? " in" : "")} role="tabpanel" aria-labelledby={dataCenter}>
 				<div className={"input-group col-xs-6 environment-datacenter-row"}>
 				  {dataCenterEnvironmentRowsAlreadyAdded}
 				  <div key={dataCenter} className="input-group">
@@ -225,13 +229,13 @@ var ModalSettings = React.createClass ({
                         <legend className="col-form-legend col-xs-4">Applications</legend>
                         <div className="col-xs-8">
                           {applicationRows}
-                          <div className={"input-group" + (this.state.showEmptyApplicationWarning ? " has-warning" : "")}>
-                            <input value={this.state.applicationToAdd} className={"form-control" + (this.state.showEmptyApplicationWarning ? " form-control-warning" : "")} type="text" onChange={this.handleApplicationToAddChange} placeholder="Add an application" />
+                          <div className={"input-group" + (this.state.applicationWarning ? " has-warning" : "")}>
+                            <input value={this.state.applicationToAdd} className={"form-control" + (this.state.applicationWarning ? " form-control-warning" : "")} type="text" onChange={this.handleApplicationToAddChange} placeholder="Add an application" />
                             <span className="input-group-btn">
                               <button type="button" className="btn btn-success mega-octicon octicon-plus" onClick={this.addApplication}></button>
                             </span>
                           </div>
-                          {emptyApplicationWarning}
+                          {applicationWarning}
                         </div>
                     </fieldset>
                 </div>
@@ -240,13 +244,13 @@ var ModalSettings = React.createClass ({
 						<legend className="col-form-legend col-xs-4">Data Centers</legend>
 						<div className="col-xs-8">
 						  {dataCenterRows}
-						  <div className={"input-group" + (this.state.showEmptyDataCenterWarning ? " has-warning" : "")}>
-							<input value={this.state.dataCenterToAdd} className={"form-control" + (this.state.showEmptyDataCenterWarning ? " form-control-warning" : "")} type="text" onChange={this.handleDataCenterToAddChange} placeholder="Add a data center" />
+						  <div className={"input-group" + (this.state.dataCenterWarning ? " has-warning" : "")}>
+							<input value={this.state.dataCenterToAdd} className={"form-control" + (this.state.dataCenterWarning ? " form-control-warning" : "")} type="text" onChange={this.handleDataCenterToAddChange} placeholder="Add a data center" />
 							<span className="input-group-btn">
 							  <button type="button" className="btn btn-success mega-octicon octicon-plus" onClick={this.addDataCenter}></button>
 							</span>
 						  </div>
-						  {emptyDataCenterWarning}
+						  {dataCenterWarning}
 						</div>
 					</fieldset>
 					<fieldset className="form-group row">
