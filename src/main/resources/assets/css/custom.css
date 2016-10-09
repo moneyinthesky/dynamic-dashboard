@@ -78,6 +78,12 @@ a:link {
     padding-left: 18.5px;
     padding-right: 18.5px;
 }
+.alert {
+	margin-bottom: 0px;
+	padding-top: 12px;
+	padding-bottom: 12px;
+	margin-left: 4px;
+}
 .environment-datacenter-row {
 	padding-left: 50px;
 	padding-right: 50px;

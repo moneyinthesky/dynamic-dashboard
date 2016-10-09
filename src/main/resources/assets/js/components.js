@@ -10,7 +10,9 @@ var ModalSettings = React.createClass ({
         primaryDataCenter: "",
         applicationWarning: "",
         dataCenterWarning: "",
-        activeTab: "generalSettings"
+        activeTab: "generalSettings",
+        importAlert: "",
+        importFile: ""
         };
   },
   componentWillReceiveProps: function(nextProps) {
@@ -77,7 +79,7 @@ var ModalSettings = React.createClass ({
 		this.state.dataCenters[dataCenter].environmentToAdd = "";
 		this.setState({ dataCenters: this.state.dataCenters });
     }
-},
+  },
   handlePrimaryDataCenterSelect(event) {
     this.setState({primaryDataCenter : event.target.dataset.datacenter});
   },
@@ -104,12 +106,14 @@ var ModalSettings = React.createClass ({
   	delete copyOfState.applicationWarning;
   	delete copyOfState.dataCenterWarning;
   	delete copyOfState.activeTab;
+  	delete copyOfState.importAlert;
+  	delete copyOfState.importFile;
   	$.map(copyOfState.dataCenters, function(value, dataCenter) {
   		delete copyOfState.dataCenters[dataCenter].environmentToAdd;
   	});
 
     this.props.onSave(copyOfState);
-    this.setState({activeTab: "generalSettings"});
+    this.setState({activeTab: "generalSettings", importAlert: ""});
   },
   handleClose: function() {
     this.setState({activeTab: "generalSettings"});
@@ -119,7 +123,10 @@ var ModalSettings = React.createClass ({
 	var reader = new FileReader();
 
 	reader.onload = function(e) {
-      this.props.onSave(JSON.parse(reader.result));
+	  var copyOfState = JSON.parse(reader.result);
+	  copyOfState.importAlert = "Import successful, Save when ready";
+	  copyOfState.importFile = "";
+	  this.setState(copyOfState);
     }.bind(this);
 
     reader.readAsText(file);
@@ -277,8 +284,9 @@ var ModalSettings = React.createClass ({
               <div className="modal-footer">
               	<a href="/api/data/settingsJson" download="dashboard-settings.json"><button type="button" className="btn btn-secondary pull-xs-left mega-octicon octicon-cloud-download" data-toggle="tooltip" title="Export Settings" data-placement="bottom" /></a>
               	<label className="btn btn-secondary pull-xs-left mega-octicon octicon-cloud-upload" data-toggle="tooltip" title="Import Settings" data-placement="bottom">
-                    <input type="file" style={{display: 'none'}} onChange={this.importSettings} />
+                    <input type="file" style={{display: 'none'}} onChange={this.importSettings} value={this.state.importFile} />
                 </label>
+                <div style={(this.state.importAlert ? {display: 'inline'} : {display: 'none'})} className="alert alert-info pull-xs-left fade in" role="alert">{this.state.importAlert}</div>
                 <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.handleClose}>Close</button>
                 <button type="button" className="btn btn-primary" data-dismiss="modal" onClick={this.handleSave}>Save</button>
               </div>
