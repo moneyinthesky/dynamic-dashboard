@@ -1,10 +1,9 @@
-
 var ModalSettings = React.createClass ({
   getInitialState: function() {
     return {
         title: this.props.settings.title,
         applications: [],
-        dataCenters: {},
+        dataCenters: [],
         applicationToAdd: "",
         dataCenterToAdd: "",
         primaryDataCenter: "",
@@ -20,14 +19,8 @@ var ModalSettings = React.createClass ({
         this.setState({title: nextProps.settings.title});
     }
 
-    var array1 = this.props.settings.applications;
-    var array2 = nextProps.settings.applications;
-    var applicationsEqual = (array1) && (array2) && (array1.length == array2.length) && array1.every(function(element, index) {
-        return element === array2[index];
-    });
-
-    if(array2 && !applicationsEqual) {
-        this.setState({applications: array2});
+    if(!(JSON.stringify(this.props.settings.applications) === JSON.stringify(nextProps.settings.applications))) {
+        this.setState({applications: nextProps.settings.applications});
     }
 
     if(!(JSON.stringify(this.props.settings.dataCenters) === JSON.stringify(nextProps.settings.dataCenters))) {
@@ -49,7 +42,8 @@ var ModalSettings = React.createClass ({
   },
   handleDataCenterEnvironmentChange(event) {
 	var dataCenter = event.target.dataset.datacenter;
-	this.state.dataCenters[dataCenter].environmentToAdd = event.target.value;
+	var dataCenterEnvironment = $.grep(this.state.dataCenters, function(e) { return e.name === dataCenter })[0];
+	dataCenterEnvironment.environmentToAdd = event.target.value;
 	this.setState({dataCenters : this.state.dataCenters});
   },
   addApplication(event) {
@@ -63,20 +57,26 @@ var ModalSettings = React.createClass ({
     }
   },
   addDataCenter(event) {
-    if(this.state.dataCenterToAdd && !this.state.dataCenters[this.state.dataCenterToAdd]) {
-      this.state.dataCenters[this.state.dataCenterToAdd] = {environments:[], environmentToAdd: ""};
-      this.setState({ dataCenters: this.state.dataCenters, dataCenterToAdd: '' });
-    } else if(this.state.dataCenters[this.state.dataCenterToAdd]) {
-      this.setState({dataCenterWarning : 'Data center already added'})
-    } else {
-      this.setState({dataCenterWarning : 'Data center name is required'})
+    if(!this.state.dataCenterToAdd) {
+        this.setState({dataCenterWarning : 'Data center name is required'});
+        return;
     }
+
+    var existingDataCenter = $.grep(this.state.dataCenters, function(e) { return e.name === this.state.dataCenterToAdd }.bind(this))[0];
+    if(existingDataCenter) {
+        this.setState({dataCenterWarning : 'Data center already added'});
+        return;
+    }
+
+    this.state.dataCenters.push({name: this.state.dataCenterToAdd, environments:[], environmentToAdd: ""});
+    this.setState({ dataCenters: this.state.dataCenters, dataCenterToAdd: '' });
   },
   addDataCenterEnvironment(event) {
   	var dataCenter = event.target.dataset.datacenter;
-    if(this.state.dataCenters[dataCenter].environmentToAdd) {
-		this.state.dataCenters[dataCenter].environments.push(this.state.dataCenters[dataCenter].environmentToAdd);
-		this.state.dataCenters[dataCenter].environmentToAdd = "";
+  	var dataCenterObject = $.grep(this.state.dataCenters, function(e) { return e.name === dataCenter})[0];
+    if(dataCenterObject.environmentToAdd) {
+		dataCenterObject.environments.push({name: dataCenterObject.environmentToAdd});
+		dataCenterObject.environmentToAdd = "";
 		this.setState({ dataCenters: this.state.dataCenters });
     }
   },
@@ -88,12 +88,19 @@ var ModalSettings = React.createClass ({
     this.setState({applications: this.state.applications});
   },
   removeDataCenter(event) {
-    delete this.state.dataCenters[event.target.dataset.datacenter];
+    this.state.dataCenters = this.state.dataCenters.filter(function(e) {
+        return e.name !== event.target.dataset.datacenter;
+    })
     this.setState({dataCenters: this.state.dataCenters});
   },
   removeDataCenterEnvironment(event) {
 	var environmentToRemove = event.target.dataset.datacenterEnvironment.split("/");
-	this.state.dataCenters[environmentToRemove[0]].environments.splice(environmentToRemove[1],1);
+
+	var dataCenterObject = $.grep(this.state.dataCenters, function(e) { return e.name === environmentToRemove[0]})[0];
+	dataCenterObject.environments = dataCenterObject.environments.filter(function(e) {
+	    return name !== environmentToRemove[1];
+	})
+
 	this.setState({dataCenters : this.state.dataCenters});
   },
   changeSettingsNav: function(event) {
@@ -108,9 +115,6 @@ var ModalSettings = React.createClass ({
   	delete copyOfState.activeTab;
   	delete copyOfState.importAlert;
   	delete copyOfState.importFile;
-  	$.map(copyOfState.dataCenters, function(value, dataCenter) {
-  		delete copyOfState.dataCenters[dataCenter].environmentToAdd;
-  	});
 
     this.props.onSave(copyOfState);
     this.setState({activeTab: "generalSettings", importAlert: ""});
@@ -144,7 +148,8 @@ var ModalSettings = React.createClass ({
 		</div>
 	  );
 	}.bind(this));
-    var dataCenterRows = $.map(this.state.dataCenters, function(value, dataCenter) {
+    var dataCenterRows = this.state.dataCenters.map(function(dataCenterObject) {
+      var dataCenter = dataCenterObject.name;
 	  return (
 		<div key={dataCenter} className="input-group">
 		  <input key={dataCenter} value={dataCenter} readOnly className="form-control" type="text" />
@@ -154,20 +159,23 @@ var ModalSettings = React.createClass ({
 		</div>
 	  );
 	}.bind(this));
-    var primaryDataCenterSelect = $.map(this.state.dataCenters, function(value, dataCenter) {
+    var primaryDataCenterSelect = this.state.dataCenters.map(function(dataCenterObject) {
+        var dataCenter = dataCenterObject.name;
     	return (
 			<label data-datacenter={dataCenter} key={dataCenter} className={"btn btn-primary" + (this.state.primaryDataCenter === dataCenter ? " active" : "")} onClick={this.handlePrimaryDataCenterSelect} >
 			  <input key={dataCenter} type="radio" name="primaryDataCenter" value={dataCenter} id={dataCenter} autoComplete="off"/> {dataCenter}
 			</label>
     	);
     }.bind(this));
-    var dataCenterEnvironmentRows = $.map(this.state.dataCenters, function(value, dataCenter) {
-    	var dataCenterEnvironmentRowsAlreadyAdded = this.state.dataCenters[dataCenter].environments.map(function(environment, index) {
+    var dataCenterEnvironmentRows = this.state.dataCenters.map(function(dataCenterObject, index) {
+        var dataCenter = dataCenterObject.name;
+    	var dataCenterEnvironmentRowsAlreadyAdded = dataCenterObject.environments.map(function(environmentObject, index) {
+    	  var environment = environmentObject.name;
           return (
 			<div key={dataCenter + "-" + environment} className="input-group">
 			  <input key={dataCenter + "-" + environment} value={environment} readOnly className="form-control" type="text" />
 			  <span className="input-group-btn">
-				<button key={dataCenter + "-" + environment} type="button" data-datacenter-environment={dataCenter + "/" + index} className="btn btn-danger mega-octicon octicon-dash" onClick={this.removeDataCenterEnvironment}></button>
+				<button key={dataCenter + "-" + environment} type="button" data-datacenter-environment={dataCenter + "/" + environment} className="btn btn-danger mega-octicon octicon-dash" onClick={this.removeDataCenterEnvironment}></button>
 			  </span>
 			</div>
           );
@@ -175,7 +183,7 @@ var ModalSettings = React.createClass ({
     	return (
 			<div key={dataCenter} className="panel panel-default">
 			  <div className="panel-heading" role="tab" id={dataCenter}>
-				  <a className={dataCenter===this.state.primaryDataCenter ? "" : "collapsed"} data-toggle="collapse" data-parent="#accordion" href={"#" + dataCenter.replace(/\s+/g, '-').toLowerCase() + "-enviornments"} aria-expanded="true" aria-controls={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-enviornments"}>
+				  <a className={dataCenter===this.state.primaryDataCenter ? "" : "collapsed"} data-toggle="collapse" data-parent="#accordion" href={"#" + dataCenter.replace(/\s+/g, '-').toLowerCase() + "-enviornments"} aria-expanded="true" aria-controls={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-environments"}>
 				  	<div key={dataCenter} className="input-group">
 						<input key={dataCenter} value={dataCenter} readOnly className="form-control" type="text" />
 						<span className="input-group-btn">
@@ -188,7 +196,7 @@ var ModalSettings = React.createClass ({
 				<div className={"input-group col-xs-6 environment-datacenter-row"}>
 				  {dataCenterEnvironmentRowsAlreadyAdded}
 				  <div key={dataCenter} className="input-group">
-					  <input value={this.state.dataCenters[dataCenter].environmentToAdd} data-datacenter={dataCenter} className={"form-control"} type="text" onChange={this.handleDataCenterEnvironmentChange} placeholder="Add an environment" />
+					  <input value={dataCenterObject.environmentToAdd} data-datacenter={dataCenter} className={"form-control"} type="text" onChange={this.handleDataCenterEnvironmentChange} placeholder="Add an environment" />
 					  <span className="input-group-btn">
 						<button type="button" className="btn btn-success mega-octicon octicon-plus" data-datacenter={dataCenter} onClick={this.addDataCenterEnvironment}></button>
 					  </span>
@@ -198,15 +206,18 @@ var ModalSettings = React.createClass ({
 			</div>
     	);
     }.bind(this));
-    var nodeDiscoveryTabs = $.map(this.state.dataCenters, function(value, dataCenter) {
+    var nodeDiscoveryTabs = this.state.dataCenters.map(function(dataCenterObject) {
+        var dataCenter = dataCenterObject.name;
     	return (
 	  		<li key={dataCenter} className="nav-item">
 				<a className={"nav-link" + (dataCenter===this.state.primaryDataCenter ? " active" : "")} data-toggle="pill" href={"#" + dataCenter.replace(/\s+/g, '-').toLowerCase() + "-node-discovery"}>{dataCenter}</a>
 		  	</li>
     	);
     }.bind(this));
-    var nodeDiscoveryPanes = $.map(this.state.dataCenters, function(value, dataCenter) {
-    	var nodeDiscoveryEnvironments = this.state.dataCenters[dataCenter].environments.map(function(environment, index) {
+    var nodeDiscoveryPanes = this.state.dataCenters.map(function(dataCenterObject) {
+        var dataCenter = dataCenterObject.name;
+    	var nodeDiscoveryEnvironments = dataCenterObject.environments.map(function(environmentObject) {
+    	    var environment = environmentObject.name;
     		var applicationNodeDiscoveryRows = this.state.applications.map(function(application, index) {
     			return (
 					<div key={dataCenter + "-" + environment + "-" + application} className="form-group row">
