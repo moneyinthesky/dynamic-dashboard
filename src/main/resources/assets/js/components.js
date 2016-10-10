@@ -1,3 +1,6 @@
+var placeholder = document.createElement("li");
+placeholder.className = "placeholder";
+
 function getByName(object, name) {
     return $.grep(object, function(e) { return e.name === name })[0];
 }
@@ -102,6 +105,29 @@ var ModalSettings = React.createClass ({
   changeSettingsNav: function(event) {
     this.setState({activeTab: event.target.dataset.tab});
   },
+    dragStart: function(e) {
+      this.dragged = e.currentTarget;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData("text/html", e.currentTarget);
+    },
+    dragEnd: function(e) {
+        this.dragged.style.display = "block";
+        this.dragged.parentNode.removeChild(placeholder);
+
+        var data = this.state.settings.applications;
+        var from = Number(this.dragged.dataset.id);
+        var to = Number(this.over.dataset.id);
+        if(from < to) to--;
+        data.splice(to, 0, data.splice(from, 1)[0]);
+        this.setState({settings: this.state.settings});
+    },
+    dragOver: function(e) {
+        e.preventDefault();
+        this.dragged.style.display = "none";
+        if(e.target.className == "placeholder") return;
+        this.over = e.target;
+        e.target.parentNode.insertBefore(placeholder, e.target);
+    },
   handleSave: function() {
     this.state.settings.title = this.state.titleToAdd;
     this.props.onSave(this.state.settings);
@@ -128,12 +154,10 @@ var ModalSettings = React.createClass ({
     var dataCenterWarning = this.state.dataCenterWarning ? <div className="form-control-feedback alert alert-warning" role="alert">{this.state.dataCenterWarning}</div> : "";
     var applicationRows = this.state.settings.applications.map(function(application, index) {
 	  return (
-		<div key={application} className="input-group">
-		  <input key={application} value={application} readOnly className="form-control" type="text" />
-		  <span className="input-group-btn">
-			<button key={application} type="button" data-index={index} className="btn btn-danger mega-octicon octicon-dash" onClick={this.removeApplication}></button>
-		  </span>
-		</div>
+		<li className="list-group-item clearfix" data-id={index} key={index} draggable="true" onDragEnd={this.dragEnd} onDragStart={this.dragStart}>
+		    <button type="button" data-id={index} data-index={index} className="btn btn-danger mega-octicon octicon-dash pull-xs-right" onClick={this.removeApplication}></button>
+            {application}
+        </li>
 	  );
 	}.bind(this));
     var dataCenterRows = this.state.settings.dataCenters.map(function(dataCenterObject) {
@@ -282,10 +306,12 @@ var ModalSettings = React.createClass ({
                 </div>
                 <div style={(this.state.activeTab == "applicationSettings" ? {display: 'inline'} : {display: 'none'})}>
                     <fieldset className="form-group row">
-                        <legend className="col-form-legend col-xs-4">Applications</legend>
+                        <legend className="col-form-legend col-xs-4">Applications <span data-toggle="tooltip" title="Drag applications to re-order" data-placement="bottom" className="mega-octicon octicon-question"></span></legend>
                         <div className="col-xs-8">
+                          <ul className="list-group" onDragOver={this.dragOver}>
                           {applicationRows}
-                          <div className={"input-group" + (this.state.applicationWarning ? " has-warning" : "")}>
+                          </ul>
+                          <div className={"application-input input-group" + (this.state.applicationWarning ? " has-warning" : "")}>
                             <input value={this.state.applicationToAdd} className={"form-control" + (this.state.applicationWarning ? " form-control-warning" : "")} type="text" onChange={this.handleApplicationToAddChange} placeholder="Add an application" />
                             <span className="input-group-btn">
                               <button type="button" className="btn btn-success mega-octicon octicon-plus" onClick={this.addApplication}></button>

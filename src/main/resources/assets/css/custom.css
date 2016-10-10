@@ -78,6 +78,13 @@ a:link {
     padding-left: 18.5px;
     padding-right: 18.5px;
 }
+.modal-body .list-group-item {
+    line-height: 35px;
+    padding-bottom: 6px;
+    padding-top: 6px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
 .alert {
 	margin-bottom: 0px;
 	padding-top: 12px;
@@ -107,7 +114,9 @@ a:link {
 .navbar-dark .navbar-nav .open>.nav-link:hover {
     color: #80CBC4;
 }
-
+.application-input {
+    margin-top: 30px;
+}
 #title-bar {
   color: #80CBC4; padding-top: 8px; padding-bottom: 8px; background-color:#424242;
 }
@@ -117,4 +126,13 @@ a:link {
 }
 #data-center-dashboard {
   padding-top: 10px;
+}
+
+li.placeholder {
+    background: #80CBC4;
+    padding-left: 15px;
+}
+li.placeholder:before {
+  content: "Drop here";
+  color: #9E9E9E;
 }
