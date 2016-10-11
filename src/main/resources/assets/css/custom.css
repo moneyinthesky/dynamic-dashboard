@@ -63,6 +63,18 @@ a:link {
   height: 40px;
   background-color: #424242;
 }
+.btn-primary {
+    color: #fff;
+    background-color: #26A69A;
+    border-color: #00897B;
+}
+
+.btn-primary:hover {
+    color: #fff;
+    background-color: #00897B;
+    border-color: #00897B;
+}
+
 .text-muted {
     padding-top: 8px;
     vertical-align: middle;
@@ -94,6 +106,11 @@ a:link {
 .environment-datacenter-row {
 	padding-left: 50px;
 	padding-right: 50px;
+}
+.heading-bar,
+.heading-bar:hover {
+    background-color: #80CBC4;
+    color: #373a3c;
 }
 .navbar-dark .navbar-brand,
 .navbar-dark .navbar-brand:hover,

@@ -111,22 +111,37 @@ var ModalSettings = React.createClass ({
       e.dataTransfer.setData("text/html", e.currentTarget);
     },
     dragEnd: function(e) {
-        this.dragged.style.display = "block";
-        this.dragged.parentNode.removeChild(placeholder);
+    this.dragged.style.display = "block";
+    this.dragged.parentNode.removeChild(placeholder);
 
-        var data = this.state.settings.applications;
-        var from = Number(this.dragged.dataset.id);
-        var to = Number(this.over.dataset.id);
-        if(from < to) to--;
-        data.splice(to, 0, data.splice(from, 1)[0]);
-        this.setState({settings: this.state.settings});
+    var data = this.state.settings.applications;
+    var from = Number(this.dragged.dataset.id);
+    var to = Number(this.over.dataset.id);
+    if(from < to) to--;
+    if(this.nodePlacement == "after") to++;
+    data.splice(to, 0, data.splice(from, 1)[0]);
+    this.setState({data: data});
     },
     dragOver: function(e) {
         e.preventDefault();
         this.dragged.style.display = "none";
         if(e.target.className == "placeholder") return;
         this.over = e.target;
-        e.target.parentNode.insertBefore(placeholder, e.target);
+
+        var relY = e.clientY - this.over.offsetTop;
+        var height = this.over.offsetHeight / 2;
+        var parent = e.target.parentNode;
+
+        if(relY > height) {
+          this.nodePlacement = "after";
+          parent.insertBefore(placeholder, e.target.nextElementSibling);
+        }
+        else if(relY < height) {
+          if(e.target.dataset.id !== 'title') {
+            this.nodePlacement = "before"
+            parent.insertBefore(placeholder, e.target);
+          }
+        }
     },
   handleSave: function() {
     this.state.settings.title = this.state.titleToAdd;
@@ -306,9 +321,11 @@ var ModalSettings = React.createClass ({
                 </div>
                 <div style={(this.state.activeTab == "applicationSettings" ? {display: 'inline'} : {display: 'none'})}>
                     <fieldset className="form-group row">
-                        <legend className="col-form-legend col-xs-4">Applications <span data-toggle="tooltip" title="Drag applications to re-order" data-placement="bottom" className="mega-octicon octicon-question"></span></legend>
-                        <div className="col-xs-8">
+                        <div className="col-xs-6">
                           <ul className="list-group" onDragOver={this.dragOver}>
+                            <li className="list-group-item list-group-item-action list-group-item-info heading-bar clearfix" data-id="title">
+                                Applications <span data-toggle="tooltip" title="Drag to re-order applications" data-placement="bottom" className="mega-octicon octicon-question"></span>
+                            </li>
                           {applicationRows}
                           </ul>
                           <div className={"application-input input-group" + (this.state.applicationWarning ? " has-warning" : "")}>
