@@ -1,8 +1,8 @@
 {
-  "timeGenerated" : "",
-  "dataCenters": {
-    "AWS": {
-      "primary": true,
+  "timeGenerated": "",
+  "dataCenters": [
+    {
+      "name": "AWS",
       "environments": [
         "d1euw1",
         "ueuw1",
@@ -61,13 +61,13 @@
         }
       }
     },
-    "M25 Hemel": {
-      "primary": false,
+    {
+      "name": "M25 Hemel",
       "environments": []
     },
-    "M25 Slough": {
-      "primary": false,
+    {
+      "name": "M25 Slough",
       "environments": []
     }
-  }
+  ]
 }

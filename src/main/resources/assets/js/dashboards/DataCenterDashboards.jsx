@@ -4,10 +4,11 @@ class DataCenterDashboards extends React.Component {
         super(props);
 
         this.render = () => {
-            var dataCenterDashboards = $.map(this.props.data.dataCenters, (value, dataCenter) => {
+            var dataCenterDashboards = this.props.data.dataCenters.map((dataCenterObject, index) => {
+                var dataCenter = dataCenterObject.name;
                 return (
-                    <div key={dataCenter} className={"tab-pane" + (dataCenter===this.props.primaryDataCenter ? ' active' : '')} id={dataCenter.replace(/\s+/g, '-').toLowerCase()} role="tabpanel">
-                        <DataCenterDashboard dataCenter={value} />
+                    <div key={dataCenter} className={"tab-pane" + (index==0 ? ' active' : '')} id={dataCenter.replace(/\s+/g, '-').toLowerCase()} role="tabpanel">
+                        <DataCenterDashboard dataCenter={dataCenterObject} />
                     </div>
                 );
             });

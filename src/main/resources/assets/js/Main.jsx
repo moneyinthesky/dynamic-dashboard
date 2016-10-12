@@ -17,7 +17,7 @@ class Parent extends React.Component {
 
         super(props);
 
-        this.state = {data: {}, settings: {}};
+        this.state = {data: { dataCenters: []}, settings: {}};
 
         this.loadData = () => {
             $.ajax({
@@ -75,8 +75,8 @@ class Parent extends React.Component {
                         <TitleBar title={this.state.settings.title} />
                     </div>
                     <div id="data-center-dashboard" className="container-fluid">
-                        <div id="data-center-tabs"><DataCenterTabs data={this.state.data} primaryDataCenter={this.state.settings.primaryDataCenter} /></div>
-                        <div id="data-center-tab-content"><DataCenterDashboards data={this.state.data} primaryDataCenter={this.state.settings.primaryDataCenter} /></div>
+                        <div id="data-center-tabs"><DataCenterTabs data={this.state.data} /></div>
+                        <div id="data-center-tab-content"><DataCenterDashboards data={this.state.data} /></div>
                     </div>
                     <div id="footer-bar"><FooterBar data={this.state.data} /></div>
                     <ModalSettings settings={this.state.settings} onSave={this.handleSaveSettings} />

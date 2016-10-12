@@ -4,10 +4,11 @@ class DataCenterTabs extends React.Component {
         super(props);
 
         this.render = () => {
-            var dataCenterTabs = $.map(this.props.data.dataCenters, (value, dataCenter) => {
+            var dataCenterTabs = this.props.data.dataCenters.map((dataCenterObject, index) => {
+                var dataCenter = dataCenterObject.name;
                 return (
                     <li key={dataCenter} className="nav-item">
-                    <a className={"nav-link" + (dataCenter===this.props.primaryDataCenter ? ' active' : '')} data-toggle="tab" href={'#' + dataCenter.replace(/\s+/g, '-').toLowerCase()} role="tab"><h5>{dataCenter}</h5></a>
+                        <a className={"nav-link" + (index==0 ? ' active' : '')} data-toggle="tab" href={'#' + dataCenter.replace(/\s+/g, '-').toLowerCase()} role="tab"><h5>{dataCenter}</h5></a>
                     </li>
                 );
             });

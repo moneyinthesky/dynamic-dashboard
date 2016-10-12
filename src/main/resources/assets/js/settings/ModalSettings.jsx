@@ -7,8 +7,7 @@ class ModalSettings extends React.Component {
             settings : {
                 title: "",
                 applications: [],
-                dataCenters: [],
-                primaryDataCenter: ""
+                dataCenters: []
             },
             titleToAdd: "",
             applicationToAdd: "",
@@ -83,10 +82,6 @@ class ModalSettings extends React.Component {
             }
         };
 
-        this.handlePrimaryDataCenterSelect = (event) => {
-            this.setState({primaryDataCenter : event.target.dataset.datacenter});
-        };
-
         this.removeApplication = (event) => {
             this.state.settings.applications.splice(event.target.dataset.index, 1);
             this.setState({settings : this.state.settings});
@@ -105,6 +100,10 @@ class ModalSettings extends React.Component {
             this.setState({settings : this.state.settings});
         };
 
+        this.isFirstDataCenter = (dataCenter) => {
+            return this.state.settings.dataCenters[0].name === dataCenter;
+        };
+
         this.changeSettingsNav = (event) => {
             this.setState({activeTab: event.target.dataset.tab});
         };
@@ -115,7 +114,7 @@ class ModalSettings extends React.Component {
             e.dataTransfer.setData("text/html", e.currentTarget);
         };
 
-        this.dragEnd = (e) => {
+        this.dragEndApplications = (e) => {
             this.dragged.style.display = "block";
             this.dragged.parentNode.removeChild(placeholder);
 
@@ -129,6 +128,21 @@ class ModalSettings extends React.Component {
 
             this.setState({data: data});
         };
+
+        this.dragEndDataCenters = (e) => {
+            this.dragged.style.display = "block";
+            this.dragged.parentNode.removeChild(placeholder);
+
+            var data = this.state.settings.dataCenters;
+            var from = Number(this.dragged.dataset.id);
+            var to = Number(this.over.dataset.id);
+
+            if(from < to) to--;
+            if(this.nodePlacement == "after") to++;
+            data.splice(to, 0, data.splice(from, 1)[0]);
+
+            this.setState({data: data});
+        }
 
         this.dragOver = (e) => {
             e.preventDefault();
@@ -181,31 +195,21 @@ class ModalSettings extends React.Component {
             var dataCenterWarning = this.state.dataCenterWarning ? <div className="form-control-feedback alert alert-warning" role="alert">{this.state.dataCenterWarning}</div> : "";
             var applicationRows = this.state.settings.applications.map(function(application, index) {
         	  return (
-        		<li className="list-group-item clearfix" data-id={index} key={index} draggable="true" onDragEnd={this.dragEnd} onDragStart={this.dragStart}>
+        		<li className="list-group-item clearfix" data-id={index} key={index} draggable="true" onDragEnd={this.dragEndApplications} onDragStart={this.dragStart}>
         		    <button type="button" data-id={index} data-index={index} className="btn btn-danger mega-octicon octicon-dash pull-xs-right" onClick={this.removeApplication}></button>
                     {application}
                 </li>
         	  );
         	}.bind(this));
-            var dataCenterRows = this.state.settings.dataCenters.map(function(dataCenterObject) {
+            var dataCenterRows = this.state.settings.dataCenters.map(function(dataCenterObject, index) {
               var dataCenter = dataCenterObject.name;
         	  return (
-        		<div key={dataCenter} className="input-group">
-        		  <input key={dataCenter} value={dataCenter} readOnly className="form-control" type="text" />
-        		  <span className="input-group-btn">
-        			<button key={dataCenter} type="button" data-datacenter={dataCenter} className="btn btn-danger mega-octicon octicon-dash" onClick={this.removeDataCenter}></button>
-        		  </span>
-        		</div>
+        		<li className="list-group-item clearfix" data-id={index} key={index} draggable="true" onDragEnd={this.dragEndDataCenters} onDragStart={this.dragStart}>
+        		    <button type="button" data-id={index} data-datacenter={dataCenter} data-index={index} className="btn btn-danger mega-octicon octicon-dash pull-xs-right" onClick={this.removeDataCenter}></button>
+                    {dataCenter}
+                </li>
         	  );
         	}.bind(this));
-            var primaryDataCenterSelect = this.state.settings.dataCenters.map(function(dataCenterObject) {
-                var dataCenter = dataCenterObject.name;
-            	return (
-        			<label data-datacenter={dataCenter} key={dataCenter} className={"btn btn-primary" + (this.state.settings.primaryDataCenter === dataCenter ? " active" : "")} onClick={this.handlePrimaryDataCenterSelect} >
-        			  <input key={dataCenter} type="radio" name="primaryDataCenter" value={dataCenter} id={dataCenter} autoComplete="off"/> {dataCenter}
-        			</label>
-            	);
-            }.bind(this));
             var dataCenterEnvironmentRows = this.state.settings.dataCenters.map(function(dataCenterObject, index) {
                 var dataCenter = dataCenterObject.name;
             	var dataCenterEnvironmentRowsAlreadyAdded = dataCenterObject.environments.map(function(environmentObject, index) {
@@ -222,7 +226,7 @@ class ModalSettings extends React.Component {
             	return (
         			<div key={dataCenter} className="panel panel-default">
         			  <div className="panel-heading" role="tab" id={dataCenter}>
-        				  <a className={dataCenter===this.state.settings.primaryDataCenter ? "" : "collapsed"} data-toggle="collapse" data-parent="#accordion" href={"#" + dataCenter.replace(/\s+/g, '-').toLowerCase() + "-enviornments"} aria-expanded="true" aria-controls={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-environments"}>
+        				  <a className={this.isFirstDataCenter(dataCenter) ? "" : "collapsed"} data-toggle="collapse" data-parent="#accordion" href={"#" + dataCenter.replace(/\s+/g, '-').toLowerCase() + "-enviornments"} aria-expanded="true" aria-controls={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-environments"}>
         				  	<div key={dataCenter} className="input-group">
         						<input key={dataCenter} value={dataCenter} readOnly className="form-control" type="text" />
         						<span className="input-group-btn">
@@ -231,7 +235,7 @@ class ModalSettings extends React.Component {
         					</div>
         				  </a>
         			  </div>
-        			  <div id={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-enviornments"} className={"panel-collapse collapse" + (dataCenter===this.state.settings.primaryDataCenter ? " in" : "")} role="tabpanel" aria-labelledby={dataCenter}>
+        			  <div id={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-enviornments"} className={"panel-collapse collapse" + (this.isFirstDataCenter(dataCenter) ? " in" : "")} role="tabpanel" aria-labelledby={dataCenter}>
         				<div className={"input-group col-xs-6 environment-datacenter-row"}>
         				  {dataCenterEnvironmentRowsAlreadyAdded}
         				  <div key={dataCenter} className="input-group">
@@ -249,7 +253,7 @@ class ModalSettings extends React.Component {
                 var dataCenter = dataCenterObject.name;
             	return (
         	  		<li key={dataCenter} className="nav-item">
-        				<a className={"nav-link" + (dataCenter===this.state.settings.primaryDataCenter ? " active" : "")} data-toggle="pill" href={"#" + dataCenter.replace(/\s+/g, '-').toLowerCase() + "-node-discovery"}>{dataCenter}</a>
+        				<a className={"nav-link" + (this.isFirstDataCenter(dataCenter) ? " active" : "")} data-toggle="pill" href={"#" + dataCenter.replace(/\s+/g, '-').toLowerCase() + "-node-discovery"}>{dataCenter}</a>
         		  	</li>
             	);
             }.bind(this));
@@ -288,7 +292,7 @@ class ModalSettings extends React.Component {
         			);
             	}.bind(this));
         		return (
-        			<div key={dataCenter} className={"tab-pane" + (dataCenter===this.state.settings.primaryDataCenter ? " active" : "")} id={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-node-discovery"} role="tabpanel">
+        			<div key={dataCenter} className={"tab-pane" + (this.isFirstDataCenter(dataCenter) ? " active" : "")} id={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-node-discovery"} role="tabpanel">
         				<div id="accordion" role="tablist" aria-multiselectable="true">
         					{nodeDiscoveryEnvironments}
         				</div>
@@ -307,10 +311,7 @@ class ModalSettings extends React.Component {
                               <a className="nav-link" href="#generalSettings" data-tab="generalSettings" onClick={this.changeSettingsNav}>General</a>
                             </li>
                             <li className={"nav-item" + (this.state.activeTab === "applicationSettings" ? " active" : "")}>
-                              <a className="nav-link" href="#applicationSettings" data-tab="applicationSettings" onClick={this.changeSettingsNav}>Applications</a>
-                            </li>
-                            <li className={"nav-item" + (this.state.activeTab === "dataCenterSettings" ? " active" : "")}>
-                              <a className="nav-link" href="#dataCenterSettings" data-tab="dataCenterSettings" onClick={this.changeSettingsNav}>Data Centers</a>
+                              <a className="nav-link" href="#applicationSettings" data-tab="applicationSettings" onClick={this.changeSettingsNav}>Basic Configuration</a>
                             </li>
                             <li className={"nav-item" + (this.state.activeTab === "environmentSettings" ? " active" : "")}>
                               <a className="nav-link" href="#environmentSettings" data-tab="environmentSettings" onClick={this.changeSettingsNav}>Environments</a>
@@ -338,7 +339,7 @@ class ModalSettings extends React.Component {
                                     <li className="list-group-item list-group-item-action list-group-item-info heading-bar clearfix" data-id="title">
                                         Applications <span data-toggle="tooltip" title="Drag to re-order applications" data-placement="bottom" className="mega-octicon octicon-question"></span>
                                     </li>
-                                  {applicationRows}
+                                    {applicationRows}
                                   </ul>
                                   <div className={"application-input input-group" + (this.state.applicationWarning ? " has-warning" : "")}>
                                     <input value={this.state.applicationToAdd} className={"form-control" + (this.state.applicationWarning ? " form-control-warning" : "")} type="text" onChange={this.handleApplicationToAddChange} placeholder="Add an application" />
@@ -348,31 +349,23 @@ class ModalSettings extends React.Component {
                                   </div>
                                   {applicationWarning}
                                 </div>
+                                <div className="col-xs-6">
+                                    <ul className="list-group" onDragOver={this.dragOver}>
+                                        <li className="list-group-item list-group-item-action list-group-item-info heading-bar clearfix" data-id="title">
+                                            Data Centers <span data-toggle="tooltip" title="Drag to re-order data centers" data-placement="bottom" className="mega-octicon octicon-question"></span>
+                                        </li>
+                                        {dataCenterRows}
+                                    </ul>
+                                    <div className={"datacenter-input input-group" + (this.state.dataCenterWarning ? " has-warning" : "")}>
+                                      <input value={this.state.dataCenterToAdd} className={"form-control" + (this.state.dataCenterWarning ? " form-control-warning" : "")} type="text" onChange={this.handleDataCenterToAddChange} placeholder="Add a data center" />
+                                      <span className="input-group-btn">
+                                        <button type="button" className="btn btn-success mega-octicon octicon-plus" onClick={this.addDataCenter}></button>
+                                      </span>
+                                    </div>
+                                    {dataCenterWarning}
+                                </div>
                             </fieldset>
                         </div>
-        				<div style={(this.state.activeTab == "dataCenterSettings" ? {display: 'inline'} : {display: 'none'})}>
-        					<fieldset className="form-group row">
-        						<legend className="col-form-legend col-xs-4">Data Centers</legend>
-        						<div className="col-xs-8">
-        						  {dataCenterRows}
-        						  <div className={"input-group" + (this.state.dataCenterWarning ? " has-warning" : "")}>
-        							<input value={this.state.dataCenterToAdd} className={"form-control" + (this.state.dataCenterWarning ? " form-control-warning" : "")} type="text" onChange={this.handleDataCenterToAddChange} placeholder="Add a data center" />
-        							<span className="input-group-btn">
-        							  <button type="button" className="btn btn-success mega-octicon octicon-plus" onClick={this.addDataCenter}></button>
-        							</span>
-        						  </div>
-        						  {dataCenterWarning}
-        						</div>
-        					</fieldset>
-        					<fieldset className="form-group row">
-        						<legend className="col-form-legend col-xs-4">Select Primary <span data-toggle="tooltip" title="Selected data center will appear by default when dashboard loads" data-placement="bottom" className="mega-octicon octicon-question"></span></legend>
-        						<div className="col-xs-8">
-        						  <div className="btn-group" data-toggle="buttons">
-        						  	{primaryDataCenterSelect}
-                                  </div>
-        						</div>
-        					</fieldset>
-        				</div>
                         <div style={(this.state.activeTab == "environmentSettings" ? {display: 'inline'} : {display: 'none'})}>
                             <fieldset className="form-group row">
                                 <legend className="col-form-legend col-xs-4">Environments</legend>

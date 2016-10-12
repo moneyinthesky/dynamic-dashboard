@@ -131,7 +131,8 @@ a:link {
 .navbar-dark .navbar-nav .open>.nav-link:hover {
     color: #80CBC4;
 }
-.application-input {
+.application-input,
+.datacenter-input {
     margin-top: 30px;
 }
 #title-bar {

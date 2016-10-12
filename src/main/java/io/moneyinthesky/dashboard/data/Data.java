@@ -6,23 +6,23 @@ import java.util.Map;
 public class Data {
 
     private String timeGenerated;
-    private Map<String, DataCenterStatus> dataCenters;
+    private List<DataCenterStatus> dataCenters;
 
     public String getTimeGenerated() {
         return timeGenerated;
     }
 
-    public Map<String, DataCenterStatus> getDataCenters() {
+    public List<DataCenterStatus> getDataCenters() {
         return dataCenters;
     }
 
     public static class DataCenterStatus {
-        private boolean primary;
+        private String name;
         private List<String> environments;
         private Map<String, ApplicationStatus> applications;
 
-        public boolean isPrimary() {
-            return primary;
+        public String getName() {
+            return name;
         }
 
         public List<String> getEnvironments() {
