@@ -206,6 +206,7 @@ class ModalSettings extends React.Component {
         	  return (
         		<li className="list-group-item clearfix" data-id={index} key={index} draggable="true" onDragEnd={this.dragEndDataCenters} onDragStart={this.dragStart}>
         		    <button type="button" data-id={index} data-datacenter={dataCenter} data-index={index} className="btn btn-danger mega-octicon octicon-dash pull-xs-right" onClick={this.removeDataCenter}></button>
+        		    <button type="button" className="environment-count btn btn-info pull-xs-right">{dataCenterObject.environments.length} Env</button>
                     {dataCenter}
                 </li>
         	  );
@@ -226,7 +227,7 @@ class ModalSettings extends React.Component {
             	return (
         			<div key={dataCenter} className="panel panel-default">
         			  <div className="panel-heading" role="tab" id={dataCenter}>
-        				  <a className={this.isFirstDataCenter(dataCenter) ? "" : "collapsed"} data-toggle="collapse" data-parent="#accordion" href={"#" + dataCenter.replace(/\s+/g, '-').toLowerCase() + "-enviornments"} aria-expanded="true" aria-controls={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-environments"}>
+        				  <a className={this.isFirstDataCenter(dataCenter) ? "" : "collapsed"} data-toggle="collapse" data-parent="#accordion" href={"#" + dataCenter.replace(/\s+/g, '-').toLowerCase() + "-environments"} aria-expanded="true" aria-controls={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-environments"}>
         				  	<div key={dataCenter} className="input-group">
         						<input key={dataCenter} value={dataCenter} readOnly className="form-control" type="text" />
         						<span className="input-group-btn">
@@ -235,7 +236,7 @@ class ModalSettings extends React.Component {
         					</div>
         				  </a>
         			  </div>
-        			  <div id={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-enviornments"} className={"panel-collapse collapse" + (this.isFirstDataCenter(dataCenter) ? " in" : "")} role="tabpanel" aria-labelledby={dataCenter}>
+        			  <div id={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-environments"} className={"panel-collapse collapse" + (this.isFirstDataCenter(dataCenter) ? " in" : "")} role="tabpanel" aria-labelledby={dataCenter}>
         				<div className={"input-group col-xs-6 environment-datacenter-row"}>
         				  {dataCenterEnvironmentRowsAlreadyAdded}
         				  <div key={dataCenter} className="input-group">
