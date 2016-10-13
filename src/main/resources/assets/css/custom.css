@@ -97,6 +97,20 @@ a:link {
     padding-left: 15px;
     padding-right: 15px;
 }
+.configuration-heading {
+    border: 1px solid;
+    border-radius: .5rem;
+    background-color: #80CBC4;
+    color: #373a3c;
+    padding: 5px;
+}
+.configuration-heading-text {
+    color: #373a3c !important;
+    margin-left: 10px;
+}
+.form-control-feedback {
+    margin-bottom: 10px;
+}
 .alert {
 	margin-bottom: 0px;
 	padding-top: 12px;
@@ -109,8 +123,18 @@ a:link {
 }
 .heading-bar,
 .heading-bar:hover {
-    background-color: #80CBC4;
+    background-color: #FFFFFF;
     color: #373a3c;
+    border-width: 0px;
+}
+.nav-stacked {
+    margin-top: 10px;
+}
+.nav-link.active {
+    background-color: #009688 !important;
+}
+.list-group {
+    margin-bottom: 10px;
 }
 .navbar-dark .navbar-brand,
 .navbar-dark .navbar-brand:hover,
@@ -133,7 +157,8 @@ a:link {
 }
 .application-input,
 .datacenter-input {
-    margin-top: 30px;
+    margin-top: 20px;
+    margin-bottom: 10px;
 }
 .environment-count {
     border-radius: 24px;
