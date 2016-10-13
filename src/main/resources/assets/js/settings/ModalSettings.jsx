@@ -145,23 +145,25 @@ class ModalSettings extends React.Component {
         }
 
         this.dragOver = (e) => {
+            var nodeDraggedOver = e.target.nodeName !== "LI" ? e.target.parentNode : e.target;
+
             e.preventDefault();
             this.dragged.style.display = "none";
-            if(e.target.className == "placeholder") return;
-            this.over = e.target;
+            if(nodeDraggedOver.className == "placeholder") return;
+            this.over = nodeDraggedOver;
 
             var relY = e.clientY - this.over.offsetTop;
             var height = this.over.offsetHeight / 2;
-            var parent = e.target.parentNode;
+            var parent = nodeDraggedOver.parentNode;
 
             if(relY > height) {
                 this.nodePlacement = "after";
-                parent.insertBefore(placeholder, e.target.nextElementSibling);
+                parent.insertBefore(placeholder, nodeDraggedOver.nextElementSibling);
             }
             else if(relY < height) {
-                if(e.target.dataset.id !== 'title') {
+                if(nodeDraggedOver.dataset.id !== 'title') {
                     this.nodePlacement = "before"
-                    parent.insertBefore(placeholder, e.target);
+                    parent.insertBefore(placeholder, nodeDraggedOver);
                 }
             }
         };
@@ -196,7 +198,7 @@ class ModalSettings extends React.Component {
             var applicationRows = this.state.settings.applications.map(function(application, index) {
         	  return (
         		<li className="list-group-item clearfix" data-id={index} key={index} draggable="true" onDragEnd={this.dragEndApplications} onDragStart={this.dragStart}>
-        		    <button type="button" data-id={index} data-index={index} className="btn btn-danger mega-octicon octicon-dash pull-xs-right" onClick={this.removeApplication}></button>
+        		    <button type="button" data-index={index} className="btn btn-danger mega-octicon octicon-dash pull-xs-right" onClick={this.removeApplication}></button>
                     {application}
                 </li>
         	  );
@@ -205,7 +207,7 @@ class ModalSettings extends React.Component {
               var dataCenter = dataCenterObject.name;
         	  return (
         		<li className="list-group-item clearfix" data-id={index} key={index} draggable="true" onDragEnd={this.dragEndDataCenters} onDragStart={this.dragStart}>
-        		    <button type="button" data-id={index} data-datacenter={dataCenter} data-index={index} className="btn btn-danger mega-octicon octicon-dash pull-xs-right" onClick={this.removeDataCenter}></button>
+        		    <button type="button" data-datacenter={dataCenter} className="btn btn-danger mega-octicon octicon-dash pull-xs-right" onClick={this.removeDataCenter}></button>
         		    <button type="button" className="environment-count btn btn-info pull-xs-right">{dataCenterObject.environments.length} Env</button>
                     {dataCenter}
                 </li>
