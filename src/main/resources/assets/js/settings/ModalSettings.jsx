@@ -44,6 +44,26 @@ class ModalSettings extends React.Component {
             this.setState({environmentToAdd : this.state.environmentToAdd, environmentWarning: ''});
         };
 
+		this.handleNodeDiscoveryMethodSelect = (event) => {
+			var dataCenterObject = getByName(this.state.settings.dataCenters, event.target.dataset.datacenter);
+			var environmentObject = getByName(dataCenterObject.environments, event.target.dataset.environment);
+			environmentObject.nodeDiscoveryMethod = event.target.value;
+
+			this.setState({settings : this.state.settings});
+		};
+
+		this.handleUrlPatternApplicationChange = (event) => {
+			var dataCenterObject = getByName(this.state.settings.dataCenters, event.target.dataset.datacenter);
+			var environmentObject = getByName(dataCenterObject.environments, event.target.dataset.environment);
+			var application = event.target.dataset.application;
+
+			if(!environmentObject.applicationConfig) environmentObject.applicationConfig={};
+			if(!environmentObject.applicationConfig[application]) environmentObject.applicationConfig[application]={};
+
+			environmentObject.applicationConfig[application][event.target.dataset.field] = event.target.value;
+			this.setState({settings: this.state.settings});
+		}
+
         this.addApplication = (event) => {
             if(this.state.applicationToAdd && !this.state.settings.applications.includes(this.state.applicationToAdd)) {
                 this.state.settings.applications.push(this.state.applicationToAdd);
@@ -114,6 +134,41 @@ class ModalSettings extends React.Component {
             dataCenterObject.environments = removeByName(dataCenterObject.environments, environmentToRemove[1]);
             this.setState({settings : this.state.settings});
         };
+
+		this.generateDataCenterEnvironmentList = () => {
+			var dataCenterEnvironmentList = [];
+			this.state.settings.dataCenters.map((dataCenterObject) => {
+				dataCenterObject.environments.map((environmentObject) => {
+					 dataCenterEnvironmentList.push(dataCenterObject.name + " / " + environmentObject.name);
+				});
+			});
+			return dataCenterEnvironmentList;
+		}
+
+		this.getDiscoveryMethodForDataCenterEnvironment = (dataCenterEnvironment) => {
+			var dataCenterEnvironmentArray = dataCenterEnvironment.split('/');
+			var dataCenter = dataCenterEnvironmentArray[0].trim();
+			var environment = dataCenterEnvironmentArray[1].trim();
+
+			var dataCenterObject = getByName(this.state.settings.dataCenters, dataCenter);
+			var environmentObject = getByName(dataCenterObject.environments, environment);
+			return environmentObject.nodeDiscoveryMethod ? environmentObject.nodeDiscoveryMethod : "";
+		}
+
+		this.getCurrentUrlPattern = (dataCenter, environment, application) => {
+			var dataCenterObject = getByName(this.state.settings.dataCenters, dataCenter);
+            var environmentObject = getByName(dataCenterObject.environments, environment);
+
+            if(environmentObject.applicationConfig) {
+            	if(environmentObject.applicationConfig[application]) {
+            		if(environmentObject.applicationConfig[application].urlPattern) {
+            			return environmentObject.applicationConfig[application].urlPattern;
+            		}
+            	}
+            }
+
+            return "";
+		};
 
         this.isFirstDataCenter = (dataCenter) => {
             return this.state.settings.dataCenters[0].name === dataCenter;
@@ -202,7 +257,7 @@ class ModalSettings extends React.Component {
         this.handleSave = () => {
             this.state.settings.title = this.state.titleToAdd;
             this.props.onSave(this.state.settings);
-            this.setState({activeTab: "applicaitonSettings", importAlert: ""});
+            this.setState({activeTab: "applicationSettings", importAlert: ""});
         };
 
         this.handleClose = () => {
@@ -227,7 +282,7 @@ class ModalSettings extends React.Component {
             var applicationWarning = this.state.applicationWarning ? <div className="form-control-feedback alert alert-warning" role="alert">{this.state.applicationWarning}</div> : "";
             var dataCenterWarning = this.state.dataCenterWarning ? <div className="form-control-feedback alert alert-warning" role="alert">{this.state.dataCenterWarning}</div> : "";
             var environmentWarning = this.state.environmentWarning ? <div className="form-control-feedback alert alert-warning" role="alert">{this.state.environmentWarning}</div> : "";
-            var applicationRows = this.state.settings.applications.map(function(application, index) {
+            var applicationRows = this.state.settings.applications.map((application, index) => {
         	  return (
         		<li className="list-group-item clearfix" data-id={index} key={index} draggable="true" onDragEnd={this.dragEndApplications} onDragStart={this.dragStart}>
         		    <button type="button" className="btn mega-octicon octicon-three-bars pull-xs-right" data-toggle="tooltip" title="Drag to re-order" data-placement="bottom"></button>
@@ -235,8 +290,8 @@ class ModalSettings extends React.Component {
                     {application}
                 </li>
         	  );
-        	}.bind(this));
-            var dataCenterRows = this.state.settings.dataCenters.map(function(dataCenterObject, index) {
+        	});
+            var dataCenterRows = this.state.settings.dataCenters.map((dataCenterObject, index) => {
               var dataCenter = dataCenterObject.name;
         	  return (
         		<li className="list-group-item clearfix" data-id={index} key={index} draggable="true" onDragEnd={this.dragEndDataCenters} onDragStart={this.dragStart}>
@@ -246,8 +301,8 @@ class ModalSettings extends React.Component {
                     {dataCenter}
                 </li>
         	  );
-        	}.bind(this));
-        	var dataCenterConfigurationTabs = this.state.settings.dataCenters.map(function(dataCenterObject, index) {
+        	});
+        	var dataCenterConfigurationTabs = this.state.settings.dataCenters.map((dataCenterObject, index) => {
         	    var dataCenter = dataCenterObject.name;
         	    return (
                     <li key={index} className="nav-item">
@@ -255,9 +310,9 @@ class ModalSettings extends React.Component {
                     </li>
         	    );
         	});
-        	var dataCenterConfigurationContent = this.state.settings.dataCenters.map(function(dataCenterObject, index) {
+        	var dataCenterConfigurationContent = this.state.settings.dataCenters.map((dataCenterObject, index) => {
         	    var dataCenter = dataCenterObject.name;
-        	    var environmentRows = dataCenterObject.environments.map(function(environmentObject, index) {
+        	    var environmentRows = dataCenterObject.environments.map((environmentObject, index) => {
         	        var environment = environmentObject.name;
                     return (
                         <li key={index} className="list-group-item clearfix" data-datacenter={dataCenter} data-id={index} draggable="true" onDragEnd={this.dragEndEnvironments} onDragStart={this.dragStart}>
@@ -266,7 +321,7 @@ class ModalSettings extends React.Component {
                             {environment}
                         </li>
                     );
-        	    }.bind(this));
+        	    });
         	    return (
         	        <div key={index} className={"tab-pane" + (index===0 ? " active" : "")} id={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-environment-config"} role="tabpanel">
         	            <ul className="list-group" onDragOver={this.dragOver}>
@@ -282,57 +337,53 @@ class ModalSettings extends React.Component {
                         {environmentWarning}
         	        </div>
         	    );
-        	}.bind(this));
-            var nodeDiscoveryTabs = this.state.settings.dataCenters.map(function(dataCenterObject) {
-                var dataCenter = dataCenterObject.name;
-            	return (
-        	  		<li key={dataCenter} className="nav-item">
-        				<a className={"nav-link" + (this.isFirstDataCenter(dataCenter) ? " active" : "")} data-toggle="pill" href={"#" + dataCenter.replace(/\s+/g, '-').toLowerCase() + "-node-discovery"}>{dataCenter}</a>
-        		  	</li>
-            	);
-            }.bind(this));
-            var nodeDiscoveryPanes = this.state.settings.dataCenters.map(function(dataCenterObject) {
-                var dataCenter = dataCenterObject.name;
-            	var nodeDiscoveryEnvironments = dataCenterObject.environments.map(function(environmentObject) {
-            	    var environment = environmentObject.name;
-            		var applicationNodeDiscoveryRows = this.state.settings.applications.map(function(application, index) {
-            			return (
-        					<div key={dataCenter + "-" + environment + "-" + application} className="form-group row">
-        						<label htmlFor="example-text-input" className="col-xs-4 col-form-label">{application}</label>
-        						<div className="col-xs-8">
-        							{application}
-        						</div>
-        					</div>
+        	});
+        	var nodeDiscoveryTabs = this.generateDataCenterEnvironmentList().map((dataCenterEnvironment, index) => {
+				return (
+					<li key={index} className="nav-item">
+						<a className={"nav-link" + ((index===0) ? " active" : "")} data-toggle="tab" href={"#" + dataCenterEnvironment.replace('/','').replace(/\s+/g, '-').toLowerCase() + "-node-discovery"} role="tab">{dataCenterEnvironment}</a>
+					</li>
+				);
+        	});
+        	var nodeDiscoveryContent = this.generateDataCenterEnvironmentList().map((dataCenterEnvironment, index) => {
+        		var dataCenterEnvironmentArray = dataCenterEnvironment.split('/');
+        		var dataCenter = dataCenterEnvironmentArray[0].trim();
+        		var environment = dataCenterEnvironmentArray[1].trim();
+        		var nodeDiscoveryConfigForm = this.getDiscoveryMethodForDataCenterEnvironment(dataCenterEnvironment)==="urlPattern" ? (
+        			this.state.settings.applications.map((application, index) => {
+        				var currentUrlPattern = this.getCurrentUrlPattern(dataCenter, environment, application);
+        				return (
+	        				<div key={index} className="form-group row">
+								<label htmlFor="example-text-input" className="col-xs-3 col-form-label">{application}</label>
+								<div className="col-xs-9">
+									<div className="input-group">
+                                		<span className="input-group-addon" id="basic-addon1">URL Pattern: </span>
+                                		<input defaultValue={currentUrlPattern} data-field="urlPattern" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleUrlPatternApplicationChange} placeholder="Add a URL pattern" />
+                                	</div>
+
+								</div>
+							</div>
         				);
-            		}.bind(this));
-            		return(
-        				<div key={dataCenter + "-" + environment} className="panel panel-default">
-        				  <div className="panel-heading" role="tab" id={dataCenter + "-" + environment}>
-        					  <a className="collapsed" data-toggle="collapse" data-parent="#accordion" href={"#" + dataCenter.replace(/\s+/g, '-').toLowerCase() + "-" + environment} aria-expanded="true" aria-controls={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-" + environment}>
-        						<div className="input-group">
-        							<span className="input-group-btn">
-        								<button key={dataCenter + "-" + environment} type="button" className="btn btn-info mega-octicon octicon-triangle-down"></button>
-        							</span>
-        							<input value={environment} readOnly className="form-control" type="text" />
-        						</div>
-        					  </a>
-        				  </div>
-        				  <div id={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-" + environment} className="panel-collapse collapse" role="tabpanel" aria-labelledby={dataCenter + "-" + environment}>
-        					<div className={"input-group col-xs-6 environment-datacenter-row"}>
-        						{applicationNodeDiscoveryRows}
-        					</div>
-        				  </div>
-        				</div>
-        			);
-            	}.bind(this));
-        		return (
-        			<div key={dataCenter} className={"tab-pane" + (this.isFirstDataCenter(dataCenter) ? " active" : "")} id={dataCenter.replace(/\s+/g, '-').toLowerCase() + "-node-discovery"} role="tabpanel">
-        				<div id="accordion" role="tablist" aria-multiselectable="true">
-        					{nodeDiscoveryEnvironments}
-        				</div>
-        			</div>
-        		);
-        	}.bind(this));
+        			})
+        		) : "";
+				return (
+					<div key={index} className={"tab-pane" + (index===0 ? " active" : "")} id={dataCenterEnvironment.replace('/','').replace(/\s+/g, '-').toLowerCase() + "-node-discovery"} role="tabpanel">
+						<div className="form-group row">
+							<label htmlFor="example-text-input" className="col-xs-6 col-form-label">Node Discovery Method</label>
+							<div className="col-xs-6">
+								<select defaultValue={this.getDiscoveryMethodForDataCenterEnvironment(dataCenterEnvironment)} className="custom-select" data-datacenter={dataCenter} data-environment={environment} onChange={this.handleNodeDiscoveryMethodSelect}>
+									<option value="">Select method</option>
+									<option value="urlPattern">URL Pattern</option>
+									<option value="fleet">Fleet</option>
+									<option value="route53">AWS Route 53</option>
+								</select>
+							</div>
+						</div>
+						<hr/>
+						{nodeDiscoveryConfigForm}
+					</div>
+				);
+			});
             return (
                 <div className="modal fade" id="settings-modal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                   <div className="modal-dialog modal-lg" role="document">
@@ -441,12 +492,20 @@ class ModalSettings extends React.Component {
                             </div>
                         </div>
                         <div style={(this.state.activeTab == "nodeDiscovery" ? {display: 'inline'} : {display: 'none'})}>
-        					<ul className="nav nav-pills">
-        					  {nodeDiscoveryTabs}
-        					</ul>
-        					<div className="tab-content">
-        					  {nodeDiscoveryPanes}
-        					</div>
+							<div className="container-fluid">
+                            	<div className="row">
+                                	<div className="col-xs-4">
+                                    	<ul className="nav nav-pills nav-stacked" role="tablist">
+                                        	{nodeDiscoveryTabs}
+                                    	</ul>
+                                  	</div>
+                                  	<div className="col-xs-8">
+                                    	<div className="tab-content">
+                                    		{nodeDiscoveryContent}
+                                    	</div>
+                                	</div>
+                            	</div>
+                            </div>
                         </div>
                         <div style={(this.state.activeTab == "generalSettings" ? {display: 'inline'} : {display: 'none'})}>
                           <div className="form-group row">

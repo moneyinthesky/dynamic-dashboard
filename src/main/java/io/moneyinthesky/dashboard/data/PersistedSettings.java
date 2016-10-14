@@ -29,19 +29,12 @@ public class PersistedSettings {
         private String name;
         private List<Environment> environments;
 
-        //TODO remove this
-        private String environmentToAdd;
-
         public String getName() {
             return name;
         }
 
         public List<Environment> getEnvironments() {
             return environments;
-        }
-
-        public String getEnvironmentToAdd() {
-            return environmentToAdd;
         }
     }
 
