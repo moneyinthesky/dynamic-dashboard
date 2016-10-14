@@ -127,6 +127,13 @@ a:link {
     color: #373a3c;
     border-width: 0px;
 }
+.panel-title-config {
+    padding-left: 10px;
+    font-size: 1.1em;
+}
+.octicon-primitive-dot {
+    padding-right: 5px;
+}
 .nav-stacked {
     margin-top: 10px;
 }

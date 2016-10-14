@@ -15,7 +15,7 @@ class ModalSettings extends React.Component {
             environmentToAdd: {},
             applicationWarning: "",
             dataCenterWarning: "",
-            activeTab: "applicationSettings",
+            activeTab: "basicConfiguration",
             importAlert: "",
             importFile: ""
         };
@@ -286,11 +286,11 @@ class ModalSettings extends React.Component {
         this.handleSave = () => {
             this.state.settings.title = this.state.titleToAdd;
             this.props.onSave(this.state.settings);
-            this.setState({activeTab: "applicationSettings", importAlert: ""});
+            this.setState({activeTab: "basicConfiguration", importAlert: ""});
         };
 
         this.handleClose = () => {
-            this.setState({activeTab: "applicationSettings"});
+            this.setState({activeTab: "basicConfiguration"});
         };
 
         this.importSettings = (event) => {
@@ -427,8 +427,8 @@ class ModalSettings extends React.Component {
                         <nav className="navbar navbar-dark bg-inverse">
                           <a className="navbar-brand" href="#"><b>Settings</b></a>
                           <ul className="nav navbar-nav">
-                            <li className={"nav-item" + (this.state.activeTab === "applicationSettings" ? " active" : "")}>
-                              <a className="nav-link" href="#applicationSettings" data-tab="applicationSettings" onClick={this.changeSettingsNav}>Basic Configuration</a>
+                            <li className={"nav-item" + (this.state.activeTab === "basicConfiguration" ? " active" : "")}>
+                              <a className="nav-link" href="#basicConfiguration" data-tab="basicConfiguration" onClick={this.changeSettingsNav}>Basic Configuration</a>
                             </li>
                             <li className={"nav-item" + (this.state.activeTab === "nodeDiscovery" ? " active" : "")}>
                               <a className="nav-link" href="#nodeDiscovery" data-tab="nodeDiscovery" onClick={this.changeSettingsNav}>Node Discovery</a>
@@ -441,14 +441,13 @@ class ModalSettings extends React.Component {
                       </div>
                       <div className="modal-body">
                       	<form>
-                        <div style={(this.state.activeTab == "applicationSettings" ? {display: 'inline'} : {display: 'none'})}>
+                        <div style={(this.state.activeTab == "basicConfiguration" ? {display: 'inline'} : {display: 'none'})}>
                             <div id="accordion" role="tablist" aria-multiselectable="true">
                               <div className="panel panel-default">
-                                <div className="configuration-heading panel-heading" role="tab" id="headingOne">
-                                  <div className="panel-title">
-                                    <a className="configuration-heading-text" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                <div className="configuration-heading panel-heading" role="tab" id="headingOne" data-parent="#accordion" data-toggle="collapse" data-target="#collapseOne">
+                                  <div className="panel-title-config panel-title">
+                                      <span className="mega-octicon octicon-primitive-dot"> </span>
                                       Applications
-                                    </a>
                                   </div>
                                 </div>
                                 <div id="collapseOne" className="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
@@ -472,11 +471,10 @@ class ModalSettings extends React.Component {
                                 </div>
                               </div>
                               <div className="panel panel-default">
-                                <div className="configuration-heading panel-heading" role="tab" id="headingTwo">
-                                  <div className="panel-title">
-                                    <a className="configuration-heading-text collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                <div className="configuration-heading panel-heading" role="tab" id="headingTwo" data-parent="#accordion" data-toggle="collapse" data-target="#collapseTwo">
+                                  <div className="panel-title-config panel-title">
+                                      <span className="mega-octicon octicon-primitive-dot"> </span>
                                       Data Centers
-                                    </a>
                                   </div>
                                 </div>
                                 <div id="collapseTwo" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
@@ -500,11 +498,10 @@ class ModalSettings extends React.Component {
                                 </div>
                               </div>
                               <div className="panel panel-default">
-                                <div className="configuration-heading panel-heading" role="tab" id="headingThree">
-                                  <div className="panel-title">
-                                    <a className="configuration-heading-text collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                <div className="configuration-heading panel-heading" role="tab" id="headingThree" data-parent="#accordion" data-toggle="collapse" data-target="#collapseThree">
+                                  <div className="panel-title-config panel-title">
+                                      <span className="mega-octicon octicon-primitive-dot"> </span>
                                       Environments
-                                    </a>
                                   </div>
                                 </div>
                                 <div id="collapseThree" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
