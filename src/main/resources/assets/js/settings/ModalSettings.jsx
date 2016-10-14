@@ -157,7 +157,6 @@ class ModalSettings extends React.Component {
 		}
 
 		this.isNodeDiscoverConfigComplete = (dataCenterEnvironment) => {
-			console.log(dataCenterEnvironment);
 			var dataCenterEnvironmentArray = dataCenterEnvironment.split('/');
 			var dataCenter = dataCenterEnvironmentArray[0].trim();
 			var environment = dataCenterEnvironmentArray[1].trim();
@@ -177,7 +176,6 @@ class ModalSettings extends React.Component {
                     return true;
             	}));
 
-				console.log(applicationConfigPresent.indexOf(false))
             	if(applicationConfigPresent.indexOf(false) !== -1) return false;
             } else if(environmentObject.nodeDiscoveryMethod==="") {
             	return false;
