@@ -166,7 +166,16 @@ a:link {
 .environment-count:hover {
     background-color: #5bc0de;
 }
-
+.node-discovery-tag-complete {
+	margin-top: 5px;
+	margin-right: 5px;
+	background-color: #81C784;
+}
+.node-discovery-tag-incomplete {
+	margin-top: 5px;
+	margin-right: 5px;
+	background-color: #FFEB3B;
+}
 #title-bar {
   color: #80CBC4; padding-top: 8px; padding-bottom: 8px; background-color:#424242;
 }

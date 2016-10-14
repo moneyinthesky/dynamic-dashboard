@@ -48,6 +48,7 @@ class ModalSettings extends React.Component {
 			var dataCenterObject = getByName(this.state.settings.dataCenters, event.target.dataset.datacenter);
 			var environmentObject = getByName(dataCenterObject.environments, event.target.dataset.environment);
 			environmentObject.nodeDiscoveryMethod = event.target.value;
+			environmentObject.applicationConfig = {};
 
 			this.setState({settings : this.state.settings});
 		};
@@ -153,6 +154,36 @@ class ModalSettings extends React.Component {
 			var dataCenterObject = getByName(this.state.settings.dataCenters, dataCenter);
 			var environmentObject = getByName(dataCenterObject.environments, environment);
 			return environmentObject.nodeDiscoveryMethod ? environmentObject.nodeDiscoveryMethod : "";
+		}
+
+		this.isNodeDiscoverConfigComplete = (dataCenterEnvironment) => {
+			console.log(dataCenterEnvironment);
+			var dataCenterEnvironmentArray = dataCenterEnvironment.split('/');
+			var dataCenter = dataCenterEnvironmentArray[0].trim();
+			var environment = dataCenterEnvironmentArray[1].trim();
+
+            var dataCenterObject = getByName(this.state.settings.dataCenters, dataCenter);
+            var environmentObject = getByName(dataCenterObject.environments, environment);
+
+            if(!environmentObject.applicationConfig) return false;
+
+            if(environmentObject.nodeDiscoveryMethod==="urlPattern") {
+            	var applicationConfigPresent = (this.state.settings.applications.map((application) => {
+                    if(!environmentObject.applicationConfig[application]) return false;
+
+                    if((!environmentObject.applicationConfig[application].urlPattern) ||
+                    	(environmentObject.applicationConfig[application].urlPattern === "")) return false;
+
+                    return true;
+            	}));
+
+				console.log(applicationConfigPresent.indexOf(false))
+            	if(applicationConfigPresent.indexOf(false) !== -1) return false;
+            } else if(environmentObject.nodeDiscoveryMethod==="") {
+            	return false;
+            }
+
+            return true;
 		}
 
 		this.getCurrentUrlPattern = (dataCenter, environment, application) => {
@@ -339,8 +370,14 @@ class ModalSettings extends React.Component {
         	    );
         	});
         	var nodeDiscoveryTabs = this.generateDataCenterEnvironmentList().map((dataCenterEnvironment, index) => {
+        		var nodeDiscoveryTagSpan = this.isNodeDiscoverConfigComplete(dataCenterEnvironment) ? (
+        			<span className="node-discovery-tag-complete tag tag-default tag-pill pull-xs-right mega-octicon octicon-check" data-toggle="tooltip" data-placement="top" title="Configuration complete"> </span>
+        		) : (
+        			<span className="node-discovery-tag-incomplete tag tag-default tag-pill pull-xs-right mega-octicon octicon-alert" data-toggle="tooltip" data-placement="top" title="Configuration incomplete"> </span>
+        		);
 				return (
 					<li key={index} className="nav-item">
+						{nodeDiscoveryTagSpan}
 						<a className={"nav-link" + ((index===0) ? " active" : "")} data-toggle="tab" href={"#" + dataCenterEnvironment.replace('/','').replace(/\s+/g, '-').toLowerCase() + "-node-discovery"} role="tab">{dataCenterEnvironment}</a>
 					</li>
 				);
