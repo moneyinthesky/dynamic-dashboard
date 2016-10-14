@@ -389,14 +389,11 @@ class ModalSettings extends React.Component {
         				var currentUrlPattern = this.getCurrentUrlPattern(dataCenter, environment, application);
         				return (
 	        				<div key={index} className="form-group row">
-								<label htmlFor="example-text-input" className="col-xs-3 col-form-label">{application}</label>
-								<div className="col-xs-9">
-									<div className="input-group">
-                                		<span className="input-group-addon" id="basic-addon1">URL Pattern: </span>
-                                		<input defaultValue={currentUrlPattern} data-field="urlPattern" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleUrlPatternApplicationChange} placeholder="Add a URL pattern" />
-                                	</div>
-
-								</div>
+								<label>{application}</label>
+                                <div className="input-group">
+                                    <span className="input-group-addon" id="basic-addon1">URL Pattern: </span>
+                                    <input defaultValue={currentUrlPattern} data-field="urlPattern" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleUrlPatternApplicationChange} placeholder="Add a URL pattern" />
+                                </div>
 							</div>
         				);
         			})
@@ -404,7 +401,7 @@ class ModalSettings extends React.Component {
 				return (
 					<div key={index} className={"tab-pane" + (index===0 ? " active" : "")} id={dataCenterEnvironment.replace('/','').replace(/\s+/g, '-').toLowerCase() + "-node-discovery"} role="tabpanel">
 						<div className="form-group row">
-							<label htmlFor="example-text-input" className="col-xs-6 col-form-label">Node Discovery Method</label>
+							<label className="col-xs-6 col-form-label">Node Discovery Method</label>
 							<div className="col-xs-6">
 								<select defaultValue={this.getDiscoveryMethodForDataCenterEnvironment(dataCenterEnvironment)} className="custom-select" data-datacenter={dataCenter} data-environment={environment} onChange={this.handleNodeDiscoveryMethodSelect}>
 									<option value="">Select method</option>

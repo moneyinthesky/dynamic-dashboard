@@ -103,6 +103,7 @@ a:link {
     background-color: #80CBC4;
     color: #373a3c;
     padding: 5px;
+    cursor: pointer;
 }
 .configuration-heading-text {
     color: #373a3c !important;
