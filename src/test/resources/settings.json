@@ -1,0 +1,66 @@
+{
+  "title" : "Dynamic Dashboard",
+  "applications" : [ "DCM", "CRM" ],
+  "dataCenters" : [ {
+    "name" : "AWS",
+    "environments" : [ {
+      "name" : "d1euw1",
+      "nodeDiscoveryMethod" : "urlPattern",
+      "applicationConfig" : {
+        "DCM" : {
+          "urlPattern" : "http://dcm-app-v02-01[a-b].d1euw1.api.bskyb.com/dcm/private/status/info"
+        },
+        "CRM" : {
+          "urlPattern" : "http://crm-app-v02-01[a-b].d1euw1.api.bskyb.com/crm/private/status/info"
+        }
+      }
+    }, {
+      "name" : "u1euw1",
+      "nodeDiscoveryMethod" : "urlPattern",
+      "applicationConfig" : {
+        "DCM" : {
+          "urlPattern" : "http://dcm-app-v02-01[a-b].u1euw1.api.bskyb.com/dcm/private/status/info"
+        },
+        "CRM" : {
+          "urlPattern" : "http://crm-app-v02-01[a-b].u1euw1.api.bskyb.com/crm/private/status/info"
+        }
+      }
+    }, {
+      "name" : "u3euw1",
+      "nodeDiscoveryMethod" : "urlPattern",
+      "applicationConfig" : {
+        "DCM" : {
+          "urlPattern" : "http://dcm-app-v02-[01-10][a-b].u3euw1.api.bskyb.com/dcm/private/status/info"
+        },
+        "CRM" : {
+          "urlPattern" : "http://crm-app-v02-01[a-b].u3euw1.api.bskyb.com/crm/private/status/info"
+        }
+      }
+    } ]
+  }, {
+    "name" : "M25 Hemel",
+    "environments" : [ {
+      "name" : "i1",
+      "nodeDiscoveryMethod" : "urlPattern",
+      "applicationConfig" : {
+        "DCM" : {
+          "urlPattern" : "http://h1wap0[1-2]-v01.dcm.i1.ovp.bskyb.com/dcm/private/status/info"
+        },
+        "CRM" : {
+          "urlPattern" : "http://h1wap0[1-2]-v01.crm.i1.ovp.bskyb.com/crm/private/status/info"
+        }
+      }
+    }, {
+      "name" : "stg2",
+      "nodeDiscoveryMethod" : "urlPattern",
+      "applicationConfig" : {
+        "DCM" : {
+          "urlPattern" : "http://h1wap[01-20]-v01.dcm.stg2.ovp.bskyb.com/dcm/private/status/info"
+        },
+        "CRM" : {
+          "urlPattern" : "http://h1wap0[1-6]-v01.crm.stg2.ovp.bskyb.com/crm/private/status/info"
+        }
+      }
+    } ]
+  } ]
+}
