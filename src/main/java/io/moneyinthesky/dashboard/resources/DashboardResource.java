@@ -2,35 +2,44 @@ package io.moneyinthesky.dashboard.resources;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
+import com.google.inject.Inject;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.FormatStyle;
 import java.util.Map;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Resources.getResource;
+import static java.time.LocalDateTime.now;
 import static java.time.format.DateTimeFormatter.ofLocalizedDateTime;
+import static java.time.format.FormatStyle.LONG;
 
 @Path("/data")
 @Produces(MediaType.APPLICATION_JSON)
 public class DashboardResource {
 
-	private ObjectMapper objectMapper = new ObjectMapper();
+	private static final ZoneId TIMEZONE = ZoneId.of("Europe/London");
+	private ObjectMapper objectMapper;
 
-    @GET
+	@Inject
+	public DashboardResource(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
+	}
+
+	@GET
     public String getData() throws IOException {
-        Map<String, Object> jsonObject = objectMapper.readValue(Resources.toString(getResource("data.json"), UTF_8), Map.class);
+        Map<String, Object> data = objectMapper.readValue(Resources.toString(getResource("data.json"), UTF_8), Map.class);
+        return objectMapper.writeValueAsString(timestamp(data));
+    }
 
-        ZonedDateTime nowWithTimeZone = ZonedDateTime.of(LocalDateTime.now(), ZoneId.of("Europe/London"));
-        jsonObject.put("timeGenerated", nowWithTimeZone.format(ofLocalizedDateTime(FormatStyle.LONG)));
-
-        return objectMapper.writeValueAsString(jsonObject);
+    private Map<String, Object> timestamp(Map<String, Object> data) {
+        ZonedDateTime nowWithTimeZone = ZonedDateTime.of(now(), TIMEZONE);
+        data.put("timeGenerated", nowWithTimeZone.format(ofLocalizedDateTime(LONG)));
+        return data;
     }
 }

@@ -1,31 +1,38 @@
 package io.moneyinthesky.dashboard.resources;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.moneyinthesky.dashboard.data.PersistedSettings;
+import com.google.inject.Inject;
+import io.moneyinthesky.dashboard.dao.SettingsDao;
+import io.moneyinthesky.dashboard.data.Settings;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.io.File;
 import java.io.IOException;
 
 @Path("/settings")
 @Produces(MediaType.APPLICATION_JSON)
 public class SettingsResource {
 
-	private static final String PERSISTED_SETTINGS_JSON = "persisted/settings.json";
-	private ObjectMapper objectMapper = new ObjectMapper();
+	private SettingsDao settingsDao;
+	private ObjectMapper objectMapper;
+
+	@Inject
+	public SettingsResource(SettingsDao settingsDao, ObjectMapper objectMapper) {
+		this.settingsDao = settingsDao;
+		this.objectMapper = objectMapper;
+	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getSettings() throws IOException {
-		PersistedSettings settings = objectMapper.readValue(new File(PERSISTED_SETTINGS_JSON), PersistedSettings.class);
+		Settings settings = settingsDao.readSettings();
 		return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(settings);
 	}
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void setSettings(PersistedSettings settings) throws IOException {
-		objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(PERSISTED_SETTINGS_JSON), settings);
+	public void setSettings(Settings settings) throws IOException {
+		settingsDao.writeSettings(settings);
 	}
 
 }

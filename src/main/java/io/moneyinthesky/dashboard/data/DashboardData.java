@@ -3,7 +3,7 @@ package io.moneyinthesky.dashboard.data;
 import java.util.List;
 import java.util.Map;
 
-public class Data {
+public class DashboardData {
 
     private String timeGenerated;
     private List<DataCenterStatus> dataCenters;

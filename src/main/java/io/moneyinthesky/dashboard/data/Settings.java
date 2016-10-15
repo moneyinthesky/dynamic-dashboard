@@ -3,7 +3,7 @@ package io.moneyinthesky.dashboard.data;
 import java.util.List;
 import java.util.Map;
 
-public class PersistedSettings {
+public class Settings {
     private String title;
     private List<String> applications;
     private List<DataCenter> dataCenters;

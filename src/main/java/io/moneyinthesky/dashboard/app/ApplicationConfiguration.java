@@ -1,4 +1,4 @@
-package io.moneyinthesky.dashboard;
+package io.moneyinthesky.dashboard.app;
 
 import io.dropwizard.Configuration;
 
