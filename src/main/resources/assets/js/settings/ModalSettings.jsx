@@ -9,7 +9,6 @@ class ModalSettings extends React.Component {
                 applications: [],
                 dataCenters: []
             },
-            titleToAdd: "",
             applicationToAdd: "",
             dataCenterToAdd: "",
             environmentToAdd: {},
@@ -22,12 +21,13 @@ class ModalSettings extends React.Component {
 
         this.componentWillReceiveProps = (nextProps) => {
             if(!(JSON.stringify(this.props.settings) === JSON.stringify(nextProps.settings))) {
-                this.setState({settings : nextProps.settings, titleToAdd : nextProps.settings.title});
+                this.setState({settings : nextProps.settings});
             }
         };
 
         this.handleTitleChange = (event) => {
-            this.setState({titleToAdd : event.target.value});
+        	this.state.settings.title = event.target.value;
+            this.setState({settings : this.state.settings});
         };
 
         this.handleApplicationToAddChange = (event) => {
@@ -284,7 +284,6 @@ class ModalSettings extends React.Component {
         };
 
         this.handleSave = () => {
-            this.state.settings.title = this.state.titleToAdd;
             this.props.onSave(this.state.settings);
             this.setState({activeTab: "basicConfiguration", importAlert: ""});
         };
@@ -299,9 +298,7 @@ class ModalSettings extends React.Component {
 
             reader.onload = (e) => {
                 var copyOfState = JSON.parse(reader.result);
-                copyOfState.importAlert = "Import successful, Save when ready";
-                copyOfState.importFile = "";
-                this.setState(copyOfState);
+                this.setState({settings: copyOfState, importAlert: "Import successful, Save when ready", importFile: ""});
             };
 
             reader.readAsText(file);
@@ -392,7 +389,7 @@ class ModalSettings extends React.Component {
 								<label>{application}</label>
                                 <div className="input-group">
                                     <span className="input-group-addon" id="basic-addon1">URL Pattern: </span>
-                                    <input defaultValue={currentUrlPattern} data-field="urlPattern" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleUrlPatternApplicationChange} placeholder="Add a URL pattern" />
+                                    <input value={currentUrlPattern} data-field="urlPattern" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleUrlPatternApplicationChange} placeholder="Add a URL pattern" />
                                 </div>
 							</div>
         				);
@@ -403,7 +400,7 @@ class ModalSettings extends React.Component {
 						<div className="form-group row">
 							<label className="col-xs-6 col-form-label">Node Discovery Method</label>
 							<div className="col-xs-6">
-								<select defaultValue={this.getDiscoveryMethodForDataCenterEnvironment(dataCenterEnvironment)} className="custom-select" data-datacenter={dataCenter} data-environment={environment} onChange={this.handleNodeDiscoveryMethodSelect}>
+								<select value={this.getDiscoveryMethodForDataCenterEnvironment(dataCenterEnvironment)} className="custom-select" data-datacenter={dataCenter} data-environment={environment} onChange={this.handleNodeDiscoveryMethodSelect}>
 									<option value="">Select method</option>
 									<option value="urlPattern">URL Pattern</option>
 									<option value="fleet">Fleet</option>
@@ -540,7 +537,7 @@ class ModalSettings extends React.Component {
                           <div className="form-group row">
                             <label htmlFor="example-text-input" className="col-xs-4 col-form-label">Dashboard Title</label>
                             <div className="col-xs-8">
-                              <input value={this.state.titleToAdd} className="form-control" type="text" onChange={this.handleTitleChange} />
+                              <input value={this.state.settings.title} className="form-control" type="text" onChange={this.handleTitleChange} />
                             </div>
                           </div>
                         </div>

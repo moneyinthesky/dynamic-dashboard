@@ -7,7 +7,6 @@ public class PersistedSettings {
     private String title;
     private List<String> applications;
     private List<DataCenter> dataCenters;
-	private String primaryDataCenter;
 
     public String getTitle() {
         return title;
@@ -20,10 +19,6 @@ public class PersistedSettings {
     public List<DataCenter> getDataCenters() {
         return dataCenters;
     }
-
-    public String getPrimaryDataCenter() {
-		return primaryDataCenter;
-	}
 
 	public static class DataCenter {
         private String name;
