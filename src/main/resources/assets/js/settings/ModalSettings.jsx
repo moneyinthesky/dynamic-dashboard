@@ -544,7 +544,7 @@ class ModalSettings extends React.Component {
                         </form>
                       </div>
                       <div className="modal-footer">
-                      	<a href="/api/data/settingsJson" download="dashboard-settings.json"><button type="button" className="btn btn-secondary pull-xs-left mega-octicon octicon-cloud-download" data-toggle="tooltip" title="Export Settings" data-placement="bottom" /></a>
+                      	<a href="/api/settings" download="dashboard-settings.json"><button type="button" className="btn btn-secondary pull-xs-left mega-octicon octicon-cloud-download" data-toggle="tooltip" title="Export Settings" data-placement="bottom" /></a>
                       	<label className="btn btn-secondary pull-xs-left mega-octicon octicon-cloud-upload" data-toggle="tooltip" title="Import Settings" data-placement="bottom">
                             <input type="file" style={{display: 'none'}} onChange={this.importSettings} value={this.state.importFile} />
                         </label>

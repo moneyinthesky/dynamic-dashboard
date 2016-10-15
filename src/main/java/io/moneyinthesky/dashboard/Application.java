@@ -4,6 +4,7 @@ import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.moneyinthesky.dashboard.resources.DashboardResource;
+import io.moneyinthesky.dashboard.resources.SettingsResource;
 import io.moneyinthesky.dashboard.resources.StatusResource;
 
 public class Application extends io.dropwizard.Application<ApplicationConfiguration> {
@@ -16,6 +17,7 @@ public class Application extends io.dropwizard.Application<ApplicationConfigurat
         environment.jersey().setUrlPattern("/api/*");
         environment.jersey().register(new StatusResource());
         environment.jersey().register(new DashboardResource());
+        environment.jersey().register(new SettingsResource());
     }
 
     public void initialize(Bootstrap<ApplicationConfiguration> bootstrap) {

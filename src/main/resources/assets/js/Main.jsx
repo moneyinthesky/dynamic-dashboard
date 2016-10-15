@@ -86,7 +86,7 @@ class Parent extends React.Component {
     }
 }
 
-ReactDOM.render(<Parent url="/api/data" settingsUrl="/api/data/settings" pollInterval={10000} />, document.getElementById('parent'));
+ReactDOM.render(<Parent url="/api/data" settingsUrl="/api/settings" pollInterval={10000} />, document.getElementById('parent'));
 
 $(document).ready(function(){
     $('[data-toggle="tooltip"]').tooltip();
