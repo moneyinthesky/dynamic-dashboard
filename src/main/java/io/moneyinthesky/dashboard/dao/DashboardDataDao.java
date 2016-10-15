@@ -1,46 +1,73 @@
 package io.moneyinthesky.dashboard.dao;
 
 import com.google.inject.Inject;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
 import io.moneyinthesky.dashboard.data.DashboardData;
 import io.moneyinthesky.dashboard.data.Settings;
-import io.moneyinthesky.dashboard.patterns.ExplodableString;
+import io.moneyinthesky.dashboard.nodediscovery.NodeDiscoveryMethod;
+import io.moneyinthesky.dashboard.nodediscovery.UrlPatternMethod;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 public class DashboardDataDao {
 
+    private static Function<String, NodeDiscoveryMethod> discoveryMethodMapper;
 	private SettingsDao settingsDao;
+    private UrlPatternMethod urlPatternMethod;
 
 	@Inject
-	public DashboardDataDao(SettingsDao settingsDao) {
+	public DashboardDataDao(SettingsDao settingsDao, UrlPatternMethod urlPatternMethod) {
 		this.settingsDao = settingsDao;
-	}
+        this.urlPatternMethod = urlPatternMethod;
+
+        discoveryMethodMapper = (method) -> {
+            if(method.equals("urlPattern")) {
+                return urlPatternMethod;
+            }
+            return null;
+        };
+    }
 
 	public DashboardData generateDashboardData() throws IOException {
+        DashboardData data = new DashboardData();
 		Settings settings = settingsDao.readSettings();
 
-		List<String> urls = new ArrayList<>();
-		settings.getDataCenters().stream()
-				.forEach((dataCenter) -> dataCenter.getEnvironments().stream()
-				.forEach((environment) -> environment.getApplicationConfig().entrySet().stream()
-				.forEach((applicationConfig) -> ExplodableString.explode(applicationConfig.getValue().get("urlPattern")).stream()
-				.forEach((url) -> urls.add(url)))));
+        List<DashboardData.DataCenterStatus> dataCenters = new ArrayList<>();
 
-		System.out.println(urls);
-		urls.stream().forEach((url) -> {
-			try {
-				HttpResponse<String> response = Unirest.get(url).asString();
-				System.out.println(response.getBody());
-			} catch (UnirestException e) {
-				e.printStackTrace();
-			}
-		});
+		settings.getDataCenters()
+				.forEach((dataCenter) -> {
+                    DashboardData.DataCenterStatus dataCenterStatus = new DashboardData.DataCenterStatus();
+                    dataCenterStatus.setName(dataCenter.getName());
+                    dataCenterStatus.setEnvironments(getEnvironmentNames(dataCenter));
 
-		return null;
+                    List<DashboardData.ApplicationStatus> applicationStatuses = new ArrayList<>();
+                    settings.getApplications()
+                            .forEach((application) -> {
+                                DashboardData.ApplicationStatus applicationStatus = new DashboardData.ApplicationStatus();
+                                applicationStatus.setName(application);
+                                //TODO
+
+                            });
+
+                    Map<String, DashboardData.EnvironmentStatus> environments = new HashMap<>();
+                    dataCenter.getEnvironments()
+                            .forEach((environment) -> {
+                                DashboardData.EnvironmentStatus environmentStatus = new DashboardData.EnvironmentStatus();
+
+                                NodeDiscoveryMethod discoveryMethod = discoveryMethodMapper.apply(environment.getNodeDiscoveryMethod());
+                                //TODO
+                            });
+                        });
+
+		return data;
 	}
+
+    private List<String> getEnvironmentNames(Settings.DataCenter dataCenter) {
+        //TODO
+        return null;
+    }
 }

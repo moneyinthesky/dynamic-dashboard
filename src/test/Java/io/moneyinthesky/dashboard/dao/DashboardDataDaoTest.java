@@ -6,6 +6,7 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import io.moneyinthesky.dashboard.data.Settings;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -34,11 +35,13 @@ public class DashboardDataDaoTest {
     }
 
     @Test
+    @Ignore
     public void testGenerateDashboardData() throws IOException {
         dashboardDataDao.generateDashboardData();
     }
 
     @Test
+    @Ignore
     public void test() throws UnirestException {
         HttpResponse<String> response = (Unirest.get("http://dcm-app-v02-01a.d1euw1.api.bskyb.com/dcm/private/status/info").asString());
         System.out.println(response.getBody());
