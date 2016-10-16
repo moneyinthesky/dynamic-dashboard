@@ -31,6 +31,9 @@ public class DashboardDataDaoTest {
     @Mock
     private SettingsDao settingsDao;
 
+	@Mock
+	private ObjectMapper objectMapper;
+
     @InjectMocks
     private DashboardDataDao dashboardDataDao;
 
@@ -48,10 +51,10 @@ public class DashboardDataDaoTest {
     }
 
     @Test
-	@Ignore
+    @Ignore
     public void testGenerateDashboardData() throws IOException {
         long start = currentTimeMillis();
-        dashboardDataDao.generateDashboardData();
+//        dashboardDataDao.populateDashboardData();
         long end = currentTimeMillis();
 
         System.out.println("Time taken: " + (end-start)/1000d);

@@ -1,6 +1,7 @@
 package io.moneyinthesky.dashboard.dao;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.util.concurrent.AbstractScheduledService;
 import com.google.inject.Inject;
 import com.mashape.unirest.http.HttpResponse;
 import io.moneyinthesky.dashboard.data.DashboardData;
@@ -14,14 +15,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import static com.google.common.util.concurrent.AbstractScheduledService.Scheduler.newFixedRateSchedule;
 import static com.mashape.unirest.http.Unirest.get;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class DashboardDataDao {
+public class DashboardDataDao extends AbstractScheduledService {
 
 	private static Logger logger = getLogger(DashboardDataDao.class);
 	private static Function<String, NodeDiscoveryMethod> discoveryMethodMapper;
@@ -30,8 +33,10 @@ public class DashboardDataDao {
 	private UrlPatternMethod urlPatternMethod;
 	private ObjectMapper objectMapper;
 
+	private DashboardData cachedDashboardData;
+
 	@Inject
-	public DashboardDataDao(SettingsDao settingsDao, UrlPatternMethod urlPatternMethod, ObjectMapper objectMapper) {
+	public DashboardDataDao(SettingsDao settingsDao, UrlPatternMethod urlPatternMethod, ObjectMapper objectMapper) throws IOException {
 		this.settingsDao = settingsDao;
 		this.urlPatternMethod = urlPatternMethod;
 		this.objectMapper = objectMapper;
@@ -42,9 +47,21 @@ public class DashboardDataDao {
 			}
 			return null;
 		};
+
+		logger.info("Starting up dashboard data dao");
+		super.startAsync();
 	}
 
-	public DashboardData generateDashboardData() throws IOException {
+	public DashboardData getDashboardData() {
+		return cachedDashboardData;
+	}
+
+	public boolean getStatus() {
+		return super.isRunning();
+	}
+
+	private void populateDashboardData() throws IOException {
+		logger.info("Still Populating dashboard data");
 		DashboardData data = new DashboardData();
 		Settings settings = settingsDao.readSettings();
 
@@ -83,7 +100,7 @@ public class DashboardDataDao {
 				});
 
 		data.setDataCenters(dataCenters);
-		return data;
+		cachedDashboardData = data;
 	}
 
 	private List<DashboardData.NodeStatus> generateNodeStatuses(List<String> urls) {
@@ -123,5 +140,16 @@ public class DashboardDataDao {
 				.stream()
 				.map((environment) -> environment.getName())
 				.collect(toList());
+	}
+
+	@Override
+	protected void runOneIteration() throws Exception {
+		//TODO Add timing logging info
+		populateDashboardData();
+	}
+
+	@Override
+	protected Scheduler scheduler() {
+		return newFixedRateSchedule(0, 60, TimeUnit.SECONDS);
 	}
 }
