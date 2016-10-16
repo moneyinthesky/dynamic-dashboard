@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import com.google.inject.Inject;
 import io.moneyinthesky.dashboard.dao.DashboardDataDao;
+import io.moneyinthesky.dashboard.data.DashboardData;
 import org.slf4j.Logger;
 
 import javax.ws.rs.GET;
@@ -41,7 +42,14 @@ public class DashboardResource {
 
 	@GET
     public String getData() throws IOException {;
-		logger.info("Service is running: " + dashboardDataDao.getStatus());
+		DashboardData dashboardData = dashboardDataDao.getDashboardData();
+
+		if (dashboardData != null) {
+			logger.info("Retrieved: " + dashboardData.getDataCenters().get(0).getEnvironments());
+		} else {
+			logger.info("No data yet");
+		}
+
 
         Map<String, Object> data = objectMapper.readValue(Resources.toString(getResource("data.json"), UTF_8), Map.class);
         return objectMapper.writeValueAsString(timestamp(data));

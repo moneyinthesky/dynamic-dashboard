@@ -21,6 +21,7 @@ import java.util.function.Function;
 import static com.google.common.util.concurrent.AbstractScheduledService.Scheduler.newFixedRateSchedule;
 import static com.mashape.unirest.http.Unirest.get;
 import static java.lang.String.format;
+import static java.lang.System.currentTimeMillis;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -48,16 +49,11 @@ public class DashboardDataDao extends AbstractScheduledService {
 			return null;
 		};
 
-		logger.info("Starting up dashboard data dao");
 		super.startAsync();
 	}
 
 	public DashboardData getDashboardData() {
 		return cachedDashboardData;
-	}
-
-	public boolean getStatus() {
-		return super.isRunning();
 	}
 
 	private void populateDashboardData() throws IOException {
@@ -144,8 +140,10 @@ public class DashboardDataDao extends AbstractScheduledService {
 
 	@Override
 	protected void runOneIteration() throws Exception {
-		//TODO Add timing logging info
+		logger.info("Populating dashboard...");
+		long start = currentTimeMillis();
 		populateDashboardData();
+		logger.info("Time to populate dashboard: " + (currentTimeMillis() - start) / 1000);
 	}
 
 	@Override
