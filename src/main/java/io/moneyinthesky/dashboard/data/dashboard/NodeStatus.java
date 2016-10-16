@@ -3,7 +3,7 @@ package io.moneyinthesky.dashboard.data.dashboard;
 public class NodeStatus {
 	private String url;
 	private String version;
-	private Boolean up;
+	private boolean up;
 	private String errorMessage;
 
 	public String getUrl() {
@@ -22,11 +22,11 @@ public class NodeStatus {
 		this.version = version;
 	}
 
-	public Boolean getUp() {
+	public boolean isUp() {
 		return up;
 	}
 
-	public void up(Boolean up) {
+	public void up(boolean up) {
 		this.up = up;
 	}
 

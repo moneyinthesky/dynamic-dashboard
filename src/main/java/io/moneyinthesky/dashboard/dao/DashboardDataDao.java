@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -61,8 +62,41 @@ public class DashboardDataDao {
 				.collect(toList());
 
 		data.setDataCenters(dataCenters);
+		aggregateNodeData(data);
 		data.setTimeGenerated(getTimestamp());
 		return data;
+	}
+
+	private void aggregateNodeData(DashboardData data) {
+		data.getDataCenters()
+				.forEach(dataCenterStatus -> dataCenterStatus.getApplications()
+                        .forEach(applicationStatus -> {
+                            applicationStatus.getEnvironmentStatusMap().entrySet()
+                                    .forEach(environmentStatusEntry -> addAggregatedEnvironmentNodeData(environmentStatusEntry.getValue()));
+                        }));
+	}
+
+	private void addAggregatedEnvironmentNodeData(EnvironmentStatus environmentStatus) {
+		Map<String, AggregatedNodeStatus> aggregatedNodeStatusMap = new HashMap<>();
+
+		for(NodeStatus nodeStatus : environmentStatus.getNodeStatusList()) {
+			if(nodeStatus.getVersion() != null) {
+				AggregatedNodeStatus aggregatedNodeStatus = aggregatedNodeStatusMap.get(nodeStatus.getVersion());
+				if(aggregatedNodeStatus == null) {
+					aggregatedNodeStatus = new AggregatedNodeStatus();
+					aggregatedNodeStatusMap.put(nodeStatus.getVersion(), aggregatedNodeStatus);
+				}
+
+				if(nodeStatus.isUp())
+					aggregatedNodeStatus.incrementNodeCount();
+
+			} else {
+				if(!nodeStatus.isUp())
+					environmentStatus.incrementNodesDown();
+			}
+		}
+
+		environmentStatus.setVersionToNodeStatusMap(aggregatedNodeStatusMap);
 	}
 
 	private DataCenterStatus generateDataCenterStatus(DataCenter dataCenter, Settings settings) {

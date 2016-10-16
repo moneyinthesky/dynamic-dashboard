@@ -4,13 +4,22 @@ class ApplicationEnvironmentStatus extends React.Component {
         super(props);
 
         this.render = () => {
-			var nodeVersionList = this.props.applicationEnvironmentStatus.nodeStatusList.map((status, index) => (
-				<div key={index}>{status.version}</div>
-			));
+
+            var optionalDownStatus = "";
+            if(this.props.applicationEnvironmentStatus.nodesDown > 0) {
+                optionalDownStatus = <button type="button" className="btn btn-danger">{this.props.applicationEnvironmentStatus.nodesDown} Down</button>;
+            }
+
+            var versionStatusList = $.map(this.props.applicationEnvironmentStatus.versionToNodeStatusMap, (status, version) => {
+                return (
+                    <button type="button" className="btn btn-success">v{version}: {status.nodeCount} Up</button>
+                );
+            });
 
             return (
                 <td>
-					{nodeVersionList}
+					{versionStatusList}
+					{optionalDownStatus}
                 </td>
             );
         };
