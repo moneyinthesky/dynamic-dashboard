@@ -56,7 +56,7 @@ public class DashboardData {
 
     public static class ApplicationStatus {
         private String name;
-        private Map<String, EnvironmentStatus> environments;
+        private Map<String, EnvironmentStatus> environmentStatuses;
 
         public String getName() {
             return name;
@@ -66,12 +66,12 @@ public class DashboardData {
             this.name = name;
         }
 
-        public Map<String, EnvironmentStatus> getEnvironments() {
-            return environments;
+        public Map<String, EnvironmentStatus> getEnvironmentStatuses() {
+            return environmentStatuses;
         }
 
-        public void setEnvironments(Map<String, EnvironmentStatus> environments) {
-            this.environments = environments;
+        public void setEnvironmentStatuses(Map<String, EnvironmentStatus> environmentStatuses) {
+            this.environmentStatuses = environmentStatuses;
         }
     }
 
@@ -88,32 +88,41 @@ public class DashboardData {
     }
 
     public static class NodeStatus {
+        private String url;
         private String version;
-        private Integer nodesUp;
-        private Integer nodesDown;
+        private Boolean up;
+        private String errorMessage;
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
 
         public String getVersion() {
             return version;
-        }
-
-        public Integer getNodesUp() {
-            return nodesUp;
-        }
-
-        public Integer getNodesDown() {
-            return nodesDown;
         }
 
         public void setVersion(String version) {
             this.version = version;
         }
 
-        public void setNodesUp(Integer nodesUp) {
-            this.nodesUp = nodesUp;
+        public Boolean getUp() {
+            return up;
         }
 
-        public void setNodesDown(Integer nodesDown) {
-            this.nodesDown = nodesDown;
+        public void setUp(Boolean up) {
+            this.up = up;
+        }
+
+        public String getErrorMessage() {
+            return errorMessage;
+        }
+
+        public void setErrorMessage(String errorMessage) {
+            this.errorMessage = errorMessage;
         }
     }
 

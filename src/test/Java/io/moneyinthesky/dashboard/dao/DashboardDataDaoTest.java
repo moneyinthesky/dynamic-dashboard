@@ -1,10 +1,9 @@
 package io.moneyinthesky.dashboard.dao;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
+import com.google.common.collect.ImmutableMap;
 import io.moneyinthesky.dashboard.data.Settings;
+import io.moneyinthesky.dashboard.nodediscovery.UrlPatternMethod;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -15,13 +14,19 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.io.Resources.getResource;
+import static io.moneyinthesky.dashboard.patterns.ExplodableString.explode;
+import static java.lang.System.currentTimeMillis;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DashboardDataDaoTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    @Mock
+    private UrlPatternMethod urlPatternMethod;
 
     @Mock
     private SettingsDao settingsDao;
@@ -32,19 +37,24 @@ public class DashboardDataDaoTest {
     @Before
     public void setUp() throws IOException {
         when(settingsDao.readSettings()).thenReturn(getSettings());
+
+        String format = "http://h1wap[01-20]-v01.dcm.stg2.ovp.bskyb.com/dcm/private/status/info";
+        when(urlPatternMethod.generateNodeUrls(ImmutableMap.of("urlPattern", format)))
+                .thenReturn(newArrayList(explode(format)));
+
+        format = "http://dcm-app-v02-[01-10][a-b].u3euw1.api.bskyb.com/dcm/private/status/info";
+        when(urlPatternMethod.generateNodeUrls(ImmutableMap.of("urlPattern", format)))
+                .thenReturn(newArrayList(explode(format)));
     }
 
     @Test
-    @Ignore
+	@Ignore
     public void testGenerateDashboardData() throws IOException {
+        long start = currentTimeMillis();
         dashboardDataDao.generateDashboardData();
-    }
+        long end = currentTimeMillis();
 
-    @Test
-    @Ignore
-    public void test() throws UnirestException {
-        HttpResponse<String> response = (Unirest.get("http://dcm-app-v02-01a.d1euw1.api.bskyb.com/dcm/private/status/info").asString());
-        System.out.println(response.getBody());
+        System.out.println("Time taken: " + (end-start)/1000d);
     }
 
     private static Settings getSettings() throws IOException {
