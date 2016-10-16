@@ -2,6 +2,7 @@ package io.moneyinthesky.dashboard.dao;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import io.moneyinthesky.dashboard.data.dashboard.DashboardData;
 import io.moneyinthesky.dashboard.data.settings.Settings;
 import io.moneyinthesky.dashboard.nodediscovery.UrlPatternMethod;
 import org.junit.Before;
@@ -13,11 +14,15 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
+import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.io.Resources.getResource;
 import static io.moneyinthesky.dashboard.patterns.ExplodableString.explode;
 import static java.lang.System.currentTimeMillis;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -48,19 +53,27 @@ public class DashboardDataDaoTest {
         format = "http://dcm-app-v02-[01-10][a-b].u3euw1.api.bskyb.com/dcm/private/status/info";
         when(urlPatternMethod.generateNodeUrls(ImmutableMap.of("urlPattern", format)))
                 .thenReturn(newArrayList(explode(format)));
+
+        when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(getSampleOutput());
     }
 
     @Test
     @Ignore
     public void testGenerateDashboardData() throws IOException {
         long start = currentTimeMillis();
-        dashboardDataDao.populateDashboardData();
+        DashboardData data = dashboardDataDao.populateDashboardData();
         long end = currentTimeMillis();
 
         System.out.println("Time taken: " + (end-start)/1000d);
+
+        assertThat(data.getTimeGenerated()).isNotNull();
     }
 
     private static Settings getSettings() throws IOException {
         return MAPPER.readValue(getResource("settings.json"), Settings.class);
+    }
+
+    private static Map<String, Object> getSampleOutput() throws IOException {
+        return MAPPER.readValue(getResource("sample-output.json"), Map.class);
     }
 }

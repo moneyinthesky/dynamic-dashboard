@@ -12,7 +12,7 @@ class ApplicationEnvironmentStatus extends React.Component {
 
             var versionStatusList = $.map(this.props.applicationEnvironmentStatus.versionToNodeStatusMap, (status, version) => {
                 return (
-                    <button type="button" className="btn btn-success">v{version}: {status.nodeCount} Up</button>
+                    <button key={version} type="button" className="btn btn-success">v{version}: {status.nodeCount} Up</button>
                 );
             });
 

@@ -1,6 +1,6 @@
 {
   "title" : "Dynamic Dashboard",
-  "applications" : [ "DCM", "CRM" ],
+  "applications" : [ "DCM", "CRM", "HKM" ],
   "dataCenters" : [ {
     "name" : "AWS",
     "environments" : [ {

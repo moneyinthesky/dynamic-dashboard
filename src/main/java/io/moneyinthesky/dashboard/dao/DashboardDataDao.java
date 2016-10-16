@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.mashape.unirest.http.Unirest.get;
 import static java.lang.String.format;
 import static java.time.LocalDateTime.now;
@@ -67,38 +68,6 @@ public class DashboardDataDao {
 		return data;
 	}
 
-	private void aggregateNodeData(DashboardData data) {
-		data.getDataCenters()
-				.forEach(dataCenterStatus -> dataCenterStatus.getApplications()
-                        .forEach(applicationStatus -> {
-                            applicationStatus.getEnvironmentStatusMap().entrySet()
-                                    .forEach(environmentStatusEntry -> addAggregatedEnvironmentNodeData(environmentStatusEntry.getValue()));
-                        }));
-	}
-
-	private void addAggregatedEnvironmentNodeData(EnvironmentStatus environmentStatus) {
-		Map<String, AggregatedNodeStatus> aggregatedNodeStatusMap = new HashMap<>();
-
-		for(NodeStatus nodeStatus : environmentStatus.getNodeStatusList()) {
-			if(nodeStatus.getVersion() != null) {
-				AggregatedNodeStatus aggregatedNodeStatus = aggregatedNodeStatusMap.get(nodeStatus.getVersion());
-				if(aggregatedNodeStatus == null) {
-					aggregatedNodeStatus = new AggregatedNodeStatus();
-					aggregatedNodeStatusMap.put(nodeStatus.getVersion(), aggregatedNodeStatus);
-				}
-
-				if(nodeStatus.isUp())
-					aggregatedNodeStatus.incrementNodeCount();
-
-			} else {
-				if(!nodeStatus.isUp())
-					environmentStatus.incrementNodesDown();
-			}
-		}
-
-		environmentStatus.setVersionToNodeStatusMap(aggregatedNodeStatusMap);
-	}
-
 	private DataCenterStatus generateDataCenterStatus(DataCenter dataCenter, Settings settings) {
 		DataCenterStatus dataCenterStatus = new DataCenterStatus();
 		dataCenterStatus.setName(dataCenter.getName());
@@ -130,7 +99,9 @@ public class DashboardDataDao {
 		EnvironmentStatus environmentStatus = new EnvironmentStatus();
 
 		NodeDiscoveryMethod discoveryMethod = discoveryMethodMapper.apply(environment.getNodeDiscoveryMethod());
-		List<String> urls = discoveryMethod.generateNodeUrls(environment.getApplicationConfig().get(application));
+
+		Map<String, String> applicationConfig = environment.getApplicationConfig().get(application);
+		List<String> urls = applicationConfig != null ? discoveryMethod.generateNodeUrls(applicationConfig) : newArrayList();
 
 		environmentStatus.setName(environment.getName());
 		environmentStatus.setNodeStatusList(generateNodeStatusList(urls));
@@ -167,6 +138,38 @@ public class DashboardDataDao {
 					}
 				})
 				.collect(toList());
+	}
+
+	private void aggregateNodeData(DashboardData data) {
+		data.getDataCenters()
+				.forEach(dataCenterStatus -> dataCenterStatus.getApplications()
+						.forEach(applicationStatus -> {
+							applicationStatus.getEnvironmentStatusMap().entrySet()
+									.forEach(environmentStatusEntry -> addAggregatedEnvironmentNodeData(environmentStatusEntry.getValue()));
+						}));
+	}
+
+	private void addAggregatedEnvironmentNodeData(EnvironmentStatus environmentStatus) {
+		Map<String, AggregatedNodeStatus> aggregatedNodeStatusMap = new HashMap<>();
+
+		for(NodeStatus nodeStatus : environmentStatus.getNodeStatusList()) {
+			if(nodeStatus.getVersion() != null) {
+				AggregatedNodeStatus aggregatedNodeStatus = aggregatedNodeStatusMap.get(nodeStatus.getVersion());
+				if(aggregatedNodeStatus == null) {
+					aggregatedNodeStatus = new AggregatedNodeStatus();
+					aggregatedNodeStatusMap.put(nodeStatus.getVersion(), aggregatedNodeStatus);
+				}
+
+				if(nodeStatus.isUp())
+					aggregatedNodeStatus.incrementNodeCount();
+
+			} else {
+				if(!nodeStatus.isUp())
+					environmentStatus.incrementNodesDown();
+			}
+		}
+
+		environmentStatus.setVersionToNodeStatusMap(aggregatedNodeStatusMap);
 	}
 
 	private List<String> getEnvironmentNames(DataCenter dataCenter) {

@@ -19,6 +19,9 @@ body {
 .table th {
    background-color: #616161;
 }
+.loading-gif {
+	margin-top: 50px;
+}
 h4 {
   margin-top: 0px;
   margin-bottom: 0px;
@@ -137,9 +140,6 @@ a:link {
 }
 .nav-stacked {
     margin-top: 10px;
-}
-.nav-link.active {
-    background-color: #009688 !important;
 }
 .list-group {
     margin-bottom: 10px;
