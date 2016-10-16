@@ -1,40 +1,41 @@
 package io.moneyinthesky.dashboard.dao;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.util.concurrent.AbstractScheduledService;
 import com.google.inject.Inject;
 import com.mashape.unirest.http.HttpResponse;
-import io.moneyinthesky.dashboard.data.DashboardData;
-import io.moneyinthesky.dashboard.data.Settings;
+import io.moneyinthesky.dashboard.data.dashboard.*;
+import io.moneyinthesky.dashboard.data.settings.DataCenter;
+import io.moneyinthesky.dashboard.data.settings.Environment;
+import io.moneyinthesky.dashboard.data.settings.Settings;
 import io.moneyinthesky.dashboard.nodediscovery.NodeDiscoveryMethod;
 import io.moneyinthesky.dashboard.nodediscovery.UrlPatternMethod;
 import org.slf4j.Logger;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import static com.google.common.util.concurrent.AbstractScheduledService.Scheduler.newFixedRateSchedule;
 import static com.mashape.unirest.http.Unirest.get;
 import static java.lang.String.format;
-import static java.lang.System.currentTimeMillis;
+import static java.time.LocalDateTime.now;
+import static java.time.format.DateTimeFormatter.ofLocalizedDateTime;
+import static java.time.format.FormatStyle.LONG;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class DashboardDataDao extends AbstractScheduledService {
+public class DashboardDataDao {
 
-	private static Logger logger = getLogger(DashboardDataDao.class);
+	private static final Logger logger = getLogger(DashboardDataDao.class);
+	private static final ZoneId TIMEZONE = ZoneId.of("Europe/London");
 	private static Function<String, NodeDiscoveryMethod> discoveryMethodMapper;
 
 	private SettingsDao settingsDao;
 	private UrlPatternMethod urlPatternMethod;
 	private ObjectMapper objectMapper;
-
-	private DashboardData cachedDashboardData;
 
 	@Inject
 	public DashboardDataDao(SettingsDao settingsDao, UrlPatternMethod urlPatternMethod, ObjectMapper objectMapper) throws IOException {
@@ -48,82 +49,85 @@ public class DashboardDataDao extends AbstractScheduledService {
 			}
 			return null;
 		};
-
-		super.startAsync();
 	}
 
-	public DashboardData getDashboardData() {
-		return cachedDashboardData;
-	}
-
-	private void populateDashboardData() throws IOException {
-		logger.info("Still Populating dashboard data");
+	public DashboardData populateDashboardData() throws IOException {
 		DashboardData data = new DashboardData();
 		Settings settings = settingsDao.readSettings();
 
-		List<DashboardData.DataCenterStatus> dataCenters = new ArrayList<>();
-
-		settings.getDataCenters()
-				.forEach((dataCenter) -> {
-					DashboardData.DataCenterStatus dataCenterStatus = new DashboardData.DataCenterStatus();
-					dataCenterStatus.setName(dataCenter.getName());
-					dataCenterStatus.setEnvironments(getEnvironmentNames(dataCenter));
-
-					List<DashboardData.ApplicationStatus> applicationStatuses = new ArrayList<>();
-					settings.getApplications()
-							.forEach((application) -> {
-								DashboardData.ApplicationStatus applicationStatus = new DashboardData.ApplicationStatus();
-								applicationStatus.setName(application);
-
-								Map<String, DashboardData.EnvironmentStatus> environmentStatuses = new HashMap<>();
-								dataCenter.getEnvironments()
-										.forEach((environment) -> {
-											DashboardData.EnvironmentStatus environmentStatus = new DashboardData.EnvironmentStatus();
-
-											NodeDiscoveryMethod discoveryMethod = discoveryMethodMapper.apply(environment.getNodeDiscoveryMethod());
-											List<String> urls = discoveryMethod.generateNodeUrls(environment.getApplicationConfig().get(application));
-											List<DashboardData.NodeStatus> nodeStatuses = generateNodeStatuses(urls);
-
-											environmentStatus.setNodeStatuses(nodeStatuses);
-											environmentStatuses.put(environment.getName(), environmentStatus);
-										});
-
-								applicationStatus.setEnvironmentStatuses(environmentStatuses);
-								applicationStatuses.add(applicationStatus);
-							});
-					dataCenterStatus.setApplications(applicationStatuses);
-					dataCenters.add(dataCenterStatus);
-				});
+		List<DataCenterStatus> dataCenters = settings.getDataCenters()
+				.stream()
+				.map(dataCenter -> generateDataCenterStatus(dataCenter, settings))
+				.collect(toList());
 
 		data.setDataCenters(dataCenters);
-		cachedDashboardData = data;
+		data.setTimeGenerated(getTimestamp());
+		return data;
 	}
 
-	private List<DashboardData.NodeStatus> generateNodeStatuses(List<String> urls) {
+	private DataCenterStatus generateDataCenterStatus(DataCenter dataCenter, Settings settings) {
+		DataCenterStatus dataCenterStatus = new DataCenterStatus();
+		dataCenterStatus.setName(dataCenter.getName());
+		dataCenterStatus.setEnvironments(getEnvironmentNames(dataCenter));
+
+		List<ApplicationStatus> applicationStatuses = settings.getApplications()
+				.stream()
+				.map(application -> generateApplicationStatus(application, dataCenter.getEnvironments()))
+				.collect(toList());
+
+		dataCenterStatus.setApplications(applicationStatuses);
+		return dataCenterStatus;
+	}
+
+	private ApplicationStatus generateApplicationStatus(String application, List<Environment> environments) {
+		ApplicationStatus applicationStatus = new ApplicationStatus();
+		applicationStatus.setName(application);
+
+		Map<String, EnvironmentStatus> environmentStatuses = new HashMap<>();
+		environments
+				.parallelStream()
+				.map(environment -> generateEnvironmentStatusForApplication(environment, application))
+				.collect(toList());
+
+		applicationStatus.setEnvironmentStatuses(environmentStatuses);
+		return applicationStatus;
+	}
+
+	private EnvironmentStatus generateEnvironmentStatusForApplication(Environment environment, String application) {
+		EnvironmentStatus environmentStatus = new EnvironmentStatus();
+
+		NodeDiscoveryMethod discoveryMethod = discoveryMethodMapper.apply(environment.getNodeDiscoveryMethod());
+		List<String> urls = discoveryMethod.generateNodeUrls(environment.getApplicationConfig().get(application));
+
+		environmentStatus.setNodeStatuses(generateNodeStatusList(urls));
+		return environmentStatus;
+	}
+
+	private List<NodeStatus> generateNodeStatusList(List<String> urls) {
 		return urls
 				.parallelStream()
 				.map((url) -> {
-					DashboardData.NodeStatus nodeStatus = new DashboardData.NodeStatus();
+					NodeStatus nodeStatus = new NodeStatus();
 					nodeStatus.setUrl(url);
 
 					try {
 						HttpResponse<String> response = get(url).asString();
 
-						if(response.getStatus() == 200) {
-							nodeStatus.setUp(true);
+						if (response.getStatus() == 200) {
+							nodeStatus.up(true);
 
 							Map<String, Object> responseBody = objectMapper.readValue(response.getBody(), Map.class);
 							nodeStatus.setVersion((String) responseBody.get("version"));
 
 						} else {
-							nodeStatus.setUp(false);
+							nodeStatus.up(false);
 							nodeStatus.setErrorMessage("Status Code: " + response.getStatus());
 						}
 						return nodeStatus;
 
 					} catch (Exception e) {
 						logger.error(format("Error while calling %s", url), e);
-						nodeStatus.setUp(false);
+						nodeStatus.up(false);
 						nodeStatus.setErrorMessage("Unknown error");
 						return nodeStatus;
 					}
@@ -131,23 +135,15 @@ public class DashboardDataDao extends AbstractScheduledService {
 				.collect(toList());
 	}
 
-	private List<String> getEnvironmentNames(Settings.DataCenter dataCenter) {
+	private List<String> getEnvironmentNames(DataCenter dataCenter) {
 		return dataCenter.getEnvironments()
 				.stream()
 				.map((environment) -> environment.getName())
 				.collect(toList());
 	}
 
-	@Override
-	protected void runOneIteration() throws Exception {
-		logger.info("Populating dashboard...");
-		long start = currentTimeMillis();
-		populateDashboardData();
-		logger.info("Time to populate dashboard: " + (currentTimeMillis() - start) / 1000);
-	}
-
-	@Override
-	protected Scheduler scheduler() {
-		return newFixedRateSchedule(0, 60, TimeUnit.SECONDS);
+	private String getTimestamp() {
+		ZonedDateTime nowWithTimeZone = ZonedDateTime.of(now(), TIMEZONE);
+		return nowWithTimeZone.format(ofLocalizedDateTime(LONG));
 	}
 }

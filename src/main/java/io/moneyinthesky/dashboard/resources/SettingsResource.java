@@ -3,7 +3,7 @@ package io.moneyinthesky.dashboard.resources;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import io.moneyinthesky.dashboard.dao.SettingsDao;
-import io.moneyinthesky.dashboard.data.Settings;
+import io.moneyinthesky.dashboard.data.settings.Settings;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

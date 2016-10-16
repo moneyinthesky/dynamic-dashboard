@@ -2,7 +2,7 @@ package io.moneyinthesky.dashboard.dao;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import io.moneyinthesky.dashboard.data.Settings;
+import io.moneyinthesky.dashboard.data.settings.Settings;
 import io.moneyinthesky.dashboard.nodediscovery.UrlPatternMethod;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -54,7 +54,7 @@ public class DashboardDataDaoTest {
     @Ignore
     public void testGenerateDashboardData() throws IOException {
         long start = currentTimeMillis();
-//        dashboardDataDao.populateDashboardData();
+        dashboardDataDao.populateDashboardData();
         long end = currentTimeMillis();
 
         System.out.println("Time taken: " + (end-start)/1000d);

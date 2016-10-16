@@ -2,7 +2,7 @@ package io.moneyinthesky.dashboard.dao;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
-import io.moneyinthesky.dashboard.data.Settings;
+import io.moneyinthesky.dashboard.data.settings.Settings;
 
 import java.io.File;
 import java.io.IOException;

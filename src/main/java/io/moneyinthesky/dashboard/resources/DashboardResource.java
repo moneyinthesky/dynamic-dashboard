@@ -3,8 +3,8 @@ package io.moneyinthesky.dashboard.resources;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import com.google.inject.Inject;
-import io.moneyinthesky.dashboard.dao.DashboardDataDao;
-import io.moneyinthesky.dashboard.data.DashboardData;
+import io.moneyinthesky.dashboard.data.dashboard.DashboardData;
+import io.moneyinthesky.dashboard.service.DashboardDataService;
 import org.slf4j.Logger;
 
 import javax.ws.rs.GET;
@@ -30,26 +30,25 @@ public class DashboardResource {
 	private static Logger logger = getLogger(DashboardResource.class);
 
 	private static final ZoneId TIMEZONE = ZoneId.of("Europe/London");
-	private DashboardDataDao dashboardDataDao;
+	private DashboardDataService dashboardDataService;
 
 	private ObjectMapper objectMapper;
 
 	@Inject
-	public DashboardResource(DashboardDataDao dashboardDataDao, ObjectMapper objectMapper) {
-		this.dashboardDataDao = dashboardDataDao;
+	public DashboardResource(DashboardDataService dashboardDataService, ObjectMapper objectMapper) {
+		this.dashboardDataService = dashboardDataService;
 		this.objectMapper = objectMapper;
 	}
 
 	@GET
     public String getData() throws IOException {;
-		DashboardData dashboardData = dashboardDataDao.getDashboardData();
+		DashboardData dashboardData = dashboardDataService.getDashboardData();
 
 		if (dashboardData != null) {
-			logger.info("Retrieved: " + dashboardData.getDataCenters().get(0).getEnvironments());
+			logger.info("Dashboard generated time: " + dashboardData.getTimeGenerated());
 		} else {
 			logger.info("No data yet");
 		}
-
 
         Map<String, Object> data = objectMapper.readValue(Resources.toString(getResource("data.json"), UTF_8), Map.class);
         return objectMapper.writeValueAsString(timestamp(data));
