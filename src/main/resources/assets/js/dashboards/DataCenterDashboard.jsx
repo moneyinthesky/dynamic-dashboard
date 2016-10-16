@@ -4,12 +4,11 @@ class DataCenterDashboard extends React.Component {
         super(props);
 
         this.render = () => {
-            var environmentHeaders = $.map(this.props.dataCenter.environments, (environment) => (
+            var environmentHeaders = this.props.dataCenter.environments.map((environment) => (
                 <th key={environment}><h4>{environment}</h4></th>
             ));
-
-            var applicationStatusRows = $.map(this.props.dataCenter.applications, (value, application) => (
-                <ApplicationStatus key={application} applicationStatus={value} applicationName={application} />
+            var applicationStatusRows = this.props.dataCenter.applications.map((applicationObject, index) => (
+                <ApplicationStatus key={index} applicationStatus={applicationObject} environmentList={this.props.dataCenter.environments} />
             ));
 
             return (

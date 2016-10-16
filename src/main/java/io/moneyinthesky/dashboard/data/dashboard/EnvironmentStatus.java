@@ -3,13 +3,22 @@ package io.moneyinthesky.dashboard.data.dashboard;
 import java.util.List;
 
 public class EnvironmentStatus {
-	private List<NodeStatus> nodeStatuses;
+	private String name;
+	private List<NodeStatus> nodeStatusList;
 
-	public List<NodeStatus> getNodeStatuses() {
-		return nodeStatuses;
+	public String getName() {
+		return name;
 	}
 
-	public void setNodeStatuses(List<NodeStatus> nodeStatuses) {
-		this.nodeStatuses = nodeStatuses;
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public List<NodeStatus> getNodeStatusList() {
+		return nodeStatusList;
+	}
+
+	public void setNodeStatusList(List<NodeStatus> nodeStatusList) {
+		this.nodeStatusList = nodeStatusList;
 	}
 }

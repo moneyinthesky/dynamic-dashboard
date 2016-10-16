@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class ApplicationStatus {
 	private String name;
-	private Map<String, EnvironmentStatus> environmentStatuses;
+	private Map<String, EnvironmentStatus> environmentStatusMap;
 
 	public String getName() {
 		return name;
@@ -14,11 +14,11 @@ public class ApplicationStatus {
 		this.name = name;
 	}
 
-	public Map<String, EnvironmentStatus> getEnvironmentStatuses() {
-		return environmentStatuses;
+	public Map<String, EnvironmentStatus> getEnvironmentStatusMap() {
+		return environmentStatusMap;
 	}
 
-	public void setEnvironmentStatuses(Map<String, EnvironmentStatus> environmentStatuses) {
-		this.environmentStatuses = environmentStatuses;
+	public void setEnvironmentStatusMap(Map<String, EnvironmentStatus> environmentStatusMap) {
+		this.environmentStatusMap = environmentStatusMap;
 	}
 }

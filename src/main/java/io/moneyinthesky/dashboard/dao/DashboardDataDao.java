@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -25,6 +24,7 @@ import static java.time.LocalDateTime.now;
 import static java.time.format.DateTimeFormatter.ofLocalizedDateTime;
 import static java.time.format.FormatStyle.LONG;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class DashboardDataDao {
@@ -70,12 +70,12 @@ public class DashboardDataDao {
 		dataCenterStatus.setName(dataCenter.getName());
 		dataCenterStatus.setEnvironments(getEnvironmentNames(dataCenter));
 
-		List<ApplicationStatus> applicationStatuses = settings.getApplications()
+		List<ApplicationStatus> applicationStatusList = settings.getApplications()
 				.stream()
 				.map(application -> generateApplicationStatus(application, dataCenter.getEnvironments()))
 				.collect(toList());
 
-		dataCenterStatus.setApplications(applicationStatuses);
+		dataCenterStatus.setApplications(applicationStatusList);
 		return dataCenterStatus;
 	}
 
@@ -83,13 +83,12 @@ public class DashboardDataDao {
 		ApplicationStatus applicationStatus = new ApplicationStatus();
 		applicationStatus.setName(application);
 
-		Map<String, EnvironmentStatus> environmentStatuses = new HashMap<>();
-		environments
+		Map<String, EnvironmentStatus> environmentStatusMap = environments
 				.parallelStream()
 				.map(environment -> generateEnvironmentStatusForApplication(environment, application))
-				.collect(toList());
+				.collect(toMap(environmentStatus -> environmentStatus.getName(), environmentStatus -> environmentStatus));
 
-		applicationStatus.setEnvironmentStatuses(environmentStatuses);
+		applicationStatus.setEnvironmentStatusMap(environmentStatusMap);
 		return applicationStatus;
 	}
 
@@ -99,7 +98,8 @@ public class DashboardDataDao {
 		NodeDiscoveryMethod discoveryMethod = discoveryMethodMapper.apply(environment.getNodeDiscoveryMethod());
 		List<String> urls = discoveryMethod.generateNodeUrls(environment.getApplicationConfig().get(application));
 
-		environmentStatus.setNodeStatuses(generateNodeStatusList(urls));
+		environmentStatus.setName(environment.getName());
+		environmentStatus.setNodeStatusList(generateNodeStatusList(urls));
 		return environmentStatus;
 	}
 
