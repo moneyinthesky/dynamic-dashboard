@@ -17,6 +17,8 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.Function;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -38,6 +40,7 @@ public class DashboardDataDao {
 	private SettingsDao settingsDao;
 	private UrlPatternMethod urlPatternMethod;
 	private ObjectMapper objectMapper;
+	private ForkJoinPool forkJoinPool = new ForkJoinPool(32);
 
 	@Inject
 	public DashboardDataDao(SettingsDao settingsDao, UrlPatternMethod urlPatternMethod, ObjectMapper objectMapper) throws IOException {
@@ -109,35 +112,44 @@ public class DashboardDataDao {
 	}
 
 	private List<NodeStatus> generateNodeStatusList(List<String> urls) {
-		return urls
-				.parallelStream()
-				.map((url) -> {
-					NodeStatus nodeStatus = new NodeStatus();
-					nodeStatus.setUrl(url);
+		try {
+			return forkJoinPool.submit(() ->
+                urls
+                    .parallelStream()
+                    .map((url) -> {
+                        NodeStatus nodeStatus = new NodeStatus();
+                        nodeStatus.setUrl(url);
 
-					try {
-						HttpResponse<String> response = get(url).asString();
+                        try {
+                            HttpResponse<String> response = get(url).asString();
 
-						if (response.getStatus() == 200) {
-							nodeStatus.up(true);
+                            if (response.getStatus() == 200) {
+                                nodeStatus.up(true);
 
-							Map<String, Object> responseBody = objectMapper.readValue(response.getBody(), Map.class);
-							nodeStatus.setVersion((String) responseBody.get("version"));
+                                Map<String, Object> responseBody = objectMapper.readValue(response.getBody(), Map.class);
+                                nodeStatus.setVersion((String) responseBody.get("version"));
 
-						} else {
-							nodeStatus.up(false);
-							nodeStatus.setErrorMessage("Status Code: " + response.getStatus());
-						}
-						return nodeStatus;
+                            } else {
+                                nodeStatus.up(false);
+                                nodeStatus.setErrorMessage("Status Code: " + response.getStatus());
+                            }
+                            return nodeStatus;
 
-					} catch (Exception e) {
-						logger.error(format("Error while calling %s", url), e);
-						nodeStatus.up(false);
-						nodeStatus.setErrorMessage("Unknown error");
-						return nodeStatus;
-					}
-				})
-				.collect(toList());
+                        } catch (Exception e) {
+                            logger.error(format("Error while calling %s", url), e);
+                            nodeStatus.up(false);
+                            nodeStatus.setErrorMessage("Unknown error");
+                            return nodeStatus;
+                        }
+                    })
+                    .collect(toList())
+            ).get();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	private void aggregateNodeData(DashboardData data) {
