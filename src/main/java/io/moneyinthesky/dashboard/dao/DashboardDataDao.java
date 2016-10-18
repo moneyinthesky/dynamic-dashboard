@@ -3,6 +3,7 @@ package io.moneyinthesky.dashboard.dao;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import io.moneyinthesky.dashboard.data.dashboard.*;
 import io.moneyinthesky.dashboard.data.settings.DataCenter;
 import io.moneyinthesky.dashboard.data.settings.Environment;
@@ -41,7 +42,7 @@ public class DashboardDataDao {
 	private UrlPatternMethod urlPatternMethod;
 	private ObjectMapper objectMapper;
 
-	private ForkJoinPool forkJoinPool = new ForkJoinPool(32);
+	private ForkJoinPool forkJoinPool = new ForkJoinPool(16);
 	private Map<String, NodeStatus> nodeStatusMap;
 
 	@Inject
@@ -135,18 +136,22 @@ public class DashboardDataDao {
 						NodeStatus nodeStatus = nodeStatusMap.get(url);
 
 						try {
-							HttpResponse<String> response = get(url).asString();
+                            HttpResponse<String> response = get(url).asString();
 
-							if (response.getStatus() == 200) {
-								nodeStatus.up(true);
+                            if (response.getStatus() == 200) {
+                                nodeStatus.up(true);
 
-								Map<String, Object> responseBody = objectMapper.readValue(response.getBody(), Map.class);
-								nodeStatus.setVersion((String) responseBody.get("version"));
-							} else {
-								nodeStatus.up(false);
-								nodeStatus.setErrorMessage("Status Code: " + response.getStatus());
-							}
+                                Map<String, Object> responseBody = objectMapper.readValue(response.getBody(), Map.class);
+                                nodeStatus.setVersion((String) responseBody.get("version"));
+                            } else {
+                                nodeStatus.up(false);
+                                nodeStatus.setErrorMessage("Status Code: " + response.getStatus());
+                            }
 
+                        } catch (UnirestException e) {
+                            logger.error(format("Error while calling %s", url), e);
+                            nodeStatus.up(false);
+                            nodeStatus.setErrorMessage(e.getMessage());
 						} catch (Exception e) {
 							logger.error(format("Error while calling %s", url), e);
 							nodeStatus.up(false);
