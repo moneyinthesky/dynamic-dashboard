@@ -5,7 +5,7 @@ import java.util.Map;
 
 import static io.moneyinthesky.dashboard.patterns.ExplodableString.explode;
 
-public class UrlPatternMethod implements NodeDiscoveryMethod {
+public class UrlPatternDiscoveryMethod implements NodeDiscoveryMethod {
 
     @Override
     public List<String> generateNodeUrls(Map<String, String> configuration) {

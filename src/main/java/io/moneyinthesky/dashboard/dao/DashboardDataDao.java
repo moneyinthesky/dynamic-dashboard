@@ -8,8 +8,9 @@ import io.moneyinthesky.dashboard.data.dashboard.*;
 import io.moneyinthesky.dashboard.data.settings.DataCenter;
 import io.moneyinthesky.dashboard.data.settings.Environment;
 import io.moneyinthesky.dashboard.data.settings.Settings;
+import io.moneyinthesky.dashboard.nodediscovery.FleetDiscoveryMethod;
 import io.moneyinthesky.dashboard.nodediscovery.NodeDiscoveryMethod;
-import io.moneyinthesky.dashboard.nodediscovery.UrlPatternMethod;
+import io.moneyinthesky.dashboard.nodediscovery.UrlPatternDiscoveryMethod;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -39,21 +40,25 @@ public class DashboardDataDao {
 	private static Function<String, NodeDiscoveryMethod> discoveryMethodMapper;
 
 	private SettingsDao settingsDao;
-	private UrlPatternMethod urlPatternMethod;
+	private UrlPatternDiscoveryMethod urlPatternDiscoveryMethod;
+	private FleetDiscoveryMethod fleetDiscoveryMethod;
 	private ObjectMapper objectMapper;
 
-	private ForkJoinPool forkJoinPool = new ForkJoinPool(16);
+	private ForkJoinPool forkJoinPool = null;
 	private Map<String, NodeStatus> nodeStatusMap;
 
 	@Inject
-	public DashboardDataDao(SettingsDao settingsDao, UrlPatternMethod urlPatternMethod, ObjectMapper objectMapper) throws IOException {
+	public DashboardDataDao(SettingsDao settingsDao, UrlPatternDiscoveryMethod urlPatternDiscoveryMethod, FleetDiscoveryMethod fleetDiscoveryMethod, ObjectMapper objectMapper) throws IOException {
 		this.settingsDao = settingsDao;
-		this.urlPatternMethod = urlPatternMethod;
+		this.urlPatternDiscoveryMethod = urlPatternDiscoveryMethod;
+		this.fleetDiscoveryMethod = fleetDiscoveryMethod;
 		this.objectMapper = objectMapper;
 
 		discoveryMethodMapper = (method) -> {
 			if (method.equals("urlPattern")) {
-				return urlPatternMethod;
+				return urlPatternDiscoveryMethod;
+			} else if (method.equals("fleet")) {
+				return fleetDiscoveryMethod;
 			}
 			return null;
 		};
@@ -63,6 +68,7 @@ public class DashboardDataDao {
 		DashboardData data = new DashboardData();
 		Settings settings = settingsDao.readSettings();
 
+		forkJoinPool = new ForkJoinPool(16);
 		nodeStatusMap = new HashMap<>();
 
 		List<DataCenterStatus> dataCenters = settings.getDataCenters()
@@ -70,7 +76,6 @@ public class DashboardDataDao {
 				.map(dataCenter -> generateDataCenterStatus(dataCenter, settings))
 				.collect(toList());
 		data.setDataCenters(dataCenters);
-
 		populateNodeStatusMap();
 
 		aggregateNodeData(data);
@@ -134,7 +139,6 @@ public class DashboardDataDao {
                     .parallelStream()
                     .forEach(url -> {
 						NodeStatus nodeStatus = nodeStatusMap.get(url);
-
 						try {
                             HttpResponse<String> response = get(url).asString();
 
@@ -149,7 +153,6 @@ public class DashboardDataDao {
                             }
 
                         } catch (UnirestException e) {
-                            logger.error(format("Error while calling %s", url), e);
                             nodeStatus.up(false);
                             nodeStatus.setErrorMessage(e.getMessage());
 						} catch (Exception e) {

@@ -53,7 +53,7 @@ class ModalSettings extends React.Component {
 			this.setState({settings : this.state.settings});
 		};
 
-		this.handleUrlPatternApplicationChange = (event) => {
+		this.handleApplicationConfigChange = (event) => {
 			var dataCenterObject = getByName(this.state.settings.dataCenters, event.target.dataset.datacenter);
 			var environmentObject = getByName(dataCenterObject.environments, event.target.dataset.environment);
 			var application = event.target.dataset.application;
@@ -63,7 +63,7 @@ class ModalSettings extends React.Component {
 
 			environmentObject.applicationConfig[application][event.target.dataset.field] = event.target.value;
 			this.setState({settings: this.state.settings});
-		}
+		};
 
         this.addApplication = (event) => {
             if(this.state.applicationToAdd && !this.state.settings.applications.includes(this.state.applicationToAdd)) {
@@ -184,20 +184,20 @@ class ModalSettings extends React.Component {
             return true;
 		}
 
-		this.getCurrentUrlPattern = (dataCenter, environment, application) => {
-			var dataCenterObject = getByName(this.state.settings.dataCenters, dataCenter);
+        this.getApplicationConfig = (dataCenter, environment, application, field) => {
+            var dataCenterObject = getByName(this.state.settings.dataCenters, dataCenter);
             var environmentObject = getByName(dataCenterObject.environments, environment);
 
             if(environmentObject.applicationConfig) {
-            	if(environmentObject.applicationConfig[application]) {
-            		if(environmentObject.applicationConfig[application].urlPattern) {
-            			return environmentObject.applicationConfig[application].urlPattern;
-            		}
-            	}
+                if(environmentObject.applicationConfig[application]) {
+                    if(environmentObject.applicationConfig[application][field]) {
+                        return environmentObject.applicationConfig[application][field];
+                    }
+                }
             }
 
             return "";
-		};
+        };
 
         this.isFirstDataCenter = (dataCenter) => {
             return this.state.settings.dataCenters[0].name === dataCenter;
@@ -383,18 +383,47 @@ class ModalSettings extends React.Component {
         		var environment = dataCenterEnvironmentArray[1].trim();
         		var nodeDiscoveryConfigForm = this.getDiscoveryMethodForDataCenterEnvironment(dataCenterEnvironment)==="urlPattern" ? (
         			this.state.settings.applications.map((application, index) => {
-        				var currentUrlPattern = this.getCurrentUrlPattern(dataCenter, environment, application);
+        				var currentUrlPattern = this.getApplicationConfig(dataCenter, environment, application, "urlPattern");
         				return (
 	        				<div key={index} className="form-group row">
 								<label>{application}</label>
                                 <div className="input-group">
                                     <span className="input-group-addon" id="basic-addon1">URL Pattern: </span>
-                                    <input value={currentUrlPattern} data-field="urlPattern" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleUrlPatternApplicationChange} placeholder="Add a URL pattern" />
+                                    <input value={currentUrlPattern} data-field="urlPattern" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add a URL pattern" />
                                 </div>
 							</div>
         				);
         			})
-        		) : "";
+        		) : (this.getDiscoveryMethodForDataCenterEnvironment(dataCenterEnvironment)==="fleet" ? (
+                    this.state.settings.applications.map((application, index) => {
+        		        var fleetRestUrl = this.getApplicationConfig(dataCenter, environment, application, "fleetRestUrl");
+        		        var appId = this.getApplicationConfig(dataCenter, environment, application, "appId");
+        		        var envId = this.getApplicationConfig(dataCenter, environment, application, "envId");
+        		        var dataCenterId = this.getApplicationConfig(dataCenter, environment, application, "dataCenterId");
+        		        var roleId = this.getApplicationConfig(dataCenter, environment, application, "roleId");
+                        return (
+                            <div key={index} className="form-group row">
+                                <label>{application}</label>
+                                <div className="input-group">
+                                    <span className="input-group-addon" id="basic-addon1">Fleet Rest URL: </span>
+                                    <input value={fleetRestUrl} data-field="fleetRestUrl" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Fleet Rest URL" />
+                                </div>
+                                <div className="input-group">
+                                    <span className="input-group-addon" id="basic-addon1">Application ID: </span>
+                                    <input value={appId} data-field="appId" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Application ID" />
+                                </div>
+                                <div className="input-group">
+                                    <span className="input-group-addon" id="basic-addon1">Environment ID: </span>
+                                    <input value={envId} data-field="envId" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Environment ID" />
+                                </div>
+                                <div className="input-group">
+                                    <span className="input-group-addon" id="basic-addon1">Role ID: </span>
+                                    <input value={roleId} data-field="roleId" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Role ID" />
+                                </div>
+                            </div>
+                        );
+                    })
+        		) : "");
 				return (
 					<div key={index} className={"tab-pane" + (index===0 ? " active" : "")} id={dataCenterEnvironment.replace('/','').replace(/\s+/g, '-').toLowerCase() + "-node-discovery"} role="tabpanel">
 						<div className="form-group row">

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import io.moneyinthesky.dashboard.data.dashboard.DashboardData;
 import io.moneyinthesky.dashboard.data.settings.Settings;
-import io.moneyinthesky.dashboard.nodediscovery.UrlPatternMethod;
+import io.moneyinthesky.dashboard.nodediscovery.UrlPatternDiscoveryMethod;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -31,7 +31,7 @@ public class DashboardDataDaoTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Mock
-    private UrlPatternMethod urlPatternMethod;
+    private UrlPatternDiscoveryMethod urlPatternMethod;
 
     @Mock
     private SettingsDao settingsDao;
