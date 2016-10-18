@@ -40,7 +40,9 @@ public class DashboardDataDao {
 	private SettingsDao settingsDao;
 	private UrlPatternMethod urlPatternMethod;
 	private ObjectMapper objectMapper;
+
 	private ForkJoinPool forkJoinPool = new ForkJoinPool(32);
+	private Map<String, NodeStatus> nodeStatusMap;
 
 	@Inject
 	public DashboardDataDao(SettingsDao settingsDao, UrlPatternMethod urlPatternMethod, ObjectMapper objectMapper) throws IOException {
@@ -60,12 +62,16 @@ public class DashboardDataDao {
 		DashboardData data = new DashboardData();
 		Settings settings = settingsDao.readSettings();
 
+		nodeStatusMap = new HashMap<>();
+
 		List<DataCenterStatus> dataCenters = settings.getDataCenters()
 				.stream()
 				.map(dataCenter -> generateDataCenterStatus(dataCenter, settings))
 				.collect(toList());
-
 		data.setDataCenters(dataCenters);
+
+		populateNodeStatusMap();
+
 		aggregateNodeData(data);
 		data.setTimeGenerated(getTimestamp());
 		return data;
@@ -107,49 +113,53 @@ public class DashboardDataDao {
 		List<String> urls = applicationConfig != null ? discoveryMethod.generateNodeUrls(applicationConfig) : newArrayList();
 
 		environmentStatus.setName(environment.getName());
-		environmentStatus.setNodeStatusList(generateNodeStatusList(urls));
+		environmentStatus.setNodeStatusList(urls
+				.stream()
+				.map(url -> {
+					NodeStatus unpopulatedNodeStatus = new NodeStatus();
+					unpopulatedNodeStatus.setUrl(url);
+					nodeStatusMap.put(url, unpopulatedNodeStatus);
+					return unpopulatedNodeStatus;
+				})
+				.collect(toList()));
 		return environmentStatus;
 	}
 
-	private List<NodeStatus> generateNodeStatusList(List<String> urls) {
+	private void populateNodeStatusMap() {
+		long start = System.currentTimeMillis();
 		try {
-			return forkJoinPool.submit(() ->
-                urls
+			forkJoinPool.submit(() ->
+					nodeStatusMap.keySet()
                     .parallelStream()
-                    .map((url) -> {
-                        NodeStatus nodeStatus = new NodeStatus();
-                        nodeStatus.setUrl(url);
+                    .forEach(url -> {
+						NodeStatus nodeStatus = nodeStatusMap.get(url);
 
-                        try {
-                            HttpResponse<String> response = get(url).asString();
+						try {
+							HttpResponse<String> response = get(url).asString();
 
-                            if (response.getStatus() == 200) {
-                                nodeStatus.up(true);
+							if (response.getStatus() == 200) {
+								nodeStatus.up(true);
 
-                                Map<String, Object> responseBody = objectMapper.readValue(response.getBody(), Map.class);
-                                nodeStatus.setVersion((String) responseBody.get("version"));
+								Map<String, Object> responseBody = objectMapper.readValue(response.getBody(), Map.class);
+								nodeStatus.setVersion((String) responseBody.get("version"));
+							} else {
+								nodeStatus.up(false);
+								nodeStatus.setErrorMessage("Status Code: " + response.getStatus());
+							}
 
-                            } else {
-                                nodeStatus.up(false);
-                                nodeStatus.setErrorMessage("Status Code: " + response.getStatus());
-                            }
-                            return nodeStatus;
-
-                        } catch (Exception e) {
-                            logger.error(format("Error while calling %s", url), e);
-                            nodeStatus.up(false);
-                            nodeStatus.setErrorMessage("Unknown error");
-                            return nodeStatus;
-                        }
-                    })
-                    .collect(toList())
-            ).get();
+						} catch (Exception e) {
+							logger.error(format("Error while calling %s", url), e);
+							nodeStatus.up(false);
+							nodeStatus.setErrorMessage("Unknown error");
+						}
+					}
+            )).get();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} catch (ExecutionException e) {
 			e.printStackTrace();
 		}
-		return null;
+		logger.info(String.format("Time taken to retrieve status of %d nodes: %f", nodeStatusMap.size(), (System.currentTimeMillis() - start) / 1000d));
 	}
 
 	private void aggregateNodeData(DashboardData data) {
