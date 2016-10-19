@@ -6,6 +6,7 @@ import java.util.Map;
 public class Settings {
     private String title;
     private List<String> applications;
+    private Map<String, Map<String, String>> applicationConfig;
     private List<DataCenter> dataCenters;
 
     public String getTitle() {
@@ -20,5 +21,7 @@ public class Settings {
         return dataCenters;
     }
 
-
+    public Map<String, Map<String, String>> getApplicationConfig() {
+        return applicationConfig;
+    }
 }

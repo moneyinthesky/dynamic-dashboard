@@ -1,9 +1,6 @@
 package io.moneyinthesky.dashboard.dao;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.exceptions.UnirestException;
 import io.moneyinthesky.dashboard.data.dashboard.*;
 import io.moneyinthesky.dashboard.data.settings.DataCenter;
 import io.moneyinthesky.dashboard.data.settings.Environment;
@@ -16,16 +13,13 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
 import java.util.function.Function;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.mashape.unirest.http.Unirest.get;
-import static java.lang.String.format;
 import static java.time.LocalDateTime.now;
 import static java.time.format.DateTimeFormatter.ofLocalizedDateTime;
 import static java.time.format.FormatStyle.LONG;
@@ -40,19 +34,20 @@ public class DashboardDataDao {
 	private static Function<String, NodeDiscoveryMethod> discoveryMethodMapper;
 
 	private SettingsDao settingsDao;
+	private NodeStatusRetrieval nodeStatusRetrieval;
 	private UrlPatternDiscoveryMethod urlPatternDiscoveryMethod;
 	private FleetDiscoveryMethod fleetDiscoveryMethod;
-	private ObjectMapper objectMapper;
 
-	private ForkJoinPool forkJoinPool = null;
-	private Map<String, NodeStatus> nodeStatusMap;
+	private List<NodeStatus> nodeStatusList;
+	private Settings settings;
 
 	@Inject
-	public DashboardDataDao(SettingsDao settingsDao, UrlPatternDiscoveryMethod urlPatternDiscoveryMethod, FleetDiscoveryMethod fleetDiscoveryMethod, ObjectMapper objectMapper) throws IOException {
+	public DashboardDataDao(SettingsDao settingsDao, NodeStatusRetrieval nodeStatusRetrieval,
+							UrlPatternDiscoveryMethod urlPatternDiscoveryMethod, FleetDiscoveryMethod fleetDiscoveryMethod) throws IOException {
 		this.settingsDao = settingsDao;
+		this.nodeStatusRetrieval = nodeStatusRetrieval;
 		this.urlPatternDiscoveryMethod = urlPatternDiscoveryMethod;
 		this.fleetDiscoveryMethod = fleetDiscoveryMethod;
-		this.objectMapper = objectMapper;
 
 		discoveryMethodMapper = (method) -> {
 			if (method.equals("urlPattern")) {
@@ -66,17 +61,15 @@ public class DashboardDataDao {
 
 	public DashboardData populateDashboardData() throws IOException {
 		DashboardData data = new DashboardData();
-		Settings settings = settingsDao.readSettings();
-
-		forkJoinPool = new ForkJoinPool(16);
-		nodeStatusMap = new HashMap<>();
+		settings = settingsDao.readSettings();
+		nodeStatusList = new ArrayList<>();
 
 		List<DataCenterStatus> dataCenters = settings.getDataCenters()
 				.stream()
 				.map(dataCenter -> generateDataCenterStatus(dataCenter, settings))
 				.collect(toList());
 		data.setDataCenters(dataCenters);
-		populateNodeStatusMap();
+		nodeStatusRetrieval.populateNodeStatus(nodeStatusList);
 
 		aggregateNodeData(data);
 		data.setTimeGenerated(getTimestamp());
@@ -124,50 +117,13 @@ public class DashboardDataDao {
 				.map(url -> {
 					NodeStatus unpopulatedNodeStatus = new NodeStatus();
 					unpopulatedNodeStatus.setUrl(url);
-					nodeStatusMap.put(url, unpopulatedNodeStatus);
+					unpopulatedNodeStatus.setStatusUrl(url + settings.getApplicationConfig().get(application).get("statusUri"));
+					unpopulatedNodeStatus.setInfoUrl(url + settings.getApplicationConfig().get(application).get("infoUri"));
+					nodeStatusList.add(unpopulatedNodeStatus);
 					return unpopulatedNodeStatus;
 				})
 				.collect(toList()));
 		return environmentStatus;
-	}
-
-	private void populateNodeStatusMap() {
-		long start = System.currentTimeMillis();
-		try {
-			forkJoinPool.submit(() ->
-					nodeStatusMap.keySet()
-                    .parallelStream()
-                    .forEach(url -> {
-						NodeStatus nodeStatus = nodeStatusMap.get(url);
-						try {
-                            HttpResponse<String> response = get(url).asString();
-
-                            if (response.getStatus() == 200) {
-                                nodeStatus.up(true);
-
-                                Map<String, Object> responseBody = objectMapper.readValue(response.getBody(), Map.class);
-                                nodeStatus.setVersion((String) responseBody.get("version"));
-                            } else {
-                                nodeStatus.up(false);
-                                nodeStatus.setErrorMessage("Status Code: " + response.getStatus());
-                            }
-
-                        } catch (UnirestException e) {
-                            nodeStatus.up(false);
-                            nodeStatus.setErrorMessage(e.getMessage());
-						} catch (Exception e) {
-							logger.error(format("Error while calling %s", url), e);
-							nodeStatus.up(false);
-							nodeStatus.setErrorMessage("Unknown error");
-						}
-					}
-            )).get();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		}
-		logger.info(String.format("Time taken to retrieve status of %d nodes: %f", nodeStatusMap.size(), (System.currentTimeMillis() - start) / 1000d));
 	}
 
 	private void aggregateNodeData(DashboardData data) {

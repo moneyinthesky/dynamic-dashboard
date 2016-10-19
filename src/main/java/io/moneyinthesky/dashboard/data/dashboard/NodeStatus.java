@@ -2,6 +2,8 @@ package io.moneyinthesky.dashboard.data.dashboard;
 
 public class NodeStatus {
 	private String url;
+	private String statusUrl;
+	private String infoUrl;
 	private String version;
 	private boolean up;
 	private String errorMessage;
@@ -36,5 +38,21 @@ public class NodeStatus {
 
 	public void setErrorMessage(String errorMessage) {
 		this.errorMessage = errorMessage;
+	}
+
+	public String getStatusUrl() {
+		return statusUrl;
+	}
+
+	public void setStatusUrl(String statusUrl) {
+		this.statusUrl = statusUrl;
+	}
+
+	public String getInfoUrl() {
+		return infoUrl;
+	}
+
+	public void setInfoUrl(String infoUrl) {
+		this.infoUrl = infoUrl;
 	}
 }

@@ -46,11 +46,11 @@ public class DashboardDataDaoTest {
     public void setUp() throws IOException {
         when(settingsDao.readSettings()).thenReturn(getSettings());
 
-        String format = "http://h1wap[01-20]-v01.dcm.stg2.ovp.bskyb.com/dcm/private/status/info";
+        String format = "http://h1wap[01-20]-v01.dcm.stg2.ovp.bskyb.com";
         when(urlPatternMethod.generateNodeUrls(ImmutableMap.of("urlPattern", format)))
                 .thenReturn(newArrayList(explode(format)));
 
-        format = "http://dcm-app-v02-[01-10][a-b].u3euw1.api.bskyb.com/dcm/private/status/info";
+        format = "http://dcm-app-v02-[01-10][a-b].u3euw1.api.bskyb.com";
         when(urlPatternMethod.generateNodeUrls(ImmutableMap.of("urlPattern", format)))
                 .thenReturn(newArrayList(explode(format)));
 

@@ -37,27 +37,28 @@ public class FleetDiscoveryMethod implements NodeDiscoveryMethod {
         String dataCenterId = configuration.get("dataCenterId");
         String roleId = configuration.get("roleId");
 
-        try {
-            HttpResponse<String> fleetResponse = Unirest.get(fleetRestUrl).asString();
-            Map<String, Object> fleetJson = objectMapper.readValue(fleetResponse.getBody(), Map.class);
+//        try {
+//            HttpResponse<String> fleetResponse = Unirest.get(fleetRestUrl).asString();
+//            Map<String, Object> fleetJson = objectMapper.readValue(fleetResponse.getBody(), Map.class);
 
-            List<Map<String, String>> hosts = (List<Map<String, String>>) fleetJson.get("hosts");
-            filteredHosts = hosts
-                    .stream()
-                    .filter(host ->
-                            (host.get("app").equals(appId) &&
-                            host.get("env").equals(envId) &&
-                            host.get("datacenter").equals(dataCenterId) &&
-                            host.get("role").equals(roleId)))
-                    .collect(toList());
+//            List<Map<String, String>> hosts = (List<Map<String, String>>) fleetJson.get("hosts");
+//            filteredHosts = hosts
+//                    .stream()
+//                    .filter(host ->
+//                            (host.get("app").equals(appId) &&
+//                            host.get("env").equals(envId) &&
+//                            host.get("datacenter").equals(dataCenterId) &&
+//                            host.get("role").equals(roleId)))
+//                    .collect(toList());
 
-        } catch (UnirestException e) {
-            logger.error("Unable to reach fleet rest URL: " + fleetRestUrl, e);
-        } catch (IOException e) {
-            logger.error("Unable to deserialize response from Fleet: " + fleetRestUrl, e);
-        }
+//        } catch (UnirestException e) {
+//            logger.error("Unable to reach fleet rest URL: " + fleetRestUrl, e);
+//        } catch (IOException e) {
+//            logger.error("Unable to deserialize response from Fleet: " + fleetRestUrl, e);
+//        }
 
         logger.info(String.format("Time taken to query Fleet: %f", (System.currentTimeMillis() - start) / 1000d));
-        return filteredHosts.stream().map(host -> host.get("fqdn")).collect(toList());
+//        return filteredHosts.stream().map(host -> host.get("fqdn")).collect(toList());
+        return newArrayList();
     }
 }

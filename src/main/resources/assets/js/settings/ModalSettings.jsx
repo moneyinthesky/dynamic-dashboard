@@ -7,6 +7,7 @@ class ModalSettings extends React.Component {
             settings : {
                 title: "",
                 applications: [],
+                applicationConfig: {},
                 dataCenters: []
             },
             applicationToAdd: "",
@@ -64,6 +65,21 @@ class ModalSettings extends React.Component {
 			environmentObject.applicationConfig[application][event.target.dataset.field] = event.target.value;
 			this.setState({settings: this.state.settings});
 		};
+
+        this.handleApplicationConfigUpdate = (event) => {
+            if(!this.state.settings.applicationConfig) {
+                this.state.settings.applicationConfig = {};
+            }
+
+            var applicationConfig = this.state.settings.applicationConfig;
+            if(!applicationConfig[event.target.dataset.application]) {
+                applicationConfig[event.target.dataset.application] = {};
+            }
+
+            applicationConfig[event.target.dataset.application][event.target.dataset.field] = event.target.value;
+
+            this.setState({settings: this.state.settings});
+        };
 
         this.addApplication = (event) => {
             if(this.state.applicationToAdd && !this.state.settings.applications.includes(this.state.applicationToAdd)) {
@@ -364,6 +380,35 @@ class ModalSettings extends React.Component {
         	        </div>
         	    );
         	});
+        	var applicationConfigurationTabs = this.state.settings.applications.map((application, index) => {
+        	    return (
+                    <li key={index} className="nav-item">
+                        <a className={"nav-link" + ((index===0) ? " active" : "")} data-toggle="tab" href={"#" + application + "-application-configuration"} role="tab">{application}</a>
+                    </li>
+                );
+        	});
+        	var applicationConfigurationContent = this.state.settings.applications.map((application, index) => {
+        	    var currentAppStatusUri = this.state.settings.applicationConfig ?
+        	        (this.state.settings.applicationConfig[application] ? this.state.settings.applicationConfig[application].statusUri : "") : "";
+                var currentAppInfoUri = this.state.settings.applicationConfig ?
+        	        (this.state.settings.applicationConfig[application] ? this.state.settings.applicationConfig[application].infoUri : "") : "";
+        	    return (
+                    <div key={index} className={"tab-pane" + (index===0 ? " active" : "")} id={application + "-application-configuration"} role="tabpanel">
+						<div className="form-group row">
+							<label className="col-xs-4 col-form-label">Status URI</label>
+							<div className="col-xs-8">
+								<input value={currentAppStatusUri} data-application={application} data-field="statusUri" className="form-control" type="text" onChange={this.handleApplicationConfigUpdate} placeholder="Add status URI" />
+							</div>
+						</div>
+						<div className="form-group row">
+							<label className="col-xs-4 col-form-label">Info URI</label>
+							<div className="col-xs-8">
+								<input value={currentAppInfoUri} data-application={application} data-field="infoUri" className="form-control" type="text" onChange={this.handleApplicationConfigUpdate} placeholder="Add info URI" />
+							</div>
+						</div>
+					</div>
+        	    );
+        	});
         	var nodeDiscoveryTabs = this.generateDataCenterEnvironmentList().map((dataCenterEnvironment, index) => {
         		var nodeDiscoveryTagSpan = this.isNodeDiscoverConfigComplete(dataCenterEnvironment) ? (
         			<span className="node-discovery-tag-complete tag tag-default tag-pill pull-xs-right mega-octicon octicon-check" data-toggle="tooltip" data-placement="top" title="Configuration complete"> </span>
@@ -452,6 +497,9 @@ class ModalSettings extends React.Component {
                           <ul className="nav navbar-nav">
                             <li className={"nav-item" + (this.state.activeTab === "basicConfiguration" ? " active" : "")}>
                               <a className="nav-link" href="#basicConfiguration" data-tab="basicConfiguration" onClick={this.changeSettingsNav}>Basic Configuration</a>
+                            </li>
+                            <li className={"nav-item" + (this.state.activeTab === "applicationConfiguration" ? " active" : "")}>
+                              <a className="nav-link" href="#applicationConfiguration" data-tab="applicationConfiguration" onClick={this.changeSettingsNav}>Application Configuration</a>
                             </li>
                             <li className={"nav-item" + (this.state.activeTab === "nodeDiscovery" ? " active" : "")}>
                               <a className="nav-link" href="#nodeDiscovery" data-tab="nodeDiscovery" onClick={this.changeSettingsNav}>Node Discovery</a>
@@ -544,6 +592,22 @@ class ModalSettings extends React.Component {
                                   </div>
                                 </div>
                               </div>
+                            </div>
+                        </div>
+                        <div style={(this.state.activeTab == "applicationConfiguration" ? {display: 'inline'} : {display: 'none'})}>
+							<div className="container-fluid">
+                            	<div className="row">
+                                	<div className="col-xs-4">
+                                    	<ul className="nav nav-pills nav-stacked" role="tablist">
+                                        	{applicationConfigurationTabs}
+                                    	</ul>
+                                  	</div>
+                                  	<div className="col-xs-8">
+                                    	<div className="tab-content">
+                                    		{applicationConfigurationContent}
+                                    	</div>
+                                	</div>
+                            	</div>
                             </div>
                         </div>
                         <div style={(this.state.activeTab == "nodeDiscovery" ? {display: 'inline'} : {display: 'none'})}>

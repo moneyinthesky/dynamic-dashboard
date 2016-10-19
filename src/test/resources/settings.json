@@ -1,6 +1,16 @@
 {
   "title" : "Dynamic Dashboard",
   "applications" : [ "DCM", "CRM", "HKM" ],
+  "applicationConfig" : {
+    "DCM" : {
+      "statusUri" : "/dcm/private/status",
+      "infoUri" : "/dcm/private/status/info"
+    },
+    "CRM" : {
+      "statusUri" : "/crm/private/status",
+      "infoUri" : "/crm/private/status/info"
+    }
+  },
   "dataCenters" : [ {
     "name" : "AWS",
     "environments" : [ {
@@ -8,10 +18,10 @@
       "nodeDiscoveryMethod" : "urlPattern",
       "applicationConfig" : {
         "DCM" : {
-          "urlPattern" : "http://dcm-app-v02-01[a-b].d1euw1.api.bskyb.com/dcm/private/status/info"
+          "urlPattern" : "http://dcm-app-v02-01[a-b].d1euw1.api.bskyb.com"
         },
         "CRM" : {
-          "urlPattern" : "http://crm-app-v02-01[a-b].d1euw1.api.bskyb.com/crm/private/status/info"
+          "urlPattern" : "http://crm-app-v02-01[a-b].d1euw1.api.bskyb.com"
         }
       }
     }, {
@@ -19,10 +29,10 @@
       "nodeDiscoveryMethod" : "urlPattern",
       "applicationConfig" : {
         "DCM" : {
-          "urlPattern" : "http://dcm-app-v02-01[a-b].u1euw1.api.bskyb.com/dcm/private/status/info"
+          "urlPattern" : "http://dcm-app-v02-01[a-b].u1euw1.api.bskyb.com"
         },
         "CRM" : {
-          "urlPattern" : "http://crm-app-v02-01[a-b].u1euw1.api.bskyb.com/crm/private/status/info"
+          "urlPattern" : "http://crm-app-v02-01[a-b].u1euw1.api.bskyb.com"
         }
       }
     }, {
@@ -30,10 +40,10 @@
       "nodeDiscoveryMethod" : "urlPattern",
       "applicationConfig" : {
         "DCM" : {
-          "urlPattern" : "http://dcm-app-v02-[01-10][a-b].u3euw1.api.bskyb.com/dcm/private/status/info"
+          "urlPattern" : "http://dcm-app-v02-[01-10][a-b].u3euw1.api.bskyb.com"
         },
         "CRM" : {
-          "urlPattern" : "http://crm-app-v02-01[a-b].u3euw1.api.bskyb.com/crm/private/status/info"
+          "urlPattern" : "http://crm-app-v02-01[a-b].u3euw1.api.bskyb.com"
         }
       }
     } ]
@@ -44,10 +54,10 @@
       "nodeDiscoveryMethod" : "urlPattern",
       "applicationConfig" : {
         "DCM" : {
-          "urlPattern" : "http://h1wap0[1-2]-v01.dcm.i1.ovp.bskyb.com/dcm/private/status/info"
+          "urlPattern" : "http://h1wap0[1-2]-v01.dcm.i1.ovp.bskyb.com"
         },
         "CRM" : {
-          "urlPattern" : "http://h1wap0[1-2]-v01.crm.i1.ovp.bskyb.com/crm/private/status/info"
+          "urlPattern" : "http://h1wap0[1-2]-v01.crm.i1.ovp.bskyb.com"
         }
       }
     }, {
@@ -55,10 +65,10 @@
       "nodeDiscoveryMethod" : "urlPattern",
       "applicationConfig" : {
         "DCM" : {
-          "urlPattern" : "http://h1wap[01-20]-v01.dcm.stg2.ovp.bskyb.com/dcm/private/status/info"
+          "urlPattern" : "http://h1wap[01-20]-v01.dcm.stg2.ovp.bskyb.com"
         },
         "CRM" : {
-          "urlPattern" : "http://h1wap0[1-6]-v01.crm.stg2.ovp.bskyb.com/crm/private/status/info"
+          "urlPattern" : "http://h1wap0[1-6]-v01.crm.stg2.ovp.bskyb.com"
         }
       }
     } ]
