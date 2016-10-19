@@ -8,7 +8,6 @@ import io.moneyinthesky.dashboard.data.settings.Settings;
 import io.moneyinthesky.dashboard.nodediscovery.FleetDiscoveryMethod;
 import io.moneyinthesky.dashboard.nodediscovery.NodeDiscoveryMethod;
 import io.moneyinthesky.dashboard.nodediscovery.UrlPatternDiscoveryMethod;
-import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.time.ZoneId;
@@ -25,11 +24,9 @@ import static java.time.format.DateTimeFormatter.ofLocalizedDateTime;
 import static java.time.format.FormatStyle.LONG;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static org.slf4j.LoggerFactory.getLogger;
 
 public class DashboardDataDao {
 
-	private static final Logger logger = getLogger(DashboardDataDao.class);
 	private static final ZoneId TIMEZONE = ZoneId.of("Europe/London");
 	private static Function<String, NodeDiscoveryMethod> discoveryMethodMapper;
 
@@ -95,7 +92,7 @@ public class DashboardDataDao {
 		applicationStatus.setName(application);
 
 		Map<String, EnvironmentStatus> environmentStatusMap = environments
-				.parallelStream()
+				.stream()
 				.map(environment -> generateEnvironmentStatusForApplication(environment, application))
 				.collect(toMap(environmentStatus -> environmentStatus.getName(), environmentStatus -> environmentStatus));
 
