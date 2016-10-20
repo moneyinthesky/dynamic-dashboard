@@ -12,13 +12,14 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.util.concurrent.AbstractScheduledService.Scheduler.newFixedRateSchedule;
 import static com.mashape.unirest.http.Unirest.get;
-import static java.lang.System.*;
+import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 public class FleetRestClient extends AbstractScheduledService {
@@ -46,24 +47,12 @@ public class FleetRestClient extends AbstractScheduledService {
 
     @Override
     protected void runOneIteration() throws Exception {
-        Set<String> fleetRestUrls = new HashSet<>();
-
         Settings settings = settingsDao.readSettings();
-        settings.getDataCenters()
-                .forEach(dataCenter -> dataCenter.getEnvironments()
-                        .forEach(environment -> {
-                            if(environment.getNodeDiscoveryMethod().equals("fleet")) {
-                                if(environment.getApplicationConfig() != null) {
-                                    environment.getApplicationConfig().values()
-                                            .forEach(applicationConfigValue -> fleetRestUrls.add(applicationConfigValue.get("fleetRestUrl")));
-                                }
-                            }
-                        }));
+        Set<String> fleetRestApiUrls = newHashSet((List<String>) settings.getPlugins().get("fleet").get("restApiUrls"));
 
-        logger.info("Retrieving hosts from Fleet on " + fleetRestUrls);
-
+        logger.info("Retrieving hosts from Fleet on " + fleetRestApiUrls);
         long start = currentTimeMillis();
-        fleetRestUrls.forEach(fleetRestUrl -> {
+        fleetRestApiUrls.forEach(fleetRestUrl -> {
             HttpResponse<String> fleetResponse = null;
             try {
                 fleetResponse = get(fleetRestUrl).asString();

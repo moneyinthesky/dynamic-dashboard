@@ -141,6 +141,21 @@ class ModalSettings extends React.Component {
             this.setState({ settings : this.state.settings, environmentToAdd : this.state.environmentToAdd});
         };
 
+        this.addFleetRestApiUrl = (event) => {
+            if(!this.state.settings.plugins) this.state.settings.plugins = {};
+            if(!this.state.settings.plugins.fleet) this.state.settings.plugins.fleet = {};
+            if(!this.state.settings.plugins.fleet.restApiUrls) this.state.settings.plugins.fleet.restApiUrls = [];
+
+            if(!this.state.fleetRestApiUrlToAdd) {
+                this.setState({fleetRestApiUrlWarning: "Please enter a URL"});
+                return;
+            }
+
+            var restApiUrls = this.state.settings.plugins.fleet.restApiUrls;
+            restApiUrls.push(this.state.fleetRestApiUrlToAdd);
+            this.setState({ settings : this.state.settings, fleetRestApiUrlToAdd : ""});
+        };
+
         this.removeApplication = (event) => {
             this.state.settings.applications.splice(event.target.dataset.index, 1);
             this.setState({settings : this.state.settings});
@@ -162,6 +177,11 @@ class ModalSettings extends React.Component {
             var environmentToRemove = event.target.dataset.datacenterEnvironment.split("/");
             var dataCenterObject = getByName(this.state.settings.dataCenters, environmentToRemove[0]);
             dataCenterObject.environments = removeByName(dataCenterObject.environments, environmentToRemove[1]);
+            this.setState({settings : this.state.settings});
+        };
+
+        this.removeFleetRestApiUrl = (event) => {
+            this.state.settings.plugins.fleet.restApiUrls.splice(event.target.dataset.index, 1);
             this.setState({settings : this.state.settings});
         };
 
@@ -464,10 +484,6 @@ class ModalSettings extends React.Component {
                             <div key={index} className="form-group row">
                                 <label>{application}</label>
                                 <div className="input-group">
-                                    <span className="input-group-addon" id="basic-addon1">Fleet Rest URL: </span>
-                                    <input value={fleetRestUrl} data-field="fleetRestUrl" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Fleet Rest URL" />
-                                </div>
-                                <div className="input-group">
                                     <span className="input-group-addon" id="basic-addon1">Application ID: </span>
                                     <input value={appId} data-field="appId" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Application ID" />
                                 </div>
@@ -505,14 +521,14 @@ class ModalSettings extends React.Component {
 					</div>
 				);
 			});
-			var fleetRestUrlRows = this.state.settings.plugins.fleet.restApiUrls.map((url, index) => {
+			var fleetRestUrlRows = (this.state.settings.plugins && this.state.settings.plugins.fleet) ? this.state.settings.plugins.fleet.restApiUrls.map((url, index) => {
 				return (
 					<li className="list-group-item clearfix" key={index}>
 						<button type="button" data-index={index} className="btn btn-danger mega-octicon octicon-dash pull-xs-right" onClick={this.removeFleetRestApiUrl}></button>
 						{url}
 					</li>
 				);
-			});
+			}) : "";
             return (
                 <div className="modal fade" id="settings-modal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                   <div className="modal-dialog modal-lg" role="document">
@@ -672,13 +688,15 @@ class ModalSettings extends React.Component {
                                     	<div className="tab-content">
 											<div key="fleet" className="tab-pane active" id="fleetPlugin" role="tabpanel">
 												<div className="form-group row">
-													<label className="col-xs-6 col-form-label">Fleet REST API URLs</label>
-													<div className="col-xs-6">
+													<label className="col-xs-4 col-form-label">Fleet REST API URLs</label>
+												</div>
+												<div className="form-group row">
+													<div className="col-xs-10">
 														<ul className="list-group">
 														  {fleetRestUrlRows}
 														</ul>
 														<div className="application-input input-group">
-														  <input value={this.state.fleetRestApiUrlToAdd} className="form-control" + (this.state.fleetRestUrlWarning ? " form-control-warning" : "")} type="text" onChange={this.handleFleetRestApiUrlToAddChange} placeholder="Add a Fleet REST API URL" />
+														  <input value={this.state.fleetRestApiUrlToAdd} className={"form-control" + (this.state.fleetRestApiUrlWarning ? " form-control-warning" : "")} type="text" onChange={this.handleFleetRestApiUrlToAddChange} placeholder="Add a Fleet REST API URL" />
 														  <span className="input-group-btn">
 															<button type="button" className="btn btn-success mega-octicon octicon-plus" onClick={this.addFleetRestApiUrl}></button>
 														  </span>
