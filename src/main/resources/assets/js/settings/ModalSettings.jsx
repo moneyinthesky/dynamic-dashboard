@@ -8,13 +8,21 @@ class ModalSettings extends React.Component {
                 title: "",
                 applications: [],
                 applicationConfig: {},
-                dataCenters: []
+                dataCenters: [],
+                plugins: {
+                	fleet: {
+                		restApiUrls: []
+                	},
+                	aws: {}
+                }
             },
             applicationToAdd: "",
             dataCenterToAdd: "",
             environmentToAdd: {},
+            fleetRestApiUrlToAdd: "",
             applicationWarning: "",
             dataCenterWarning: "",
+            fleetRestApiUrlWarning: "",
             activeTab: "basicConfiguration",
             importAlert: "",
             importFile: ""
@@ -35,6 +43,7 @@ class ModalSettings extends React.Component {
             this.setState({applicationToAdd: event.target.value, applicationWarning: ''});
         };
 
+
         this.handleDataCenterToAddChange = (event) => {
             this.setState({dataCenterToAdd: event.target.value, dataCenterWarning: ''});
         };
@@ -44,6 +53,10 @@ class ModalSettings extends React.Component {
             this.state.environmentToAdd[dataCenter] = event.target.value;
             this.setState({environmentToAdd : this.state.environmentToAdd, environmentWarning: ''});
         };
+
+		this.handleFleetRestApiUrlToAddChange = (event) => {
+			this.setState({fleetRestApiUrlToAdd: event.target.value, fleetRestApiUrlWarning: ''});
+		};
 
 		this.handleNodeDiscoveryMethodSelect = (event) => {
 			var dataCenterObject = getByName(this.state.settings.dataCenters, event.target.dataset.datacenter);
@@ -324,6 +337,7 @@ class ModalSettings extends React.Component {
             var applicationWarning = this.state.applicationWarning ? <div className="form-control-feedback alert alert-warning" role="alert">{this.state.applicationWarning}</div> : "";
             var dataCenterWarning = this.state.dataCenterWarning ? <div className="form-control-feedback alert alert-warning" role="alert">{this.state.dataCenterWarning}</div> : "";
             var environmentWarning = this.state.environmentWarning ? <div className="form-control-feedback alert alert-warning" role="alert">{this.state.environmentWarning}</div> : "";
+            var fleetRestApiUrlWarning = this.state.fleetRestApiUrlWarning ? <div className="form-control-feedback alert alert-warning" role="alert">{this.state.fleetRestApiUrlWarning}</div> : "";
             var applicationRows = this.state.settings.applications.map((application, index) => {
         	  return (
         		<li className="list-group-item clearfix" data-id={index} key={index} draggable="true" onDragEnd={this.dragEndApplications} onDragStart={this.dragStart}>
@@ -491,6 +505,14 @@ class ModalSettings extends React.Component {
 					</div>
 				);
 			});
+			var fleetRestUrlRows = this.state.settings.plugins.fleet.restApiUrls.map((url, index) => {
+				return (
+					<li className="list-group-item clearfix" key={index}>
+						<button type="button" data-index={index} className="btn btn-danger mega-octicon octicon-dash pull-xs-right" onClick={this.removeFleetRestApiUrl}></button>
+						{url}
+					</li>
+				);
+			});
             return (
                 <div className="modal fade" id="settings-modal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                   <div className="modal-dialog modal-lg" role="document">
@@ -500,14 +522,17 @@ class ModalSettings extends React.Component {
                           <a className="navbar-brand" href="#"><b>Settings</b></a>
                           <ul className="nav navbar-nav">
                             <li className={"nav-item" + (this.state.activeTab === "basicConfiguration" ? " active" : "")}>
-                              <a className="nav-link" href="#basicConfiguration" data-tab="basicConfiguration" onClick={this.changeSettingsNav}>Basic Configuration</a>
+                              <a className="nav-link" href="#basicConfiguration" data-tab="basicConfiguration" onClick={this.changeSettingsNav}>Basic</a>
                             </li>
                             <li className={"nav-item" + (this.state.activeTab === "applicationConfiguration" ? " active" : "")}>
-                              <a className="nav-link" href="#applicationConfiguration" data-tab="applicationConfiguration" onClick={this.changeSettingsNav}>Application Configuration</a>
+                              <a className="nav-link" href="#applicationConfiguration" data-tab="applicationConfiguration" onClick={this.changeSettingsNav}>Applications</a>
                             </li>
                             <li className={"nav-item" + (this.state.activeTab === "nodeDiscovery" ? " active" : "")}>
                               <a className="nav-link" href="#nodeDiscovery" data-tab="nodeDiscovery" onClick={this.changeSettingsNav}>Node Discovery</a>
                             </li>
+                            <li className={"nav-item" + (this.state.activeTab === "plugins" ? " active" : "")}>
+							  <a className="nav-link" href="#plugins" data-tab="plugins" onClick={this.changeSettingsNav}>Plugins</a>
+							</li>
                             <li className={"nav-item" + (this.state.activeTab === "generalSettings" ? " active" : "")}>
                               <a className="nav-link" href="#generalSettings" data-tab="generalSettings" onClick={this.changeSettingsNav}>Miscellaneous</a>
                             </li>
@@ -625,6 +650,51 @@ class ModalSettings extends React.Component {
                                   	<div className="col-xs-8">
                                     	<div className="tab-content">
                                     		{nodeDiscoveryContent}
+                                    	</div>
+                                	</div>
+                            	</div>
+                            </div>
+                        </div>
+                        <div style={(this.state.activeTab == "plugins" ? {display: 'inline'} : {display: 'none'})}>
+							<div className="container-fluid">
+                            	<div className="row">
+                                	<div className="col-xs-4">
+                                    	<ul className="nav nav-pills nav-stacked" role="tablist">
+											<li key="fleet" className="nav-item">
+												<a className="nav-link active" data-toggle="tab" href="#fleetPlugin" role="tab">Fleet</a>
+											</li>
+											<li key="aws" className="nav-item">
+												<a className="nav-link" data-toggle="tab" href="#awsPlugin" role="tab">AWS Route 53</a>
+											</li>
+                                    	</ul>
+                                  	</div>
+                                  	<div className="col-xs-8">
+                                    	<div className="tab-content">
+											<div key="fleet" className="tab-pane active" id="fleetPlugin" role="tabpanel">
+												<div className="form-group row">
+													<label className="col-xs-6 col-form-label">Fleet REST API URLs</label>
+													<div className="col-xs-6">
+														<ul className="list-group">
+														  {fleetRestUrlRows}
+														</ul>
+														<div className="application-input input-group">
+														  <input value={this.state.fleetRestApiUrlToAdd} className="form-control" + (this.state.fleetRestUrlWarning ? " form-control-warning" : "")} type="text" onChange={this.handleFleetRestApiUrlToAddChange} placeholder="Add a Fleet REST API URL" />
+														  <span className="input-group-btn">
+															<button type="button" className="btn btn-success mega-octicon octicon-plus" onClick={this.addFleetRestApiUrl}></button>
+														  </span>
+														</div>
+														{fleetRestApiUrlWarning}
+													</div>
+												</div>
+											</div>
+											<div key="aws" className="tab-pane" id="awsPlugin" role="tabpanel">
+												<div className="form-group row">
+													<label className="col-xs-6 col-form-label">AWS Credentials</label>
+													<div className="col-xs-6">
+
+													</div>
+												</div>
+											</div>
                                     	</div>
                                 	</div>
                             	</div>
