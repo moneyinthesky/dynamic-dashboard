@@ -462,6 +462,10 @@ class ModalSettings extends React.Component {
                                     <input value={envId} data-field="envId" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Environment ID" />
                                 </div>
                                 <div className="input-group">
+									<span className="input-group-addon" id="basic-addon1">Data Center ID: </span>
+									<input value={dataCenterId} data-field="dataCenterId" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Data Center ID" />
+								</div>
+                                <div className="input-group">
                                     <span className="input-group-addon" id="basic-addon1">Role ID: </span>
                                     <input value={roleId} data-field="roleId" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Role ID" />
                                 </div>

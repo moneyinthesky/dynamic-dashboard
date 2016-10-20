@@ -41,6 +41,6 @@ public class DashboardDataService extends AbstractScheduledService {
 
 	@Override
 	protected Scheduler scheduler() {
-		return newFixedRateSchedule(5, 60, SECONDS);
+		return newFixedRateSchedule(30, 60, SECONDS);
 	}
 }

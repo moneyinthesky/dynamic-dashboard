@@ -18,6 +18,7 @@ import java.util.Set;
 
 import static com.google.common.util.concurrent.AbstractScheduledService.Scheduler.newFixedRateSchedule;
 import static com.mashape.unirest.http.Unirest.get;
+import static java.lang.System.*;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 public class FleetRestClient extends AbstractScheduledService {
@@ -61,6 +62,7 @@ public class FleetRestClient extends AbstractScheduledService {
 
         logger.info("Retrieving hosts from Fleet on " + fleetRestUrls);
 
+        long start = currentTimeMillis();
         fleetRestUrls.forEach(fleetRestUrl -> {
             HttpResponse<String> fleetResponse = null;
             try {
@@ -73,6 +75,7 @@ public class FleetRestClient extends AbstractScheduledService {
                 logger.error("Unable to parse JSON response from Fleet - URL: " + fleetRestUrl, e);
             }
         });
+		logger.info("Time take to query Fleet {}", (currentTimeMillis() - start)/1000d);
     }
 
     @Override
