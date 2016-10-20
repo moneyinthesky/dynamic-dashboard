@@ -5,16 +5,6 @@ import com.google.inject.Inject;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import io.moneyinthesky.dashboard.data.dashboard.NodeStatus;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
-import org.apache.http.impl.nio.client.HttpAsyncClients;
-import org.apache.http.impl.nio.conn.PoolingNHttpClientConnectionManager;
-import org.apache.http.impl.nio.reactor.DefaultConnectingIOReactor;
-import org.apache.http.nio.reactor.ConnectingIOReactor;
-import org.apache.http.nio.reactor.IOReactorException;
-import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -22,11 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.Future;
 
 import static com.mashape.unirest.http.Unirest.get;
-import static java.util.stream.Collectors.toList;
-import static org.apache.commons.codec.Charsets.UTF_8;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class NodeStatusRetrieval {
@@ -91,67 +78,5 @@ public class NodeStatusRetrieval {
             e.printStackTrace();
         }
         logger.info(String.format("Time taken to retrieve status of %d nodes: %f", nodeStatusList.size(), (System.currentTimeMillis() - start) / 1000d));
-    }
-
-    public void populateNodeStatusAlternate(List<NodeStatus> nodeStatusList) {
-        CloseableHttpAsyncClient client = getCloseableHttpAsyncClient();
-        client.start();
-
-        System.out.println("Node list size: " + nodeStatusList.size());
-        List<GetThread> threads = nodeStatusList
-                .stream()
-                .map(nodeStatus -> new GetThread(client, nodeStatus))
-                .collect(toList());
-
-        System.out.println("Thread list size: " + threads.size());
-        threads.forEach(Thread::start);
-        threads.forEach(thread -> {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
-    private CloseableHttpAsyncClient getCloseableHttpAsyncClient() {
-        ConnectingIOReactor ioReactor = null;
-        try {
-            ioReactor = new DefaultConnectingIOReactor();
-        } catch (IOReactorException e) {
-            e.printStackTrace();
-        }
-        PoolingNHttpClientConnectionManager cm =
-                new PoolingNHttpClientConnectionManager(ioReactor);
-        return HttpAsyncClients.custom().setConnectionManager(cm).build();
-    }
-
-    static class GetThread extends Thread {
-        private CloseableHttpAsyncClient client;
-        private HttpContext context;
-        private NodeStatus nodeStatus;
-
-        public GetThread(CloseableHttpAsyncClient client, NodeStatus nodeStatus){
-            this.client = client;
-            this.nodeStatus = nodeStatus;
-            context = HttpClientContext.create();
-        }
-
-        @Override
-        public void run() {
-            try {
-                HttpGet request = new HttpGet(nodeStatus.getStatusUrl());
-                Future<org.apache.http.HttpResponse> future = client.execute(request, context, null);
-                org.apache.http.HttpResponse response = future.get();
-
-                String responseContent = IOUtils.toString(response.getEntity().getContent(), UTF_8);
-                boolean nodeIsUp = responseContent.equals("OK");
-                nodeStatus.up(nodeIsUp);
-                nodeStatus.setVersion("1.2.3");
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
     }
 }
