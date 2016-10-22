@@ -733,7 +733,7 @@ class ModalSettings extends React.Component {
                       	<label className="btn btn-secondary pull-xs-left mega-octicon octicon-cloud-upload" data-toggle="tooltip" title="Import Settings" data-placement="bottom">
                             <input type="file" style={{display: 'none'}} onChange={this.importSettings} value={this.state.importFile} />
                         </label>
-                        <div style={(this.state.importAlert ? {display: 'inline'} : {display: 'none'})} className="alert alert-info pull-xs-left fade in" role="alert">{this.state.importAlert}</div>
+                        <div style={this.state.importAlert ? {display: 'inline'} : {display: 'none'}} className="alert alert-info pull-xs-left fade in" role="alert">{this.state.importAlert}</div>
                         <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={this.handleClose}>Close</button>
                         <button type="button" className="btn btn-primary" data-dismiss="modal" onClick={this.handleSave}>Save</button>
                       </div>
