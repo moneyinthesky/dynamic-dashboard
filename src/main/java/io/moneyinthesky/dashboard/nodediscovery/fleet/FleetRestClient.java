@@ -8,7 +8,6 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import io.moneyinthesky.dashboard.dao.SettingsDao;
 import io.moneyinthesky.dashboard.data.settings.Settings;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -16,15 +15,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.util.concurrent.AbstractScheduledService.Scheduler.newFixedRateSchedule;
 import static com.mashape.unirest.http.Unirest.get;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MINUTES;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class FleetRestClient extends AbstractScheduledService {
 
-    private static final Logger logger = LoggerFactory.getLogger(FleetRestClient.class);
+    private static final Logger logger = getLogger(FleetRestClient.class);
 
     private ObjectMapper objectMapper;
     private SettingsDao settingsDao;
@@ -41,8 +42,13 @@ public class FleetRestClient extends AbstractScheduledService {
         super.startAsync();
     }
 
-    public Map<String, Object> getFleetResponse(String fleetRestUrl) {
-        return cachedFleetResponse.get(fleetRestUrl);
+    public List<Map<String, String>> getFleetHosts() {
+        List<Map<String, String>> fleetHosts = newArrayList();
+
+        cachedFleetResponse.values()
+                .forEach(fleetResponse -> fleetHosts.addAll((List<Map<String, String>>) fleetResponse.get("hosts")));
+
+        return fleetHosts;
     }
 
     @Override
