@@ -203,3 +203,8 @@ li.placeholder:before {
   content: "Drop here";
   color: #9E9E9E;
 }
+.app-env-status {
+	padding: .25rem;
+	background-color: initial;
+	border-color: #80CBC4;
+}
