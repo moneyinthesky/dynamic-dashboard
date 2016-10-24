@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import io.moneyinthesky.dashboard.data.dashboard.DependencyStatus;
 import io.moneyinthesky.dashboard.data.dashboard.NodeStatus;
 import org.slf4j.Logger;
 
@@ -14,6 +15,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 
 import static com.mashape.unirest.http.Unirest.get;
+import static java.lang.System.currentTimeMillis;
+import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class NodeStatusRetrieval {
@@ -28,7 +31,7 @@ public class NodeStatusRetrieval {
     }
 
     public void populateNodeStatus(List<NodeStatus> nodeStatusList) {
-        long start = System.currentTimeMillis();
+        long start = currentTimeMillis();
         try {
             ForkJoinPool forkJoinPool = new ForkJoinPool(32);
             forkJoinPool.submit(() ->
@@ -48,6 +51,18 @@ public class NodeStatusRetrieval {
                                                     try {
                                                         responseBody = objectMapper.readValue(infoResponse.getBody(), Map.class);
                                                         nodeStatus.setVersion((String) responseBody.get("version"));
+
+                                                        nodeStatus.setDependencyStatus(responseBody.entrySet().stream()
+                                                                .filter(entry -> !(entry.getKey().equals("version") || entry.getKey().equals("environment")))
+                                                                .map(entry -> {
+                                                                    Map<String, Object> dependencyInfo = (Map<String, Object>) entry.getValue();
+                                                                    return new DependencyStatus(
+                                                                            entry.getKey(),
+                                                                            (String) dependencyInfo.get("endpoint"),
+                                                                            (Boolean) dependencyInfo.get("running") ? "UP" : "DOWN");
+                                                                    })
+                                                                .collect(toList()));
+
                                                     } catch (IOException e) {
                                                         nodeStatus.setVersion("unknown");
                                                         nodeStatus.setErrorMessage("Unable to deserialize info response: " + nodeStatus.getInfoUrl());
@@ -77,6 +92,6 @@ public class NodeStatusRetrieval {
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
-        logger.info(String.format("Time taken to retrieve status of %d nodes: %f", nodeStatusList.size(), (System.currentTimeMillis() - start) / 1000d));
+        logger.info(String.format("Time taken to retrieve status of %d nodes: %f", nodeStatusList.size(), (currentTimeMillis() - start) / 1000d));
     }
 }

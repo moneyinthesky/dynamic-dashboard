@@ -1,5 +1,7 @@
 package io.moneyinthesky.dashboard.data.dashboard;
 
+import java.util.List;
+
 public class NodeStatus {
 	private String url;
 	private String statusUrl;
@@ -7,6 +9,7 @@ public class NodeStatus {
 	private String version;
 	private boolean up;
 	private String errorMessage;
+	private List<DependencyStatus> dependencyStatus;
 
 	public String getUrl() {
 		return url;
@@ -54,5 +57,13 @@ public class NodeStatus {
 
 	public void setInfoUrl(String infoUrl) {
 		this.infoUrl = infoUrl;
+	}
+
+	public List<DependencyStatus> getDependencyStatus() {
+		return dependencyStatus;
+	}
+
+	public void setDependencyStatus(List<DependencyStatus> dependencyStatus) {
+		this.dependencyStatus = dependencyStatus;
 	}
 }

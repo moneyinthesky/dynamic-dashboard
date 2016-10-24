@@ -146,6 +146,10 @@ public class DashboardDataDao {
 				if(nodeStatus.isUp())
 					aggregatedNodeStatus.incrementNodeCount();
 
+				for(DependencyStatus dependencyStatus : nodeStatus.getDependencyStatus()) {
+					if(dependencyStatus.getStatus().equals("DOWN"))
+						aggregatedNodeStatus.addToUnhealthyDependencies(dependencyStatus);
+				}
 			} else {
 				if(!nodeStatus.isUp())
 					environmentStatus.incrementNodesDown();
