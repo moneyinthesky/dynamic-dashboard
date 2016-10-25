@@ -2,6 +2,8 @@ package io.moneyinthesky.dashboard.data.dashboard;
 
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
+
 public class NodeStatus {
 	private String url;
 	private String statusUrl;
@@ -9,7 +11,7 @@ public class NodeStatus {
 	private String version;
 	private boolean up;
 	private String errorMessage;
-	private List<DependencyStatus> dependencyStatus;
+	private List<DependencyStatus> dependencyStatus = newArrayList();
 
 	public String getUrl() {
 		return url;

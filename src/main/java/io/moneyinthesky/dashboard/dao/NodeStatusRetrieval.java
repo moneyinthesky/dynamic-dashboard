@@ -52,7 +52,7 @@ public class NodeStatusRetrieval {
                                                         responseBody = objectMapper.readValue(infoResponse.getBody(), Map.class);
                                                         nodeStatus.setVersion((String) responseBody.get("version"));
 
-                                                        nodeStatus.setDependencyStatus(responseBody.entrySet().stream()
+                                                        List<DependencyStatus> dependencyStatusList = responseBody.entrySet().stream()
                                                                 .filter(entry -> !(entry.getKey().equals("version") || entry.getKey().equals("environment")))
                                                                 .map(entry -> {
                                                                     Map<String, Object> dependencyInfo = (Map<String, Object>) entry.getValue();
@@ -61,7 +61,10 @@ public class NodeStatusRetrieval {
                                                                             (String) dependencyInfo.get("endpoint"),
                                                                             (Boolean) dependencyInfo.get("running") ? "UP" : "DOWN");
                                                                     })
-                                                                .collect(toList()));
+                                                                .collect(toList());
+
+                                                        if(dependencyStatusList != null)
+                                                            nodeStatus.setDependencyStatus(dependencyStatusList);
 
                                                     } catch (IOException e) {
                                                         nodeStatus.setVersion("unknown");
