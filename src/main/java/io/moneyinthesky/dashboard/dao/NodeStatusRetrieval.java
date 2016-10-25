@@ -67,13 +67,13 @@ public class NodeStatusRetrieval {
                                                             nodeStatus.setDependencyStatus(dependencyStatusList);
 
                                                     } catch (IOException e) {
-                                                        nodeStatus.setVersion("unknown");
+                                                        nodeStatus.setVersion("???");
                                                         nodeStatus.setErrorMessage("Unable to deserialize info response: " + nodeStatus.getInfoUrl());
                                                         logger.info("Unable to deserialize info response: " + nodeStatus.getInfoUrl());
                                                     }
 
                                                 } else {
-                                                    nodeStatus.setVersion("unknown");
+                                                    nodeStatus.setVersion("???");
                                                     nodeStatus.setErrorMessage("Info page not responding: " + nodeStatus.getInfoUrl());
                                                     logger.info("Info page not responding: " + nodeStatus.getInfoUrl());
                                                 }

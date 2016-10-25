@@ -11,14 +11,16 @@ class ApplicationEnvironmentStatus extends React.Component {
             }
 
             var versionStatusList = $.map(this.props.applicationEnvironmentStatus.versionToNodeStatusMap, (status, version) => {
-                var unhealthyDependencies = $.map(status.unhealthyDependencies, (dependency, dependencyName) => {
-                    return <button key={dependencyName} type="button" className="btn btn-danger">{dependencyName}</button>
-                });
+                var numberOfUnhealthyDependencies = Object.keys(status.unhealthyDependencies).length;
+                var unhealthyDependencies = numberOfUnhealthyDependencies>0 ?
+                        <button type="button" className="btn btn-danger">{numberOfUnhealthyDependencies + " DD"}</button> : "";
                 return (
                 	<li key={version} className="app-env-status list-group-item">
-                		v{version}<br/>
-                    	<button key={version} type="button" className="btn btn-success">{status.nodeCount} Up</button>
-                    	{unhealthyDependencies}
+                	    <div className="container">
+                          <div className="col-md-4"><h5>{version}</h5></div>
+                          <div className="col-md-4"><button key={version} type="button" className="btn btn-success">{status.nodeCount} Up</button></div>
+                          <div className="col-md-4">{unhealthyDependencies}</div>
+                        </div>
                    	</li>
                 );
             });
