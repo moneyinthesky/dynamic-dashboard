@@ -30,18 +30,18 @@ public class FleetRestClient {
     private ObjectMapper objectMapper;
     private SettingsDao settingsDao;
 
-    private Supplier<List<Map<String, String>>> memoizer;
+    private Supplier<List<Map<String, String>>> fleetResponseSupplier;
 
     @Inject
     public FleetRestClient(ObjectMapper objectMapper, SettingsDao settingsDao) throws IOException {
         this.objectMapper = objectMapper;
         this.settingsDao = settingsDao;
 
-        memoizer = memoizeWithExpiration(this::generateFleetHosts, 10, MINUTES);
+        fleetResponseSupplier = memoizeWithExpiration(this::generateFleetHosts, 10, MINUTES);
     }
 
     public List<Map<String, String>> getFleetHosts() {
-        return memoizer.get();
+        return fleetResponseSupplier.get();
     }
 
     public List<Map<String, String>> generateFleetHosts() {
