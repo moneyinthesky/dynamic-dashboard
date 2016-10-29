@@ -7,7 +7,7 @@ import io.moneyinthesky.dashboard.data.settings.DataCenter;
 import io.moneyinthesky.dashboard.data.settings.Environment;
 import io.moneyinthesky.dashboard.data.settings.Settings;
 import io.moneyinthesky.dashboard.nodediscovery.NodeDiscoveryMethod;
-import io.moneyinthesky.dashboard.nodediscovery.UrlPatternDiscoveryMethod;
+import io.moneyinthesky.dashboard.nodediscovery.urlpattern.UrlPatternDiscoveryMethod;
 import io.moneyinthesky.dashboard.nodediscovery.aws.AwsDiscoveryMethod;
 import io.moneyinthesky.dashboard.nodediscovery.fleet.FleetDiscoveryMethod;
 

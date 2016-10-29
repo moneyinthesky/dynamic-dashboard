@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import io.moneyinthesky.dashboard.data.dashboard.DashboardData;
 import io.moneyinthesky.dashboard.data.settings.Settings;
-import io.moneyinthesky.dashboard.nodediscovery.UrlPatternDiscoveryMethod;
+import io.moneyinthesky.dashboard.nodediscovery.urlpattern.UrlPatternDiscoveryMethod;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

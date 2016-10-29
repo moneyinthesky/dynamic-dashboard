@@ -1,4 +1,6 @@
-package io.moneyinthesky.dashboard.nodediscovery;
+package io.moneyinthesky.dashboard.nodediscovery.urlpattern;
+
+import io.moneyinthesky.dashboard.nodediscovery.NodeDiscoveryMethod;
 
 import java.util.List;
 import java.util.Map;
