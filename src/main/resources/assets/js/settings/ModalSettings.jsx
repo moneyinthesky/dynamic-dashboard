@@ -43,7 +43,6 @@ class ModalSettings extends React.Component {
             this.setState({applicationToAdd: event.target.value, applicationWarning: ''});
         };
 
-
         this.handleDataCenterToAddChange = (event) => {
             this.setState({dataCenterToAdd: event.target.value, dataCenterWarning: ''});
         };
@@ -90,9 +89,23 @@ class ModalSettings extends React.Component {
             }
 
             applicationConfig[event.target.dataset.application][event.target.dataset.field] = event.target.value;
-
             this.setState({settings: this.state.settings});
         };
+
+        this.handleAWSAccessKeyChange = (event) => {
+            this.state.settings.plugins.aws.accessKey = event.target.value;
+            this.setState({settings : this.state.settings});
+        }
+
+        this.handleAWSSecretKeyChange = (event) => {
+            this.state.settings.plugins.aws.secretKey = event.target.value;
+            this.setState({settings : this.state.settings});
+        }
+
+        this.handleAWSRegionChange = (event) => {
+            this.state.settings.plugins.aws.region = event.target.value;
+            this.setState({settings : this.state.settings});
+        }
 
         this.addApplication = (event) => {
             if(this.state.applicationToAdd && !this.state.settings.applications.includes(this.state.applicationToAdd)) {
@@ -502,7 +515,30 @@ class ModalSettings extends React.Component {
                             </div>
                         );
                     })
-        		) : "");
+        		) : (this.getDiscoveryMethodForDataCenterEnvironment(dataCenterEnvironment)==="aws" ? (
+                    this.state.settings.applications.map((application, index) => {
+        		        var hostedZone = this.getApplicationConfig(dataCenter, environment, application, "hostedZone");
+        		        var loadBalancer = this.getApplicationConfig(dataCenter, environment, application, "loadBalancer");
+        		        var appPrefix = this.getApplicationConfig(dataCenter, environment, application, "appPrefix");
+                        return (
+                            <div key={index} className="form-group row">
+                                <label>{application}</label>
+                                <div className="input-group">
+                                    <span className="input-group-addon" id="basic-addon1">Hosted Zone: </span>
+                                    <input value={hostedZone} data-field="hostedZone" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Hosted Zone" />
+                                </div>
+                                <div className="input-group">
+                                    <span className="input-group-addon" id="basic-addon1">Load Balancer: </span>
+                                    <input value={loadBalancer} data-field="loadBalancer" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Load Balancer" />
+                                </div>
+                                <div className="input-group">
+									<span className="input-group-addon" id="basic-addon1">App Prefix: </span>
+									<input value={appPrefix} data-field="appPrefix" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add App Prefix" />
+								</div>
+                            </div>
+                        );
+                    })
+        		) : ""));
 				return (
 					<div key={index} className={"tab-pane" + (index===0 ? " active" : "")} id={dataCenterEnvironment.replace('/','').replace(/\s+/g, '-').toLowerCase() + "-node-discovery"} role="tabpanel">
 						<div className="form-group row">
@@ -512,7 +548,7 @@ class ModalSettings extends React.Component {
 									<option value="">Select method</option>
 									<option value="urlPattern">URL Pattern</option>
 									<option value="fleet">Fleet</option>
-									<option value="route53">AWS Route 53</option>
+									<option value="aws">AWS</option>
 								</select>
 							</div>
 						</div>
@@ -680,7 +716,7 @@ class ModalSettings extends React.Component {
 												<a className="nav-link active" data-toggle="tab" href="#fleetPlugin" role="tab">Fleet</a>
 											</li>
 											<li key="aws" className="nav-item">
-												<a className="nav-link" data-toggle="tab" href="#awsPlugin" role="tab">AWS Route 53</a>
+												<a className="nav-link" data-toggle="tab" href="#awsPlugin" role="tab">AWS</a>
 											</li>
                                     	</ul>
                                   	</div>
@@ -707,9 +743,21 @@ class ModalSettings extends React.Component {
 											</div>
 											<div key="aws" className="tab-pane" id="awsPlugin" role="tabpanel">
 												<div className="form-group row">
-													<label className="col-xs-6 col-form-label">AWS Credentials</label>
-													<div className="col-xs-6">
-
+													<label className="col-xs-4 col-form-label">Access Key</label>
+													<div className="col-xs-8">
+                                                        <input value={this.state.settings.plugins.aws.accessKey} className="form-control" type="text" onChange={this.handleAWSAccessKeyChange} placeholder="Enter AWS Access Key" />
+													</div>
+												</div>
+												<div className="form-group row">
+													<label className="col-xs-4 col-form-label">Secret Key</label>
+													<div className="col-xs-8">
+                                                        <input value={this.state.settings.plugins.aws.secretKey} className="form-control" type="text" onChange={this.handleAWSSecretKeyChange} placeholder="Enter AWS Secret Key" />
+													</div>
+												</div>
+												<div className="form-group row">
+													<label className="col-xs-4 col-form-label">Region</label>
+													<div className="col-xs-8">
+                                                        <input value={this.state.settings.plugins.aws.region} className="form-control" type="text" onChange={this.handleAWSRegionChange} placeholder="Enter AWS Region" />
 													</div>
 												</div>
 											</div>

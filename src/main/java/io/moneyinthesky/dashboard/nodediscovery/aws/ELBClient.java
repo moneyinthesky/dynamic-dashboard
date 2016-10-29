@@ -9,7 +9,6 @@ import com.amazonaws.services.elasticloadbalancing.model.DescribeLoadBalancersRe
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -19,8 +18,8 @@ public class ELBClient {
 
 	private AmazonElasticLoadBalancing elasticLoadBalancing;
 
-	public ELBClient(Map<String, String> configuration, AWSCredentials credentials) {
-		this.elasticLoadBalancing = getElbClient(configuration, credentials);
+	public ELBClient(AWSCredentials credentials, Regions region) {
+		this.elasticLoadBalancing = getElbClient(credentials, region);
 	}
 
 	public List<String> getInstanceIds(String loadBalancerDNS) {
@@ -40,9 +39,9 @@ public class ELBClient {
 		return newArrayList();
 	}
 
-	private AmazonElasticLoadBalancing getElbClient(Map<String, String> configuration, AWSCredentials credentials) {
+	private AmazonElasticLoadBalancing getElbClient(AWSCredentials credentials, Regions region) {
 		return AmazonElasticLoadBalancingClientBuilder.standard()
-				.withRegion(Regions.fromName(configuration.get("region")))
+				.withRegion(region)
 				.withCredentials(new AWSStaticCredentialsProvider(credentials))
 				.build();
 	}

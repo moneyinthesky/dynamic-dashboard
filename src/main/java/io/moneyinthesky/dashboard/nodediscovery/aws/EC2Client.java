@@ -10,14 +10,13 @@ import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class EC2Client {
 
 	private AmazonEC2 amazonEC2;
 
-	public EC2Client(Map<String, String> configuration, AWSCredentials credentials) {
-		this.amazonEC2 = getEC2Client(configuration, credentials);
+	public EC2Client(AWSCredentials credentials, Regions region) {
+		this.amazonEC2 = getEC2Client(credentials, region);
 	}
 
 	public List<String> getPrivateIpsFromInstances(List<String> instanceIds) {
@@ -33,9 +32,9 @@ public class EC2Client {
 		return privateIps;
 	}
 
-	private AmazonEC2 getEC2Client(Map<String, String> configuration, AWSCredentials credentials) {
+	private AmazonEC2 getEC2Client(AWSCredentials credentials, Regions region) {
 		return AmazonEC2ClientBuilder.standard()
-				.withRegion(Regions.fromName(configuration.get("region")))
+				.withRegion(region)
 				.withCredentials(new AWSStaticCredentialsProvider(credentials))
 				.build();
 	}

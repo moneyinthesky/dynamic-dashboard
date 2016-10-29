@@ -20,8 +20,8 @@ public class Route53Client {
 	private Map<String, String> configuration;
 	private AmazonRoute53 amazonRoute53;
 
-	public Route53Client(Map<String, String> configuration, AWSCredentials credentials) {
-		this.amazonRoute53 = getRoute53Client(configuration, credentials);
+	public Route53Client(Map<String, String> configuration, AWSCredentials credentials, Regions region) {
+		this.amazonRoute53 = getRoute53Client(credentials, region);
 		this.configuration = configuration;
 	}
 
@@ -109,9 +109,9 @@ public class Route53Client {
 		return highestWeightedResourceRecordSet;
 	}
 
-	private AmazonRoute53 getRoute53Client(Map<String, String> configuration, AWSCredentials credentials) {
+	private AmazonRoute53 getRoute53Client(AWSCredentials credentials, Regions region) {
 		return AmazonRoute53ClientBuilder.standard()
-				.withRegion(Regions.fromName(configuration.get("region")))
+				.withRegion(region)
 				.withCredentials(new AWSStaticCredentialsProvider(credentials))
 				.build();
 	}
