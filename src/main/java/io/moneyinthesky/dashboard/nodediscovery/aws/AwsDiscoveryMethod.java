@@ -16,11 +16,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -35,7 +35,7 @@ public class AwsDiscoveryMethod implements NodeDiscoveryMethod {
 	public AwsDiscoveryMethod(SettingsDao settingsDao) {
 		this.settingsDao = settingsDao;
 		this.cache = CacheBuilder.newBuilder()
-				.expireAfterWrite(10, TimeUnit.MINUTES)
+				.expireAfterWrite(10, MINUTES)
 				.build();
 	}
 
@@ -66,34 +66,38 @@ public class AwsDiscoveryMethod implements NodeDiscoveryMethod {
 
 		List<String> nodeUrls = cache.getIfPresent(key);
 		if(nodeUrls == null) {
-			long start = currentTimeMillis();
-			ELBClient elbClient = new ELBClient(credentials, region);
-			EC2Client ec2Client = new EC2Client(credentials, region);
-			Route53Client route53Client = new Route53Client(configuration, credentials, region);
-
-			Optional<String> hostedZoneId = route53Client.getHostedZoneIdByName(hostedZoneName);
-			Optional<String> loadBalancerDNS = route53Client.getLoadBalancerDNS(hostedZoneId.get());
-			List<String> instanceIds = elbClient.getInstanceIds(loadBalancerDNS.get());
-
-			List<String> privateIps = ec2Client.getPrivateIpsFromInstances(instanceIds);
-			List<ResourceRecordSet> instanceResources = route53Client.getResourceRecordSets(hostedZoneId.get(),
-					resourceRecordSet -> {
-						if (resourceRecordSet.getResourceRecords().size() > 0) {
-							return privateIps.contains(resourceRecordSet.getResourceRecords().get(0).getValue());
-						}
-						return false;
-					});
-
-			nodeUrls = instanceResources.stream()
-					.filter(instanceResource -> instanceResource.getName().startsWith(appPrefix))
-					.map(instanceResource -> "http://" + instanceResource.getName().substring(0, instanceResource.getName().length()-1))
-					.collect(toList());
-
-			logger.info("Time to query AWS: {}", (currentTimeMillis() - start) / 1000d);
-			cache.put(key, nodeUrls);
+			cache.put(key, getNodeUrls(credentials, region, configuration,
+					hostedZoneName, appPrefix, loadBalancer));
 		}
 
 		return nodeUrls;
+	}
+
+	private List<String> getNodeUrls(AWSCredentials credentials, Regions region, Map<String, String> configuration,
+									 String hostedZoneName, String appPrefix, String loadBalancer) {
+		long start = currentTimeMillis();
+		ELBClient elbClient = new ELBClient(credentials, region);
+		EC2Client ec2Client = new EC2Client(credentials, region);
+		Route53Client route53Client = new Route53Client(configuration, credentials, region);
+
+		Optional<String> hostedZoneId = route53Client.getHostedZoneIdByName(hostedZoneName);
+		Optional<String> loadBalancerDNS = route53Client.getLoadBalancerDNS(hostedZoneId.get());
+		List<String> instanceIds = elbClient.getInstanceIds(loadBalancerDNS.get());
+
+		List<String> privateIps = ec2Client.getPrivateIpsFromInstances(instanceIds);
+		List<ResourceRecordSet> instanceResources = route53Client.getResourceRecordSets(hostedZoneId.get(),
+				resourceRecordSet -> {
+					if (resourceRecordSet.getResourceRecords().size() > 0) {
+						return privateIps.contains(resourceRecordSet.getResourceRecords().get(0).getValue());
+					}
+					return false;
+				});
+
+		logger.info("Time to query AWS for {}: {}", loadBalancer, (currentTimeMillis() - start) / 1000d);
+		return instanceResources.stream()
+				.filter(instanceResource -> instanceResource.getName().startsWith(appPrefix))
+				.map(instanceResource -> "http://" + instanceResource.getName().substring(0, instanceResource.getName().length()-1))
+				.collect(toList());
 	}
 
 	private String generateKey(String... keyElements) {
