@@ -32,7 +32,8 @@ h4 {
 button {
   margin-left: 2px;
 }
-a:link {
+a:link,
+a:visited {
   color: #80CBC4;
 }
 
@@ -215,15 +216,15 @@ li.placeholder:before {
 .app-env-status {
     padding: .1rem;
     border: 0px;
-    color: white;
+    color: #424242;
     font-size: larger;
     margin: 2px;
 }
 .status-down {
-    background-color: #F44336;
+    background-color: #E57373;
 }
 .status-up {
-    background-color: #4CAF50;
+    background-color: #81C784;
 }
 .app-env-status-container {
     padding-left: 2px;
@@ -231,10 +232,12 @@ li.placeholder:before {
 }
 .app-env-status-deps {
     border: 2px solid;
-    border-color: #F44336;
+    border-color: #E57373;
     border-radius: .5rem;
-    background-color: #388E3C;
+    background-color: #FFB74D;
     font-size: medium;
+	margin-left: 5px;
+	margin-right: 5px;
 }
 .node-discovery-label {
 	padding-right: 5px;
@@ -249,4 +252,21 @@ li.placeholder:before {
     padding-left: 10px;
     border-radius: .25rem;
     color: white;
+}
+.status-summary {
+	max-width: 1000px;
+}
+.status-summary-table {
+	border: 0px !important;
+	padding-right: 20px;
+}
+.down-dependency {
+	background-color: #E57373;
+	border-radius: 1rem;
+	padding-left: 5px;
+	padding-right: 5px;
+	color: #424242;
+}
+.status-summary-link {
+	margin-right: 20px;
 }

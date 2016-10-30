@@ -8,10 +8,12 @@ public class NodeStatus {
 	private String url;
 	private String statusUrl;
 	private String infoUrl;
+	private String identifier;
 	private String version;
 	private boolean up;
 	private String errorMessage;
 	private List<DependencyStatus> dependencyStatus = newArrayList();
+	private List<DependencyStatus> downDependencies = newArrayList();
 
 	public String getUrl() {
 		return url;
@@ -61,11 +63,27 @@ public class NodeStatus {
 		this.infoUrl = infoUrl;
 	}
 
+	public String getIdentifier() {
+		return identifier;
+	}
+
+	public void setIdentifier(String identifier) {
+		this.identifier = identifier;
+	}
+
 	public List<DependencyStatus> getDependencyStatus() {
 		return dependencyStatus;
 	}
 
 	public void setDependencyStatus(List<DependencyStatus> dependencyStatus) {
 		this.dependencyStatus = dependencyStatus;
+	}
+
+	public void addToDownDependencies(DependencyStatus dependencyStatus) {
+		downDependencies.add(dependencyStatus);
+	}
+
+	public List<DependencyStatus> getDownDependencies() {
+		return downDependencies;
 	}
 }

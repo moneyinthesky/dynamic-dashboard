@@ -110,6 +110,7 @@ public class DashboardDataDao {
 					unpopulatedNodeStatus.setUrl(url);
 					unpopulatedNodeStatus.setStatusUrl(url + settings.getApplicationConfig().get(application).get("statusUri"));
 					unpopulatedNodeStatus.setInfoUrl(url + settings.getApplicationConfig().get(application).get("infoUri"));
+					unpopulatedNodeStatus.setIdentifier(url.replace("http://", ""));
 					nodeStatusList.add(unpopulatedNodeStatus);
 					return unpopulatedNodeStatus;
 				})
@@ -141,12 +142,18 @@ public class DashboardDataDao {
 					aggregatedNodeStatus.incrementNodeCount();
 
 				for(DependencyStatus dependencyStatus : nodeStatus.getDependencyStatus()) {
-					if(dependencyStatus.getStatus().equals("DOWN"))
+					if(dependencyStatus.getStatus().equals("DOWN")) {
 						aggregatedNodeStatus.addToUnhealthyDependencies(dependencyStatus);
+						nodeStatus.addToDownDependencies(dependencyStatus);
+					}
 				}
+
+				aggregatedNodeStatus.addToNodesForVersion(nodeStatus);
 			} else {
-				if(!nodeStatus.isUp())
+				if(!nodeStatus.isUp()) {
 					environmentStatus.incrementNodesDown();
+					environmentStatus.addToUnhealthyNodes(nodeStatus);
+				}
 			}
 		}
 
