@@ -27,10 +27,27 @@ public class AggregatedNodeStatus {
     }
 
     public void addToNodesForVersion(NodeStatus nodeStatus) {
-        nodesForVersion.add(nodeStatus);
+        addToListInOrder(nodesForVersion, nodeStatus);
     }
 
     public List<NodeStatus> getNodesForVersion() {
         return nodesForVersion;
+    }
+
+    private List<NodeStatus> addToListInOrder(List<NodeStatus> list, NodeStatus nodeStatus) {
+        //TODO make this less ugly
+        if(list.isEmpty())
+            list.add(nodeStatus);
+        else {
+            int initialSize = list.size();
+            for(int i = 0; i < initialSize; i++) {
+                if(nodeStatus.getUrl().compareTo(list.get(i).getUrl()) < 0) {
+                    list.add(i, nodeStatus);
+                    return list;
+                }
+            }
+            list.add(initialSize, nodeStatus);
+        }
+        return list;
     }
 }

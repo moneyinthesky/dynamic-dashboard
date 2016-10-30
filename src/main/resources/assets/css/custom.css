@@ -231,10 +231,10 @@ li.placeholder:before {
     padding-right: 2px;
 }
 .app-env-status-deps {
-    border: 2px solid;
-    border-color: #E57373;
+    border: 1px solid;
+    border-color: #FFA726;
     border-radius: .5rem;
-    background-color: #FFB74D;
+    background-color: #FFCC80;
     font-size: medium;
 	margin-left: 5px;
 	margin-right: 5px;
@@ -252,6 +252,9 @@ li.placeholder:before {
     padding-left: 10px;
     border-radius: .25rem;
     color: white;
+}
+.app-env-status-td {
+	cursor: pointer;
 }
 .status-summary {
 	max-width: 1000px;

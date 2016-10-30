@@ -25,7 +25,7 @@ class ApplicationEnvironmentStatus extends React.Component {
 
             var modalId = (this.props.dataCenterName + this.props.applicationName + this.props.applicationEnvironmentStatus.name).replace(/\s+/g, '-').toLowerCase();
             return (
-                <td data-toggle="modal" data-target={"#" + modalId}>
+                <td className="app-env-status-td" data-toggle="modal" data-target={"#" + modalId}>
                 	<ul className="list-group">
 						{versionStatusList}
 						{optionalDownStatus}

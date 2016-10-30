@@ -13,7 +13,7 @@ class ModalStatus extends React.Component {
                         		var downDependencies = nodeStatus.downDependencies.map((dependency, index) => {
                         			return (
                         				<td className="status-summary-table" key={index}>
-                        					<a href={dependency.url}><div className="down-dependency">{dependency.name}</div></a>
+                        					<div className="down-dependency">{dependency.name}</div>
                         				</td>
                         			);
                         		});
