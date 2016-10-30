@@ -213,19 +213,29 @@ li.placeholder:before {
   color: #9E9E9E;
 }
 .app-env-status {
-	padding: .1rem;
-	border: 0px;
-	color: white;
+    padding: .1rem;
+    border: 0px;
+    color: white;
+    font-size: larger;
+    margin: 2px;
 }
-
 .status-down {
     background-color: #F44336;
 }
-
 .status-up {
     background-color: #4CAF50;
 }
-
+.app-env-status-container {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+.app-env-status-deps {
+    border: 2px solid;
+    border-color: #F44336;
+    border-radius: .5rem;
+    background-color: #388E3C;
+    font-size: medium;
+}
 .node-discovery-label {
 	padding-right: 5px;
 }

@@ -87,6 +87,7 @@ class Parent extends React.Component {
 					{dataCenterDashboard}
                     <div id="footer-bar"><FooterBar data={this.state.data} /></div>
                     <ModalSettings settings={this.state.settings} onSave={this.handleSaveSettings} />
+                    <ModalStatus data={this.state.data} />
                 </div>
             );
         };

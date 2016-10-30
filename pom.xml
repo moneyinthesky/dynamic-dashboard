@@ -206,6 +206,7 @@
                                 <jsSourceFile>dashboards/DataCenterDashboard.js</jsSourceFile>
                                 <jsSourceFile>dashboards/ApplicationStatus.js</jsSourceFile>
                                 <jsSourceFile>dashboards/ApplicationEnvironmentStatus.js</jsSourceFile>
+                                <jsSourceFile>dashboards/ModalStatus.js</jsSourceFile>
                                 <jsSourceFile>layout/FooterBar.js</jsSourceFile>
                                 <jsSourceFile>layout/TitleBar.js</jsSourceFile>
                                 <jsSourceFile>settings/ModalSettings.js</jsSourceFile>

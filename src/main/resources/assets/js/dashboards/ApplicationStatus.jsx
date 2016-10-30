@@ -5,7 +5,10 @@ class ApplicationStatus extends React.Component {
 
         this.render = () => {
             var applicationEnvironmentStatusCells = this.props.environmentList.map((environment, index) => (
-            	<ApplicationEnvironmentStatus key={index} applicationEnvironmentStatus={this.props.applicationStatus.environmentStatusMap[environment]} />
+            	<ApplicationEnvironmentStatus key={index}
+            	    applicationEnvironmentStatus={this.props.applicationStatus.environmentStatusMap[environment]}
+            	    applicationName={this.props.applicationStatus.name}
+            	    dataCenterName={this.props.dataCenterName} />
             ));
 
             return (

@@ -8,7 +8,7 @@ class DataCenterDashboard extends React.Component {
                 <th key={environment}><h4>{environment}</h4></th>
             ));
             var applicationStatusRows = this.props.dataCenter.applications.map((applicationObject, index) => (
-                <ApplicationStatus key={index} applicationStatus={applicationObject} environmentList={this.props.dataCenter.environments} />
+                <ApplicationStatus key={index} applicationStatus={applicationObject} environmentList={this.props.dataCenter.environments} dataCenterName={this.props.dataCenter.name} />
             ));
 
             return (
