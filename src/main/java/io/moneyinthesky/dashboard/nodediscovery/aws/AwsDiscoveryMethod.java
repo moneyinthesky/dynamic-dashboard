@@ -4,6 +4,7 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.route53.model.ResourceRecordSet;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
@@ -12,6 +13,7 @@ import io.moneyinthesky.dashboard.data.settings.Settings;
 import io.moneyinthesky.dashboard.nodediscovery.NodeDiscoveryMethod;
 import org.slf4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -28,15 +30,21 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class AwsDiscoveryMethod implements NodeDiscoveryMethod {
 
 	private static final Logger logger = getLogger(AwsDiscoveryMethod.class);
+	private static final String PERSISTED_AWS_RESPONSE_JSON = "persisted/aws-response.json";
+
 	private SettingsDao settingsDao;
+	private ObjectMapper objectMapper;
 	private Cache<String, List<String>> cache;
 
 	@Inject
-	public AwsDiscoveryMethod(SettingsDao settingsDao) {
+	public AwsDiscoveryMethod(SettingsDao settingsDao, ObjectMapper objectMapper) {
 		this.settingsDao = settingsDao;
+		this.objectMapper = objectMapper;
 		this.cache = CacheBuilder.newBuilder()
 				.expireAfterWrite(10, MINUTES)
 				.build();
+
+		initializeCache();
 	}
 
 	@Override
@@ -66,8 +74,11 @@ public class AwsDiscoveryMethod implements NodeDiscoveryMethod {
 
 		List<String> nodeUrls = cache.getIfPresent(key);
 		if(nodeUrls == null) {
-			cache.put(key, getNodeUrls(credentials, region, configuration,
-					hostedZoneName, appPrefix, loadBalancer));
+			nodeUrls = getNodeUrls(credentials, region, configuration,
+					hostedZoneName, appPrefix, loadBalancer);
+			cache.put(key, nodeUrls);
+
+			persistCache();
 		}
 
 		return nodeUrls;
@@ -100,11 +111,28 @@ public class AwsDiscoveryMethod implements NodeDiscoveryMethod {
 				.collect(toList());
 	}
 
+	private AWSCredentials getCredentials(String accessKey, String secretKey) {
+		return new BasicAWSCredentials(accessKey, secretKey);
+	}
+
 	private String generateKey(String... keyElements) {
 		return asList(keyElements).stream().collect(joining("/"));
 	}
 
-	private AWSCredentials getCredentials(String accessKey, String secretKey) {
-		return new BasicAWSCredentials(accessKey, secretKey);
+	private void initializeCache() {
+		try {
+			Map<String, List<String>> persistedAwsResponses = objectMapper.readValue(new File(PERSISTED_AWS_RESPONSE_JSON), Map.class);
+			cache.putAll(persistedAwsResponses);
+		} catch (IOException e) {
+			logger.warn("Unable to read persisted AWS responses", e);
+		}
+	}
+
+	private void persistCache() {
+		try {
+			objectMapper.writeValue(new File(PERSISTED_AWS_RESPONSE_JSON), cache.asMap());
+		} catch (IOException e) {
+			logger.error("Unable to persist AWS response to file", e);
+		}
 	}
 }
