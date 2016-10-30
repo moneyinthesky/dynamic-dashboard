@@ -217,8 +217,9 @@ li.placeholder:before {
     padding: .1rem;
     border: 0px;
     color: #424242;
-    font-size: larger;
+    font-size: x-large;
     margin: 2px;
+    margin-bottom: 5px;
 }
 .status-down {
     background-color: #E57373;
@@ -238,6 +239,7 @@ li.placeholder:before {
     font-size: medium;
 	margin-left: 5px;
 	margin-right: 5px;
+	margin-bottom: 5px;
 }
 .node-discovery-label {
 	padding-right: 5px;
