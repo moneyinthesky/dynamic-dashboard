@@ -259,7 +259,7 @@ li.placeholder:before {
 	cursor: pointer;
 }
 .status-summary {
-	max-width: 1000px;
+	max-width: 800px;
 }
 .status-summary-table {
 	border: 0px !important;
@@ -274,4 +274,5 @@ li.placeholder:before {
 }
 .status-summary-link {
 	margin-right: 20px;
+	margin-left: 20px;
 }
