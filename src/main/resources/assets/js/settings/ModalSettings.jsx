@@ -395,7 +395,7 @@ class ModalSettings extends React.Component {
         	    var dataCenter = dataCenterObject.name;
         	    return (
                     <li key={index} className="nav-item">
-                      <a className={"nav-link" + (index===0 ? " active" : "")} data-toggle="tab" href={"#" + dataCenter.replace(/\s+/g, '-').toLowerCase() + "-environment-config"} role="tab">{dataCenter}</a>
+                      <a className={"nav-link left-nav" + (index===0 ? " active" : "")} data-toggle="tab" href={"#" + dataCenter.replace(/\s+/g, '-').toLowerCase() + "-environment-config"} role="tab">{dataCenter}</a>
                     </li>
         	    );
         	});
@@ -430,7 +430,7 @@ class ModalSettings extends React.Component {
         	var applicationConfigurationTabs = this.state.settings.applications.map((application, index) => {
         	    return (
                     <li key={index} className="nav-item">
-                        <a className={"nav-link" + ((index===0) ? " active" : "")} data-toggle="tab" href={"#" + application + "-application-configuration"} role="tab">{application}</a>
+                        <a className={"nav-link left-nav" + ((index===0) ? " active" : "")} data-toggle="tab" href={"#" + application + "-application-configuration"} role="tab">{application}</a>
                     </li>
                 );
         	});
@@ -465,7 +465,7 @@ class ModalSettings extends React.Component {
 				return (
 					<li key={index} className="nav-item">
 						{nodeDiscoveryTagSpan}
-						<a className={"nav-link" + ((index===0) ? " active" : "")} data-toggle="tab" href={"#" + dataCenterEnvironment.replace('/','').replace(/\s+/g, '-').toLowerCase() + "-node-discovery"} role="tab">{dataCenterEnvironment}</a>
+						<a className={"nav-link left-nav" + ((index===0) ? " active" : "")} data-toggle="tab" href={"#" + dataCenterEnvironment.replace('/','').replace(/\s+/g, '-').toLowerCase() + "-node-discovery"} role="tab">{dataCenterEnvironment}</a>
 					</li>
 				);
         	});
@@ -477,12 +477,17 @@ class ModalSettings extends React.Component {
         			this.state.settings.applications.map((application, index) => {
         				var currentUrlPattern = this.getApplicationConfig(dataCenter, environment, application, "urlPattern");
         				return (
-	        				<div key={index} className="form-group row">
-								<label>{application}</label>
-                                <div className="input-group">
-                                    <span className="input-group-addon" id="basic-addon1">URL Pattern: </span>
-                                    <input value={currentUrlPattern} data-field="urlPattern" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add a URL pattern" />
-                                </div>
+        					<div key={index} >
+								<div className="row">
+									<label className="col-xs-12 col-form-label node-discovery-heading">{application}</label>
+								</div>
+								<div className="row">
+									<label className="col-xs-3 col-form-label node-discovery-label">URL Pattern</label>
+									<div className="col-xs-9 node-discovery-input">
+										<input value={currentUrlPattern} data-field="urlPattern" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add a URL pattern" />
+									</div>
+								</div>
+								<hr/>
 							</div>
         				);
         			})
@@ -494,25 +499,36 @@ class ModalSettings extends React.Component {
         		        var dataCenterId = this.getApplicationConfig(dataCenter, environment, application, "dataCenterId");
         		        var roleId = this.getApplicationConfig(dataCenter, environment, application, "roleId");
                         return (
-                            <div key={index} className="form-group row">
-                                <label>{application}</label>
-                                <div className="input-group">
-                                    <span className="input-group-addon" id="basic-addon1">Application ID: </span>
-                                    <input value={appId} data-field="appId" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Application ID" />
-                                </div>
-                                <div className="input-group">
-                                    <span className="input-group-addon" id="basic-addon1">Environment ID: </span>
-                                    <input value={envId} data-field="envId" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Environment ID" />
-                                </div>
-                                <div className="input-group">
-									<span className="input-group-addon" id="basic-addon1">Data Center ID: </span>
-									<input value={dataCenterId} data-field="dataCenterId" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Data Center ID" />
+        					<div key={index} >
+								<div className="row">
+									<label className="col-xs-12 col-form-label node-discovery-heading">{application}</label>
 								</div>
-                                <div className="input-group">
-                                    <span className="input-group-addon" id="basic-addon1">Role ID: </span>
-                                    <input value={roleId} data-field="roleId" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Role ID" />
-                                </div>
-                            </div>
+								<div className="row">
+									<label className="col-xs-3 col-form-label node-discovery-label">Application ID</label>
+									<div className="col-xs-9 node-discovery-input">
+										<input value={appId} data-field="appId" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Application ID" />
+									</div>
+								</div>
+								<div className="row">
+									<label className="col-xs-3 col-form-label node-discovery-label">Environment ID</label>
+									<div className="col-xs-9 node-discovery-input">
+										<input value={envId} data-field="envId" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Environment ID" />
+									</div>
+								</div>
+								<div className="row">
+									<label className="col-xs-3 col-form-label node-discovery-label">Data Center ID</label>
+									<div className="col-xs-9 node-discovery-input">
+										<input value={dataCenterId} data-field="dataCenterId" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Data Center ID" />
+									</div>
+								</div>
+								<div className="row">
+									<label className="col-xs-3 col-form-label node-discovery-label">Role ID</label>
+									<div className="col-xs-9 node-discovery-input">
+										<input value={roleId} data-field="roleId" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Role ID" />
+									</div>
+								</div>
+								<hr/>
+							</div>
                         );
                     })
         		) : (this.getDiscoveryMethodForDataCenterEnvironment(dataCenterEnvironment)==="aws" ? (
@@ -521,21 +537,30 @@ class ModalSettings extends React.Component {
         		        var loadBalancer = this.getApplicationConfig(dataCenter, environment, application, "loadBalancer");
         		        var appPrefix = this.getApplicationConfig(dataCenter, environment, application, "appPrefix");
                         return (
-                            <div key={index} className="form-group row">
-                                <label>{application}</label>
-                                <div className="input-group">
-                                    <span className="input-group-addon" id="basic-addon1">Hosted Zone: </span>
-                                    <input value={hostedZone} data-field="hostedZone" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Hosted Zone" />
-                                </div>
-                                <div className="input-group">
-                                    <span className="input-group-addon" id="basic-addon1">Load Balancer: </span>
-                                    <input value={loadBalancer} data-field="loadBalancer" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Load Balancer" />
-                                </div>
-                                <div className="input-group">
-									<span className="input-group-addon" id="basic-addon1">App Prefix: </span>
-									<input value={appPrefix} data-field="appPrefix" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add App Prefix" />
+        					<div key={index} >
+								<div className="row">
+									<label className="col-xs-12 col-form-label node-discovery-heading">{application}</label>
 								</div>
-                            </div>
+								<div className="row">
+									<label className="col-xs-3 col-form-label node-discovery-label">Hosted Zone</label>
+									<div className="col-xs-9 node-discovery-input">
+										<input value={hostedZone} data-field="hostedZone" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Hosted Zone" />
+									</div>
+								</div>
+								<div className="row">
+									<label className="col-xs-3 col-form-label node-discovery-label">Load Balancer</label>
+									<div className="col-xs-9 node-discovery-input">
+										<input value={loadBalancer} data-field="loadBalancer" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add Load Balancer" />
+									</div>
+								</div>
+								<div className="row">
+									<label className="col-xs-3 col-form-label node-discovery-label">App Prefix</label>
+									<div className="col-xs-9 node-discovery-input">
+										<input value={appPrefix} data-field="appPrefix" data-datacenter={dataCenter} data-environment={environment} data-application={application} className="form-control" type="text" onChange={this.handleApplicationConfigChange} placeholder="Add App Prefix" />
+									</div>
+								</div>
+								<hr/>
+							</div>
                         );
                     })
         		) : ""));
@@ -598,7 +623,6 @@ class ModalSettings extends React.Component {
                               <div className="panel panel-default">
                                 <div className="configuration-heading panel-heading" role="tab" id="headingOne" data-parent="#accordion" data-toggle="collapse" data-target="#collapseOne">
                                   <div className="panel-title-config panel-title">
-                                      <span className="mega-octicon octicon-primitive-dot"> </span>
                                       Applications
                                   </div>
                                 </div>
@@ -625,7 +649,6 @@ class ModalSettings extends React.Component {
                               <div className="panel panel-default">
                                 <div className="configuration-heading panel-heading" role="tab" id="headingTwo" data-parent="#accordion" data-toggle="collapse" data-target="#collapseTwo">
                                   <div className="panel-title-config panel-title">
-                                      <span className="mega-octicon octicon-primitive-dot"> </span>
                                       Data Centers
                                   </div>
                                 </div>
@@ -652,7 +675,6 @@ class ModalSettings extends React.Component {
                               <div className="panel panel-default">
                                 <div className="configuration-heading panel-heading" role="tab" id="headingThree" data-parent="#accordion" data-toggle="collapse" data-target="#collapseThree">
                                   <div className="panel-title-config panel-title">
-                                      <span className="mega-octicon octicon-primitive-dot"> </span>
                                       Environments
                                   </div>
                                 </div>
@@ -713,10 +735,10 @@ class ModalSettings extends React.Component {
                                 	<div className="col-xs-4">
                                     	<ul className="nav nav-pills nav-stacked" role="tablist">
 											<li key="fleet" className="nav-item">
-												<a className="nav-link active" data-toggle="tab" href="#fleetPlugin" role="tab">Fleet</a>
+												<a className="nav-link left-nav active" data-toggle="tab" href="#fleetPlugin" role="tab">Fleet</a>
 											</li>
 											<li key="aws" className="nav-item">
-												<a className="nav-link" data-toggle="tab" href="#awsPlugin" role="tab">AWS</a>
+												<a className="nav-link left-nav" data-toggle="tab" href="#awsPlugin" role="tab">AWS</a>
 											</li>
                                     	</ul>
                                   	</div>
