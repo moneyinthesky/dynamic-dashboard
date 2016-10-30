@@ -19,6 +19,9 @@ body {
 .table th {
    background-color: #616161;
 }
+.table td {
+   padding: 2px;
+}
 .loading-gif {
 	margin-top: 50px;
 }
@@ -210,9 +213,17 @@ li.placeholder:before {
   color: #9E9E9E;
 }
 .app-env-status {
-	padding: .25rem;
-	background-color: initial;
-	border-color: #80CBC4;
+	padding: .1rem;
+	border: 0px;
+	color: white;
+}
+
+.status-down {
+    background-color: #F44336;
+}
+
+.status-up {
+    background-color: #4CAF50;
 }
 
 .node-discovery-label {
