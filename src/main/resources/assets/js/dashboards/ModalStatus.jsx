@@ -46,7 +46,7 @@ class ModalStatus extends React.Component {
                         var unhealthyNodes = environmentObject.unhealthyNodes.map((nodeStatus, index) => {
                         	return (
                         		<li key={index} className="list-group-item">
-									<a href={nodeStatus.infoUrl} target="_blank">{nodeStatus.identifier}</a>
+									<a className="status-summary-link" href={nodeStatus.infoUrl} target="_blank">{nodeStatus.identifier}</a>
 								</li>
                         	);
                         });
@@ -63,7 +63,7 @@ class ModalStatus extends React.Component {
                         return (
                             <div key={environmentName} className="modal fade" id={modalId} tabIndex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                                 <div className="modal-dialog status-summary" role="document">
-                                    <div className="modal-content">
+                                    <div className="modal-status-content modal-content">
                                       <div className="modal-header">
                                         <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                                           <span aria-hidden="true">&times;</span>
