@@ -210,7 +210,9 @@ a:visited {
   background: linear-gradient(to bottom right, #212121, #757575);
 }
 #settings-button {
-  background-color: #212121; color: #80CBC4;
+  background: #212121;
+  background: linear-gradient(to bottom right, #616161, #212121);
+  color: #80CBC4;
   padding: 0;
   border-radius: 1rem;
 }
