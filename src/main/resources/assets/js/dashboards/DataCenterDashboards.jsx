@@ -12,8 +12,14 @@ class DataCenterDashboards extends React.Component {
                 );
             });
 
+            var dataCenterInitializationMessage = (this.props.data.dataCenters.length === 0) ? (
+                <div className="setup-alert alert alert-info" role="alert">
+                  Add <strong>data centers</strong> in settings
+                </div>
+            ) : "";
+
             return (
-                <div className="tab-content">{dataCenterDashboards}</div>
+                <div className="tab-content">{dataCenterDashboards}{dataCenterInitializationMessage}</div>
             );
         };
     }

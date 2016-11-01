@@ -621,38 +621,12 @@ class ModalSettings extends React.Component {
                         <div style={(this.state.activeTab == "basicConfiguration" ? {display: 'inline'} : {display: 'none'})}>
                             <div id="accordion" role="tablist" aria-multiselectable="true">
                               <div className="panel panel-default">
-                                <div className="configuration-heading panel-heading" role="tab" id="headingOne" data-parent="#accordion" data-toggle="collapse" data-target="#collapseOne">
-                                  <div className="panel-title-config panel-title">
-                                      Applications
-                                  </div>
-                                </div>
-                                <div id="collapseOne" className="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
-                                    <div className="container-fluid">
-                                    <div className="row">
-                                    <div className="col-xs-8">
-                                    <ul className="list-group" onDragOver={this.dragOver}>
-                                      <li className="list-group-item list-group-item-action list-group-item-info heading-bar clearfix" data-id="title"></li>
-                                      {applicationRows}
-                                    </ul>
-                                    <div className={"application-input input-group" + (this.state.applicationWarning ? " has-warning" : "")}>
-                                      <input value={this.state.applicationToAdd} className={"form-control" + (this.state.applicationWarning ? " form-control-warning" : "")} type="text" onChange={this.handleApplicationToAddChange} placeholder="Add an application" />
-                                      <span className="input-group-btn">
-                                        <button type="button" className="btn btn-success mega-octicon octicon-plus" onClick={this.addApplication}></button>
-                                      </span>
-                                    </div>
-                                    {applicationWarning}
-                                    </div>
-                                    </div>
-                                    </div>
-                                </div>
-                              </div>
-                              <div className="panel panel-default">
                                 <div className="configuration-heading panel-heading" role="tab" id="headingTwo" data-parent="#accordion" data-toggle="collapse" data-target="#collapseTwo">
                                   <div className="panel-title-config panel-title">
                                       Data Centers
                                   </div>
                                 </div>
-                                <div id="collapseTwo" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                                <div id="collapseTwo" className="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingTwo">
                                   <div className="container-fluid">
                                   <div className="row">
                                   <div className="col-xs-8">
@@ -670,6 +644,32 @@ class ModalSettings extends React.Component {
                                   </div>
                                   </div>
                                   </div>
+                                </div>
+                              </div>
+                              <div className="panel panel-default">
+                                <div className="configuration-heading panel-heading" role="tab" id="headingOne" data-parent="#accordion" data-toggle="collapse" data-target="#collapseOne">
+                                  <div className="panel-title-config panel-title">
+                                      Applications
+                                  </div>
+                                </div>
+                                <div id="collapseOne" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                                    <div className="container-fluid">
+                                    <div className="row">
+                                    <div className="col-xs-8">
+                                    <ul className="list-group" onDragOver={this.dragOver}>
+                                      <li className="list-group-item list-group-item-action list-group-item-info heading-bar clearfix" data-id="title"></li>
+                                      {applicationRows}
+                                    </ul>
+                                    <div className={"application-input input-group" + (this.state.applicationWarning ? " has-warning" : "")}>
+                                      <input value={this.state.applicationToAdd} className={"form-control" + (this.state.applicationWarning ? " form-control-warning" : "")} type="text" onChange={this.handleApplicationToAddChange} placeholder="Add an application" />
+                                      <span className="input-group-btn">
+                                        <button type="button" className="btn btn-success mega-octicon octicon-plus" onClick={this.addApplication}></button>
+                                      </span>
+                                    </div>
+                                    {applicationWarning}
+                                    </div>
+                                    </div>
+                                    </div>
                                 </div>
                               </div>
                               <div className="panel panel-default">

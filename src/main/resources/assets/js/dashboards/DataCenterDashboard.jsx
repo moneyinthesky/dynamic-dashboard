@@ -11,18 +11,33 @@ class DataCenterDashboard extends React.Component {
                 <ApplicationStatus key={index} applicationStatus={applicationObject} environmentList={this.props.dataCenter.environments} dataCenterName={this.props.dataCenter.name} />
             ));
 
+            var applicationsInitializationMessage = this.props.dataCenter.applications.length === 0 ? (
+                <div className="setup-alert alert alert-info" role="alert">
+                  Add <strong>applications</strong> in settings
+                </div>
+            ) : "";
+
+            var environmentsInitializationMessage = this.props.dataCenter.environments.length === 0 ? (
+                <div className="setup-alert alert alert-info" role="alert">
+                  Add <strong>environments</strong> in settings
+                </div>
+            ) : "";
             return (
-                <table className="table table-bordered">
-                    <thead>
-                        <tr className="table-active">
-                            <th></th>
-                            {environmentHeaders}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {applicationStatusRows}
-                    </tbody>
-                </table>
+                <div>
+                    <table className="table table-bordered">
+                        <thead>
+                            <tr className="table-active">
+                                <th></th>
+                                {environmentHeaders}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {applicationStatusRows}
+                        </tbody>
+                    </table>
+                    {environmentsInitializationMessage}
+                    {applicationsInitializationMessage}
+                </div>
             );
         };
     }

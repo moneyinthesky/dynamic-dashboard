@@ -7,9 +7,10 @@ import io.moneyinthesky.dashboard.data.settings.DataCenter;
 import io.moneyinthesky.dashboard.data.settings.Environment;
 import io.moneyinthesky.dashboard.data.settings.Settings;
 import io.moneyinthesky.dashboard.nodediscovery.NodeDiscoveryMethod;
-import io.moneyinthesky.dashboard.nodediscovery.urlpattern.UrlPatternDiscoveryMethod;
 import io.moneyinthesky.dashboard.nodediscovery.aws.AwsDiscoveryMethod;
 import io.moneyinthesky.dashboard.nodediscovery.fleet.FleetDiscoveryMethod;
+import io.moneyinthesky.dashboard.nodediscovery.urlpattern.UrlPatternDiscoveryMethod;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.time.ZoneId;
@@ -25,6 +26,7 @@ import static java.time.format.DateTimeFormatter.ofLocalizedDateTime;
 import static java.time.format.FormatStyle.LONG;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class DashboardDataDao {
 
@@ -55,15 +57,17 @@ public class DashboardDataDao {
 		settings = settingsDao.readSettings();
 		nodeStatusList = new ArrayList<>();
 
-		List<DataCenterStatus> dataCenters = settings.getDataCenters()
-				.stream()
-				.map(dataCenter -> generateDataCenterStatus(dataCenter, settings))
-				.collect(toList());
-		data.setDataCenters(dataCenters);
-		nodeStatusRetrieval.populateNodeStatus(nodeStatusList);
+		if(settings.getDataCenters() != null) {
+			List<DataCenterStatus> dataCenters = settings.getDataCenters()
+					.stream()
+					.map(dataCenter -> generateDataCenterStatus(dataCenter, settings))
+					.collect(toList());
+			data.setDataCenters(dataCenters);
+			nodeStatusRetrieval.populateNodeStatus(nodeStatusList);
 
-		aggregateNodeData(data);
-		data.setTimeGenerated(getTimestamp());
+			aggregateNodeData(data);
+			data.setTimeGenerated(getTimestamp());
+		}
 		return data;
 	}
 
@@ -96,25 +100,28 @@ public class DashboardDataDao {
 
 	private EnvironmentStatus generateEnvironmentStatusForApplication(Environment environment, String application) {
 		EnvironmentStatus environmentStatus = new EnvironmentStatus();
-
-		NodeDiscoveryMethod discoveryMethod = discoveryMethodMap.get(environment.getNodeDiscoveryMethod());
-
-		Map<String, String> applicationConfig = environment.getApplicationConfig().get(application);
-		List<String> urls = applicationConfig != null ? discoveryMethod.generateNodeUrls(applicationConfig) : newArrayList();
-
 		environmentStatus.setName(environment.getName());
-		environmentStatus.setNodeStatusList(urls
-				.stream()
-				.map(url -> {
-					NodeStatus unpopulatedNodeStatus = new NodeStatus();
-					unpopulatedNodeStatus.setUrl(url);
-					unpopulatedNodeStatus.setStatusUrl(url + settings.getApplicationConfig().get(application).get("statusUri"));
-					unpopulatedNodeStatus.setInfoUrl(url + settings.getApplicationConfig().get(application).get("infoUri"));
-					unpopulatedNodeStatus.setIdentifier(url.replace("http://", ""));
-					nodeStatusList.add(unpopulatedNodeStatus);
-					return unpopulatedNodeStatus;
-				})
-				.collect(toList()));
+
+		if(environment.getNodeDiscoveryMethod() != null && environment.getApplicationConfig() != null ) {
+			NodeDiscoveryMethod discoveryMethod = discoveryMethodMap.get(environment.getNodeDiscoveryMethod());
+
+			Map<String, String> applicationConfig = environment.getApplicationConfig().get(application);
+			List<String> urls = applicationConfig != null ? discoveryMethod.generateNodeUrls(applicationConfig) : newArrayList();
+
+			environmentStatus.setNodeStatusList(urls
+					.stream()
+					.map(url -> {
+						NodeStatus unpopulatedNodeStatus = new NodeStatus();
+						unpopulatedNodeStatus.setUrl(url);
+						unpopulatedNodeStatus.setStatusUrl(url + settings.getApplicationConfig().get(application).get("statusUri"));
+						unpopulatedNodeStatus.setInfoUrl(url + settings.getApplicationConfig().get(application).get("infoUri"));
+						unpopulatedNodeStatus.setIdentifier(url.replace("http://", ""));
+						nodeStatusList.add(unpopulatedNodeStatus);
+						return unpopulatedNodeStatus;
+					})
+					.collect(toList()));
+		}
+
 		return environmentStatus;
 	}
 

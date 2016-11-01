@@ -33,6 +33,20 @@ class Parent extends React.Component {
             });
         };
 
+        this.forceLoadData = () => {
+            $.ajax({
+                url: this.props.forceUrl,
+                dataType: 'json',
+                cache: false,
+                success: function(data) {
+                    this.setState({data: data});
+                }.bind(this),
+                error: function(xhr, status, err) {
+                    console.error(this.props.forceUrl, status, err.toString());
+                }.bind(this)
+            });
+        };
+
         this.loadSettings = () => {
             $.ajax({
                 url: this.props.settingsUrl,
@@ -62,6 +76,9 @@ class Parent extends React.Component {
                 dataType: 'json',
                 type: 'POST',
                 data: JSON.stringify(newSettings),
+                success: function() {
+                    this.forceLoadData();
+                }.bind(this),
                 error: function(xhr, status, err) {
                     console.error(this.props.settingsUrl, status, err.toString());
                 }.bind(this)
@@ -94,7 +111,7 @@ class Parent extends React.Component {
     }
 }
 
-ReactDOM.render(<Parent url="/api/data" settingsUrl="/api/settings" pollInterval={10000} />, document.getElementById('parent'));
+ReactDOM.render(<Parent url="/api/data" forceUrl="/api/data/force" settingsUrl="/api/settings" pollInterval={10000} />, document.getElementById('parent'));
 
 $(document).ready(function(){
     $('[data-toggle="tooltip"]').tooltip();

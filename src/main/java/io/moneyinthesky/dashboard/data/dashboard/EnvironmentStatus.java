@@ -1,5 +1,6 @@
 package io.moneyinthesky.dashboard.data.dashboard;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -7,8 +8,8 @@ import static com.google.common.collect.Lists.newArrayList;
 
 public class EnvironmentStatus {
 	private String name;
-	private List<NodeStatus> nodeStatusList;
-	private Map<String, AggregatedNodeStatus> versionToNodeStatusMap;
+	private List<NodeStatus> nodeStatusList = newArrayList();
+	private Map<String, AggregatedNodeStatus> versionToNodeStatusMap = new HashMap<>();
 	private List<NodeStatus> unhealthyNodes = newArrayList();
 	private Integer nodesDown = 0;
 

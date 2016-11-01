@@ -124,7 +124,7 @@ public class AwsDiscoveryMethod implements NodeDiscoveryMethod {
 			Map<String, List<String>> persistedAwsResponses = objectMapper.readValue(new File(PERSISTED_AWS_RESPONSE_JSON), Map.class);
 			cache.putAll(persistedAwsResponses);
 		} catch (IOException e) {
-			logger.warn("Unable to read persisted AWS responses", e);
+			logger.warn("Unable to read persisted AWS responses");
 		}
 	}
 

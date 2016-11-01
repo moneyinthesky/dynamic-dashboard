@@ -40,4 +40,11 @@ public class DashboardResource {
 
         return objectMapper.writeValueAsString(dashboardData);
     }
+
+    @GET
+	@Path("/force")
+	public String forceDataRefresh() throws Exception {
+		dashboardDataService.forceDataRefresh();
+		return getData();
+	}
 }

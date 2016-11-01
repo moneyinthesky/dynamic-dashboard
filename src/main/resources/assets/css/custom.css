@@ -324,3 +324,12 @@ li.placeholder:before {
     background: #FFCDD2;
     background: linear-gradient(to bottom right, #FFCDD2, #EF9A9A);
 }
+
+.setup-alert {
+    border-color: #00796B;
+    color: #00796B;
+    border: 2px solid;
+    background: #80CBC4;
+    background: linear-gradient(to bottom right, #80CBC4, #B2DFDB);
+    margin-top: 25px;
+}

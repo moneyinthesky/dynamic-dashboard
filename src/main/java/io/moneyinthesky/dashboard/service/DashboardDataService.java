@@ -31,11 +31,20 @@ public class DashboardDataService extends AbstractScheduledService {
 		return cachedDashboardData;
 	}
 
+	public void forceDataRefresh() throws Exception {
+		runOneIteration();
+	}
+
 	@Override
 	protected void runOneIteration() throws Exception {
 		logger.info("Populating dashboard...");
 		long start = currentTimeMillis();
-		cachedDashboardData = dashboardDataDao.populateDashboardData();
+		try {
+			cachedDashboardData = dashboardDataDao.populateDashboardData();
+		} catch(Exception e) {
+			logger.error("Caught exception from dashboardDataDao", e);
+			throw e;
+		}
 		logger.info("Time to populate dashboard: " + (currentTimeMillis() - start) / 1000d);
 	}
 
