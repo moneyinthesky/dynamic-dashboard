@@ -4,7 +4,7 @@ class ModalStatus extends React.Component {
         super(props);
 
         this.render = () => {
-            var dataCenters = this.props.data.dataCenters.map((dataCenterObject, index) => {
+            var dataCenters = this.props.data ? (this.props.data.dataCenters.map((dataCenterObject, index) => {
                 var applications = dataCenterObject.applications.map((applicationObject, index) => {
                     var environments = $.map(applicationObject.environmentStatusMap, (environmentObject, environmentName) => {
                         var modalId = (dataCenterObject.name + applicationObject.name + environmentName).replace(/\s+/g, '-').toLowerCase();
@@ -87,7 +87,7 @@ class ModalStatus extends React.Component {
                     return <div key={index}>{environments}</div>;
                 });
                 return <div key={index}>{applications}</div>;
-            });
+            })) : "";
             return (
                 <div>{dataCenters}</div>
             );

@@ -17,7 +17,13 @@ class Parent extends React.Component {
 
         super(props);
 
-        this.state = {data: { dataCenters: []}, settings: {}};
+        this.state = {
+            data: {
+                dataCenters: []
+            },
+            settings: {},
+            rotating: false
+        };
 
         this.loadData = () => {
             $.ajax({
@@ -85,10 +91,14 @@ class Parent extends React.Component {
             });
         };
 
+        this.handleRotateClick = (rotating) => {
+            this.setState({rotating: rotating});
+        };
+
         this.render = () => {
         	var dataCenterDashboard = (this.state.data) ? (
         		<div id="data-center-dashboard" className="container-fluid">
-					<div id="data-center-tabs"><DataCenterTabs data={this.state.data} /></div>
+					<div id="data-center-tabs"><DataCenterTabs data={this.state.data} rotating={this.state.rotating} /></div>
 					<div id="data-center-tab-content"><DataCenterDashboards data={this.state.data} /></div>
 				</div>
         	) : (
@@ -99,7 +109,7 @@ class Parent extends React.Component {
             return (
                 <div>
                     <div id="title-bar" className="container-fluid">
-                        <TitleBar title={this.state.settings.title} />
+                        <TitleBar title={this.state.settings.title} onRotateClick={this.handleRotateClick}/>
                     </div>
 					{dataCenterDashboard}
                     <div id="footer-bar"><FooterBar data={this.state.data} /></div>

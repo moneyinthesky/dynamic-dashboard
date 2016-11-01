@@ -333,3 +333,21 @@ li.placeholder:before {
     background: linear-gradient(to bottom right, #80CBC4, #B2DFDB);
     margin-top: 25px;
 }
+.rotate-button {
+    border-radius: 1rem;
+    font-size: 24px;
+    line-height: 20px;
+    padding-left: 8px;
+    padding-right: 8px;
+    margin-right: 5px;
+    background: #212121;
+    background: linear-gradient(to bottom right, #616161, #212121);
+    color: #80CBC4;
+    border: 2px solid;
+}
+.rotate-true {
+    color: #80CBC4;
+}
+.rotate-false {
+    color: grey;
+}
