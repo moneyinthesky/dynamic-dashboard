@@ -36,7 +36,7 @@ public class DashboardDataService extends AbstractScheduledService {
 	}
 
 	@Override
-	protected void runOneIteration() throws Exception {
+	protected synchronized void runOneIteration() throws Exception {
 		logger.info("Populating dashboard...");
 		long start = currentTimeMillis();
 		try {

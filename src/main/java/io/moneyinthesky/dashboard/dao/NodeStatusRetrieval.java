@@ -11,9 +11,11 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static com.mashape.unirest.http.Unirest.get;
 import static java.lang.System.currentTimeMillis;
 import static java.util.stream.Collectors.toList;
@@ -22,6 +24,9 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class NodeStatusRetrieval {
 
     private static final Logger logger = getLogger(NodeStatusRetrieval.class);
+
+    private static final Set IGNORED_DEPENDENCY_KEYS = newHashSet("version", "environment", "buildTimestamp");
+
 
     private ObjectMapper objectMapper;
 
@@ -53,7 +58,7 @@ public class NodeStatusRetrieval {
                                                         nodeStatus.setVersion((String) responseBody.get("version"));
 
                                                         List<DependencyStatus> dependencyStatusList = responseBody.entrySet().stream()
-                                                                .filter(entry -> !(entry.getKey().equals("version") || entry.getKey().equals("environment")))
+                                                                .filter(entry -> !IGNORED_DEPENDENCY_KEYS.contains(entry.getKey()))
                                                                 .map(entry -> {
                                                                     Map<String, Object> dependencyInfo = (Map<String, Object>) entry.getValue();
                                                                     return new DependencyStatus(
@@ -75,18 +80,18 @@ public class NodeStatusRetrieval {
                                                 } else {
                                                     nodeStatus.setVersion("???");
                                                     nodeStatus.setErrorMessage("HTTP status code: " + infoResponse.getStatus() + " from info page");
-                                                    logger.info("Status code: " + infoResponse.getStatus() + " from " + nodeStatus.getInfoUrl());
+                                                    logger.info("Status code: {} from {}", infoResponse.getStatus(), nodeStatus.getInfoUrl());
                                                 }
                                             } else {
                                                 nodeStatus.up(false);
                                                 nodeStatus.setErrorMessage("HTTP Status Code: " + statusResponse.getStatus() + " from status page");
-                                                logger.info("Status Code: " + statusResponse.getStatus() + " from " + nodeStatus.getStatusUrl());
+                                                logger.info("Status Code: {} from {}", statusResponse.getStatus(), nodeStatus.getStatusUrl());
                                             }
 
                                         } catch (UnirestException e) {
                                             nodeStatus.up(false);
                                             nodeStatus.setErrorMessage("Error calling node: " + e.getMessage());
-                                            logger.error("Error calling " + nodeStatus.getUrl(), e);
+                                            logger.error("Error calling {} - {}", nodeStatus.getUrl(), e.getMessage());
                                         }
                                     }
                             )).get();

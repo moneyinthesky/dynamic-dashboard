@@ -239,6 +239,43 @@ class ModalSettings extends React.Component {
             	}));
 
             	if(applicationConfigPresent.indexOf(false) !== -1) return false;
+            } else if(environmentObject.nodeDiscoveryMethod==="aws") {
+            	var applicationConfigPresent = (this.state.settings.applications.map((application) => {
+                    if(!environmentObject.applicationConfig[application]) return false;
+
+                    if((!environmentObject.applicationConfig[application].hostedZone) ||
+                    	(environmentObject.applicationConfig[application].hostedZone === "")) return false;
+
+                    if((!environmentObject.applicationConfig[application].loadBalancer) ||
+                    	(environmentObject.applicationConfig[application].loadBalancer === "")) return false;
+
+                    if((!environmentObject.applicationConfig[application].appPrefix) ||
+                    	(environmentObject.applicationConfig[application].appPrefix === "")) return false;
+
+                    return true;
+            	}));
+
+            	if(applicationConfigPresent.indexOf(false) !== -1) return false;
+            } else if(environmentObject.nodeDiscoveryMethod==="fleet") {
+            	var applicationConfigPresent = (this.state.settings.applications.map((application) => {
+                    if(!environmentObject.applicationConfig[application]) return false;
+
+                    if((!environmentObject.applicationConfig[application].appId) ||
+                    	(environmentObject.applicationConfig[application].appId === "")) return false;
+
+                    if((!environmentObject.applicationConfig[application].envId) ||
+                    	(environmentObject.applicationConfig[application].envId === "")) return false;
+
+                    if((!environmentObject.applicationConfig[application].dataCenterId) ||
+                    	(environmentObject.applicationConfig[application].dataCenterId === "")) return false;
+
+                    if((!environmentObject.applicationConfig[application].roleId) ||
+                    	(environmentObject.applicationConfig[application].roleId === "")) return false;
+
+                    return true;
+            	}));
+
+            	if(applicationConfigPresent.indexOf(false) !== -1) return false;
             } else if(environmentObject.nodeDiscoveryMethod==="") {
             	return false;
             }
