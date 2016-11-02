@@ -17,6 +17,11 @@ class ModalStatus extends React.Component {
                         				</td>
                         			);
                         		});
+                        		var errorMessage = nodeStatus.errorMessage ? (
+                                        <td className="status-summary-table">
+                                            {nodeStatus.errorMessage}
+                                        </td>
+                        		) : "";
                         		return (
                         			<li key={index} className="list-group-item">
                         				<table>
@@ -26,6 +31,7 @@ class ModalStatus extends React.Component {
 														<a className="status-summary-link" href={nodeStatus.infoUrl} target="_blank">{nodeStatus.identifier}</a>
 													</td>
 													{downDependencies}
+													{errorMessage}
 												</tr>
                         					</tbody>
                         				</table>
@@ -46,7 +52,18 @@ class ModalStatus extends React.Component {
                         var unhealthyNodes = environmentObject.unhealthyNodes.map((nodeStatus, index) => {
                         	return (
                         		<li key={index} className="list-group-item">
-									<a className="status-summary-link" href={nodeStatus.infoUrl} target="_blank">{nodeStatus.identifier}</a>
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <td className="status-summary-table">
+                                                    <a className="status-summary-link" href={nodeStatus.infoUrl} target="_blank">{nodeStatus.identifier}</a>
+                                                </td>
+                                                <td className="status-summary-table">
+                                                    {nodeStatus.errorMessage}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
 								</li>
                         	);
                         });

@@ -209,12 +209,15 @@ a:visited {
   background: #424242;
   background: linear-gradient(to bottom right, #212121, #757575);
 }
-#settings-button {
+#settings-button,
+#settings-button:focus,
+#settings-button:active {
   background: #212121;
   background: linear-gradient(to bottom right, #616161, #212121);
   color: #80CBC4;
   padding: 0;
   border-radius: 1rem;
+  outline: none !important;
 }
 #data-center-dashboard {
   padding-top: 10px;
@@ -345,6 +348,11 @@ li.placeholder:before {
     color: #80CBC4;
     border: 2px solid;
 }
+.rotate-button:focus,
+.rotate-button:active {
+    outline: none !important;
+}
+
 .rotate-true {
     color: #80CBC4;
 }

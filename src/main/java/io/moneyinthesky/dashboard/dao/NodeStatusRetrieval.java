@@ -42,11 +42,11 @@ public class NodeStatusRetrieval {
 
                                             HttpResponse<String> statusResponse = get(nodeStatus.getStatusUrl()).asString();
 
-                                            if (statusResponse.getStatus() == 200 && statusResponse.getBody().equals("OK")) {
+                                            if ((statusResponse.getStatus() >= 200 && statusResponse.getStatus() < 300) && statusResponse.getBody().equals("OK")) {
                                                 nodeStatus.up(true);
 
                                                 HttpResponse<String> infoResponse = get(nodeStatus.getInfoUrl()).asString();
-                                                if(infoResponse.getStatus() == 200) {
+                                                if(infoResponse.getStatus() >= 200 && infoResponse.getStatus() < 300) {
                                                     Map<String, Object> responseBody = null;
                                                     try {
                                                         responseBody = objectMapper.readValue(infoResponse.getBody(), Map.class);
@@ -68,24 +68,24 @@ public class NodeStatusRetrieval {
 
                                                     } catch (IOException e) {
                                                         nodeStatus.setVersion("???");
-                                                        nodeStatus.setErrorMessage("Unable to deserialize info response: " + nodeStatus.getInfoUrl());
-                                                        logger.info("Unable to deserialize info response: " + nodeStatus.getInfoUrl());
+                                                        nodeStatus.setErrorMessage("Unable to deserialize info page response");
+                                                        logger.info("Unable to deserialize info page response");
                                                     }
 
                                                 } else {
                                                     nodeStatus.setVersion("???");
-                                                    nodeStatus.setErrorMessage("Info page not responding: " + nodeStatus.getInfoUrl());
-                                                    logger.info("Info page not responding: " + nodeStatus.getInfoUrl());
+                                                    nodeStatus.setErrorMessage("HTTP status code: " + infoResponse.getStatus() + " from info page");
+                                                    logger.info("Status code: " + infoResponse.getStatus() + " from " + nodeStatus.getInfoUrl());
                                                 }
                                             } else {
                                                 nodeStatus.up(false);
-                                                nodeStatus.setErrorMessage("Status Code: " + statusResponse.getStatus() + " from " + nodeStatus.getStatusUrl());
+                                                nodeStatus.setErrorMessage("HTTP Status Code: " + statusResponse.getStatus() + " from status page");
                                                 logger.info("Status Code: " + statusResponse.getStatus() + " from " + nodeStatus.getStatusUrl());
                                             }
 
                                         } catch (UnirestException e) {
                                             nodeStatus.up(false);
-                                            nodeStatus.setErrorMessage("Error calling " + nodeStatus.getUrl() + ": " + e.getMessage());
+                                            nodeStatus.setErrorMessage("Error calling node: " + e.getMessage());
                                             logger.error("Error calling " + nodeStatus.getUrl(), e);
                                         }
                                     }
