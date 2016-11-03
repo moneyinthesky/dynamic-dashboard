@@ -22,7 +22,7 @@ import java.util.Optional;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
-import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.HOURS;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -41,7 +41,7 @@ public class AwsDiscoveryMethod implements NodeDiscoveryMethod {
 		this.settingsDao = settingsDao;
 		this.objectMapper = objectMapper;
 		this.cache = CacheBuilder.newBuilder()
-				.expireAfterWrite(10, MINUTES)
+				.expireAfterWrite(1, HOURS)
 				.build();
 
 		initializeCache();
