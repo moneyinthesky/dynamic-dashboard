@@ -73,12 +73,14 @@ public class NodeStatusRetrieval {
 
                                                     } catch (IOException e) {
                                                         nodeStatus.setVersion("???");
+                                                        nodeStatus.setInfoPageUnavailable(true);
                                                         nodeStatus.setErrorMessage("Unable to deserialize info page response");
                                                         logger.info("Unable to deserialize info page response");
                                                     }
 
                                                 } else {
                                                     nodeStatus.setVersion("???");
+                                                    nodeStatus.setInfoPageUnavailable(true);
                                                     nodeStatus.setErrorMessage("HTTP status code: " + infoResponse.getStatus() + " from info page");
                                                     logger.info("Status code: {} from {}", infoResponse.getStatus(), nodeStatus.getInfoUrl());
                                                 }

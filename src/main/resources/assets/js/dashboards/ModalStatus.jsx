@@ -49,6 +49,34 @@ class ModalStatus extends React.Component {
 								</li>
                         	);
                         });
+                        var unknownVersionNodes = environmentObject.unknownVersionNodes.map((nodeStatus, index) => {
+                            return (
+                                <li key={index} className="list-group-item">
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <td className="status-summary-table">
+                                                    <a className="status-summary-link" href={nodeStatus.infoUrl} target="_blank">{nodeStatus.identifier}</a>
+                                                </td>
+                                                <td className="status-summary-table">
+                                                    {nodeStatus.errorMessage}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </li>
+                            );
+                        });
+                        var unknownVersionNodesWrapper = environmentObject.unknownVersionNodes.length>0 ? (
+                            <li className="list-group-item list-group-item-success">
+                                Unknown Version
+                                <div>
+                                    <ul className="list-group">
+                                        {unknownVersionNodes}
+                                    </ul>
+                                </div>
+                            </li>
+                        ) : "";
                         var unhealthyNodes = environmentObject.unhealthyNodes.map((nodeStatus, index) => {
                         	return (
                         		<li key={index} className="list-group-item">
@@ -90,6 +118,7 @@ class ModalStatus extends React.Component {
                                       <div className="modal-body">
 										<ul className="list-group">
 											{versions}
+											{unknownVersionNodesWrapper}
 											{unhealthyNodesWrapper}
 										</ul>
                                       </div>

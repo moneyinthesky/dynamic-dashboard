@@ -22,7 +22,7 @@ class DataCenterTabs extends React.Component {
         };
 
         this.startRotatingDataCenterTabs = () => {
-            setInterval(this.rotateDataCenterTabs, 5000);
+            setInterval(this.rotateDataCenterTabs, 10000);
         };
 
         this.componentWillReceiveProps = (nextProps) => {

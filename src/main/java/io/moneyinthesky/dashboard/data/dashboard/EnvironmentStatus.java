@@ -12,6 +12,7 @@ public class EnvironmentStatus {
 	private Map<String, AggregatedNodeStatus> versionToNodeStatusMap = new HashMap<>();
 	private List<NodeStatus> unhealthyNodes = newArrayList();
 	private Integer nodesDown = 0;
+	private List<NodeStatus> unknownVersionNodes = newArrayList();
 
 	public String getName() {
 		return name;
@@ -51,5 +52,13 @@ public class EnvironmentStatus {
 
 	public List<NodeStatus> getUnhealthyNodes() {
 		return unhealthyNodes;
+	}
+
+	public List<NodeStatus> getUnknownVersionNodes() {
+		return unknownVersionNodes;
+	}
+
+	public void addToUnknownVersionNodes(NodeStatus nodeStatus) {
+		unknownVersionNodes.add(nodeStatus);
 	}
 }

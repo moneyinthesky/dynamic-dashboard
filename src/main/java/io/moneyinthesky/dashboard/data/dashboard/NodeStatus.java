@@ -11,6 +11,7 @@ public class NodeStatus {
 	private String identifier;
 	private String version;
 	private boolean up;
+	private boolean infoPageUnavailable = false;
 	private String errorMessage;
 	private List<DependencyStatus> dependencyStatus = newArrayList();
 	private List<DependencyStatus> downDependencies = newArrayList();
@@ -85,5 +86,13 @@ public class NodeStatus {
 
 	public List<DependencyStatus> getDownDependencies() {
 		return downDependencies;
+	}
+
+	public boolean isInfoPageUnavailable() {
+		return infoPageUnavailable;
+	}
+
+	public void setInfoPageUnavailable(boolean infoPageUnavailable) {
+		this.infoPageUnavailable = infoPageUnavailable;
 	}
 }

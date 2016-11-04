@@ -23,11 +23,21 @@ class ApplicationEnvironmentStatus extends React.Component {
                 );
             });
 
+            var unknownVersionNodes = (this.props.applicationEnvironmentStatus.unknownVersionNodes.length>0) ?
+                <li className="app-env-status status-up list-group-item">
+                    <div className="container app-env-status-container">
+                      v??? - {this.props.applicationEnvironmentStatus.unknownVersionNodes.length} Up
+                      <div className="app-env-status-deps">Info Page Unavailable</div>
+                    </div>
+                </li>
+            : "";
+
             var modalId = (this.props.dataCenterName + this.props.applicationName + this.props.applicationEnvironmentStatus.name).replace(/\s+/g, '-').toLowerCase();
             return (
                 <td className="app-env-status-td" data-toggle="modal" data-target={"#" + modalId}>
                 	<ul className="list-group">
 						{versionStatusList}
+						{unknownVersionNodes}
 						{optionalDownStatus}
 					</ul>
                 </td>

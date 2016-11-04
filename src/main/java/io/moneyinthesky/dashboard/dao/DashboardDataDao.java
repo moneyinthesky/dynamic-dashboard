@@ -138,7 +138,7 @@ public class DashboardDataDao {
 		Map<String, AggregatedNodeStatus> aggregatedNodeStatusMap = new HashMap<>();
 
 		for(NodeStatus nodeStatus : environmentStatus.getNodeStatusList()) {
-			if(nodeStatus.getVersion() != null) {
+			if(!nodeStatus.isInfoPageUnavailable() && nodeStatus.isUp()) {
 				AggregatedNodeStatus aggregatedNodeStatus = aggregatedNodeStatusMap.get(nodeStatus.getVersion());
 				if(aggregatedNodeStatus == null) {
 					aggregatedNodeStatus = new AggregatedNodeStatus();
@@ -156,11 +156,13 @@ public class DashboardDataDao {
 				}
 
 				aggregatedNodeStatus.addToNodesForVersion(nodeStatus);
+
+			} else if(nodeStatus.isUp()) {
+				environmentStatus.addToUnknownVersionNodes(nodeStatus);
+
 			} else {
-				if(!nodeStatus.isUp()) {
-					environmentStatus.incrementNodesDown();
-					environmentStatus.addToUnhealthyNodes(nodeStatus);
-				}
+				environmentStatus.incrementNodesDown();
+				environmentStatus.addToUnhealthyNodes(nodeStatus);
 			}
 		}
 
