@@ -10,7 +10,6 @@ import io.moneyinthesky.dashboard.nodediscovery.NodeDiscoveryMethod;
 import io.moneyinthesky.dashboard.nodediscovery.aws.AwsDiscoveryMethod;
 import io.moneyinthesky.dashboard.nodediscovery.fleet.FleetDiscoveryMethod;
 import io.moneyinthesky.dashboard.nodediscovery.urlpattern.UrlPatternDiscoveryMethod;
-import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.time.ZoneId;
@@ -26,7 +25,6 @@ import static java.time.format.DateTimeFormatter.ofLocalizedDateTime;
 import static java.time.format.FormatStyle.LONG;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static org.slf4j.LoggerFactory.getLogger;
 
 public class DashboardDataDao {
 
@@ -92,7 +90,7 @@ public class DashboardDataDao {
 		Map<String, EnvironmentStatus> environmentStatusMap = environments
 				.stream()
 				.map(environment -> generateEnvironmentStatusForApplication(environment, application))
-				.collect(toMap(environmentStatus -> environmentStatus.getName(), environmentStatus -> environmentStatus));
+				.collect(toMap(EnvironmentStatus::getName, environmentStatus -> environmentStatus));
 
 		applicationStatus.setEnvironmentStatusMap(environmentStatusMap);
 		return applicationStatus;
@@ -172,7 +170,7 @@ public class DashboardDataDao {
 	private List<String> getEnvironmentNames(DataCenter dataCenter) {
 		return dataCenter.getEnvironments()
 				.stream()
-				.map((environment) -> environment.getName())
+				.map(Environment::getName)
 				.collect(toList());
 	}
 

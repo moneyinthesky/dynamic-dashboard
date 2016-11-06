@@ -21,7 +21,7 @@ import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.System.currentTimeMillis;
-import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
 import static java.util.concurrent.TimeUnit.HOURS;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -116,9 +116,10 @@ public class AwsDiscoveryMethod implements NodeDiscoveryMethod {
 	}
 
 	private String generateKey(String... keyElements) {
-		return asList(keyElements).stream().collect(joining("/"));
+		return stream(keyElements).collect(joining("/"));
 	}
 
+	@SuppressWarnings("unchecked")
 	private void initializeCache() {
 		try {
 			Map<String, List<String>> persistedAwsResponses = objectMapper.readValue(new File(PERSISTED_AWS_RESPONSE_JSON), Map.class);

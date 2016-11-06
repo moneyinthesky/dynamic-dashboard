@@ -23,7 +23,7 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class FleetRestClient {
+class FleetRestClient {
 
     private static final Logger logger = getLogger(FleetRestClient.class);
 
@@ -40,16 +40,16 @@ public class FleetRestClient {
         fleetResponseSupplier = memoizeWithExpiration(this::generateFleetHosts, 10, MINUTES);
     }
 
-    public List<Map<String, String>> getFleetHosts() {
+    List<Map<String, String>> getFleetHosts() {
         return fleetResponseSupplier.get();
     }
 
-    public List<Map<String, String>> generateFleetHosts() {
+    @SuppressWarnings("unchecked")
+    private List<Map<String, String>> generateFleetHosts() {
         List<Map<String, String>> fleetHosts = newArrayList();
-
         Map<String, Map<String, Object>> fleetResponses = new HashMap<>();
-        Settings settings;
 
+        Settings settings;
         try {
             settings = settingsDao.readSettings();
         } catch (IOException e) {
@@ -58,7 +58,16 @@ public class FleetRestClient {
         }
 
         Set<String> fleetRestApiUrls = newHashSet((List<String>) settings.getPlugins().get("fleet").get("restApiUrls"));
+        getAndPopulateFleetResponses(fleetResponses, fleetRestApiUrls);
 
+        fleetResponses.values()
+                .forEach(fleetResponse -> fleetHosts.addAll((List<Map<String, String>>) fleetResponse.get("hosts")));
+
+        return fleetHosts;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void getAndPopulateFleetResponses(Map<String, Map<String, Object>> fleetResponses, Set<String> fleetRestApiUrls) {
         logger.info("Retrieving hosts from Fleet on " + fleetRestApiUrls);
         long start = currentTimeMillis();
         fleetRestApiUrls.forEach(fleetRestUrl -> {
@@ -74,10 +83,5 @@ public class FleetRestClient {
             }
         });
         logger.info("Time take to query Fleet {}", (currentTimeMillis() - start)/1000d);
-
-        fleetResponses.values()
-                .forEach(fleetResponse -> fleetHosts.addAll((List<Map<String, String>>) fleetResponse.get("hosts")));
-
-        return fleetHosts;
     }
 }
