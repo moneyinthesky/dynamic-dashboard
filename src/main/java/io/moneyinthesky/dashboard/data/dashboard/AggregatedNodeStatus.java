@@ -9,6 +9,7 @@ public class AggregatedNodeStatus {
     private Integer nodeCount = 0;
     private List<NodeStatus> nodesForVersion = new ArrayList<>();
     private Map<String, DependencyStatus> unhealthyDependencies = new HashMap<>();
+    private Map<String, DependencyStatus> disabledDependencies = new HashMap<>();
 
     public void incrementNodeCount() {
         nodeCount++;
@@ -32,6 +33,14 @@ public class AggregatedNodeStatus {
 
     public List<NodeStatus> getNodesForVersion() {
         return nodesForVersion;
+    }
+
+    public void addToDisabledDependencies(DependencyStatus dependencyStatus) {
+        disabledDependencies.put(dependencyStatus.getName(), dependencyStatus);
+    }
+
+    public Map<String, DependencyStatus> getDisabledDependencies() {
+        return disabledDependencies;
     }
 
     private List<NodeStatus> addToListInOrder(List<NodeStatus> list, NodeStatus nodeStatus) {

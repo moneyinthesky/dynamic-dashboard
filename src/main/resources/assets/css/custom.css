@@ -300,6 +300,14 @@ li.placeholder:before {
     padding-right: 5px;
     color: #B71C1C;
 }
+.disabled-dependency {
+    background-color: #FFECB3;
+    background: linear-gradient(to bottom right, #FFE082 , #FFECB3);
+    border-radius: 1rem;
+    padding-left: 5px;
+    padding-right: 5px;
+    color: #FF6F00;
+}
 .status-summary-link {
 	margin-right: 20px;
 	margin-left: 20px;

@@ -15,6 +15,7 @@ public class NodeStatus {
 	private String errorMessage;
 	private List<DependencyStatus> dependencyStatus = newArrayList();
 	private List<DependencyStatus> downDependencies = newArrayList();
+	private List<DependencyStatus> disabledDependencies = newArrayList();
 
 	public String getUrl() {
 		return url;
@@ -86,6 +87,14 @@ public class NodeStatus {
 
 	public List<DependencyStatus> getDownDependencies() {
 		return downDependencies;
+	}
+
+	public void addToDisabledDependencies(DependencyStatus dependencyStatus) {
+		disabledDependencies.add(dependencyStatus);
+	}
+
+	public List<DependencyStatus> getDisabledDependencies() {
+		return disabledDependencies;
 	}
 
 	public boolean isInfoPageUnavailable() {

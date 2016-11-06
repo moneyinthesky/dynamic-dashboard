@@ -109,12 +109,20 @@ class NodeStatusRetrieval {
                     return new DependencyStatus(
                             entry.getKey(),
                             (String) dependencyInfo.get("endpoint"),
-                            (Boolean) dependencyInfo.get("running") ? "UP" : "DOWN");
+                            getDependencyStatus(dependencyInfo));
                     })
                 .collect(toList());
 
         if(dependencyStatusList != null)
             nodeStatus.setDependencyStatus(dependencyStatusList);
+    }
+
+    private String getDependencyStatus(Map<String, Object> dependencyInfo) {
+        if(dependencyInfo.get("status") != null) {
+            return (String) dependencyInfo.get("status");
+        } else {
+            return (Boolean) dependencyInfo.get("running") ? "UP" : "DOWN";
+        }
     }
 
     private boolean isNodeUp(HttpResponse<String> statusResponse) {

@@ -17,6 +17,13 @@ class ModalStatus extends React.Component {
                         				</td>
                         			);
                         		});
+                        		var disabledDependencies = nodeStatus.disabledDependencies.map((dependency, index) => {
+                        			return (
+                        				<td className="status-summary-table" key={index}>
+                        					<div className="disabled-dependency">{dependency.name}</div>
+                        				</td>
+                        			);
+                        		});
                         		var errorMessage = nodeStatus.errorMessage ? (
                                         <td className="status-summary-table">
                                             {nodeStatus.errorMessage}
@@ -31,6 +38,7 @@ class ModalStatus extends React.Component {
 														<a className="status-summary-link" href={nodeStatus.infoUrl} target="_blank">{nodeStatus.identifier}</a>
 													</td>
 													{downDependencies}
+													{disabledDependencies}
 													{errorMessage}
 												</tr>
                         					</tbody>

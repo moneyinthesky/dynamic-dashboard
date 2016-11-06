@@ -150,6 +150,9 @@ public class DashboardDataDao {
 					if(dependencyStatus.getStatus().equals("DOWN")) {
 						aggregatedNodeStatus.addToUnhealthyDependencies(dependencyStatus);
 						nodeStatus.addToDownDependencies(dependencyStatus);
+					} else if(dependencyStatus.getStatus().equals("DISABLED")){
+						aggregatedNodeStatus.addToDisabledDependencies(dependencyStatus);
+						nodeStatus.addToDisabledDependencies(dependencyStatus);
 					}
 				}
 
