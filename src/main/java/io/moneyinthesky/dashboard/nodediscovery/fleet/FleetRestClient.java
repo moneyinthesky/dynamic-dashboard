@@ -5,8 +5,8 @@ import com.google.common.base.Supplier;
 import com.google.inject.Inject;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import io.moneyinthesky.dashboard.dao.SettingsDao;
-import io.moneyinthesky.dashboard.data.settings.Settings;
+import io.moneyinthesky.dashboard.core.dao.SettingsDao;
+import io.moneyinthesky.dashboard.core.data.settings.Settings;
 import org.slf4j.Logger;
 
 import java.io.IOException;
