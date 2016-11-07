@@ -6,7 +6,6 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.moneyinthesky.dashboard.core.resources.DashboardResource;
 import io.moneyinthesky.dashboard.core.resources.SettingsResource;
-import io.moneyinthesky.dashboard.core.resources.StatusResource;
 
 import static com.google.inject.Guice.createInjector;
 
@@ -19,8 +18,9 @@ public class Application extends io.dropwizard.Application<ApplicationConfigurat
     public void run(ApplicationConfiguration configuration, Environment environment) throws Exception {
         Injector injector = createInjector(new DashboardModule());
 
+        environment.healthChecks().register("application", new ApplicationHealthCheck());
+
         environment.jersey().setUrlPattern("/api/*");
-        environment.jersey().register(injector.getInstance(StatusResource.class));
         environment.jersey().register(injector.getInstance(DashboardResource.class));
         environment.jersey().register(injector.getInstance(SettingsResource.class));
     }
