@@ -5,6 +5,7 @@ import com.google.common.base.Supplier;
 import com.google.inject.Inject;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import io.moneyinthesky.dashboard.core.aspects.LogExecutionTime;
 import io.moneyinthesky.dashboard.core.dao.SettingsDao;
 import io.moneyinthesky.dashboard.core.data.settings.Settings;
 import org.slf4j.Logger;
@@ -19,7 +20,6 @@ import static com.google.common.base.Suppliers.memoizeWithExpiration;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.mashape.unirest.http.Unirest.get;
-import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -67,9 +67,9 @@ class FleetRestClient {
     }
 
     @SuppressWarnings("unchecked")
-    private void getAndPopulateFleetResponses(Map<String, Map<String, Object>> fleetResponses, Set<String> fleetRestApiUrls) {
+    @LogExecutionTime(value="Time taken to query Fleet: %f")
+    protected void getAndPopulateFleetResponses(Map<String, Map<String, Object>> fleetResponses, Set<String> fleetRestApiUrls) {
         logger.info("Retrieving hosts from Fleet on " + fleetRestApiUrls);
-        long start = currentTimeMillis();
         fleetRestApiUrls.forEach(fleetRestUrl -> {
             HttpResponse<String> fleetResponse = null;
             try {
@@ -82,6 +82,5 @@ class FleetRestClient {
                 logger.error("Unable to parse JSON response from Fleet - URL: " + fleetRestUrl, e);
             }
         });
-        logger.info("Time take to query Fleet {}", (currentTimeMillis() - start)/1000d);
     }
 }
