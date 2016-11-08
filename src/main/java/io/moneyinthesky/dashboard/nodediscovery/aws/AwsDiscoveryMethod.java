@@ -30,7 +30,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class AwsDiscoveryMethod implements NodeDiscoveryMethod {
 
 	private static final Logger logger = getLogger(AwsDiscoveryMethod.class);
-	private static final String PERSISTED_AWS_RESPONSE_JSON = "persisted/aws-response.json";
+	private static final String PERSISTED_AWS_RESPONSE_JSON = "output/persisted/aws-response.json";
 
 	private SettingsDao settingsDao;
 	private ObjectMapper objectMapper;

@@ -15,7 +15,7 @@ import static com.google.common.io.Files.createParentDirs;
 public class SettingsDao {
 
 	private static final Logger logger = LoggerFactory.getLogger(SettingsDao.class);
-	private static final String PERSISTED_SETTINGS_JSON = "persisted/settings.json";
+	private static final String PERSISTED_SETTINGS_JSON = "output/persisted/settings.json";
 	private ObjectMapper objectMapper;
 
 	@Inject

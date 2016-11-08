@@ -2,10 +2,10 @@ server:
   requestLog:
     appenders:
       - type: file
-        currentLogFilename: ./logs/access.log
+        currentLogFilename: ./output/logs/access.log
         threshold: ALL
         archive: true
-        archivedLogFilenamePattern: /opt/broker/log/access.%d.log.gz
+        archivedLogFilenamePattern: /output/logs/access.%d.log.gz
         archivedFileCount: 2
         timeZone: UTC
 
@@ -13,8 +13,8 @@ logging:
   level: INFO
   appenders:
     - type: file
-      currentLogFilename: ./logs/dynamic-dashboard.log
+      currentLogFilename: ./output/logs/dynamic-dashboard.log
       archive: true
-      archivedLogFilenamePattern: ./logs/dynamic-dashboard-%d.log.gz
+      archivedLogFilenamePattern: ./output/logs/dynamic-dashboard-%d.log.gz
       archivedFileCount: 2
       timeZone: UTC
