@@ -18,7 +18,8 @@ public class Application extends io.dropwizard.Application<ApplicationConfigurat
     public void run(ApplicationConfiguration configuration, Environment environment) throws Exception {
         Injector injector = createInjector(new DashboardModule());
 
-        environment.healthChecks().register("application", new ApplicationHealthCheck());
+        environment.healthChecks().register("application", injector.getInstance(ApplicationHealthCheck.class));
+        environment.healthChecks().register("dashboardDataService", injector.getInstance(DashboardDataServiceHealthCheck.class));
 
         environment.jersey().setUrlPattern("/api/*");
         environment.jersey().register(injector.getInstance(DashboardResource.class));
