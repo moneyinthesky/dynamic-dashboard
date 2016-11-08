@@ -3,12 +3,15 @@ package io.moneyinthesky.dashboard.statuspopulation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.mashape.unirest.http.HttpResponse;
+import io.moneyinthesky.dashboard.core.data.dashboard.AggregatedNodeStatus;
 import io.moneyinthesky.dashboard.core.data.dashboard.DependencyStatus;
+import io.moneyinthesky.dashboard.core.data.dashboard.EnvironmentStatus;
 import io.moneyinthesky.dashboard.core.data.dashboard.NodeStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,6 +56,48 @@ public class DefaultNodeStatusPopulation implements NodeStatusPopulation {
             nodeStatus.setErrorMessage("HTTP status code: " + response.getStatus() + " from info page");
             logger.info("Status code: {} from {}", response.getStatus(), nodeStatus.getInfoUrl());
         }
+    }
+
+    @Override
+    public void addAggregatedEnvironmentNodeStatusData(EnvironmentStatus environmentStatus) {
+        Map<String, AggregatedNodeStatus> aggregatedNodeStatusMap = new HashMap<>();
+
+        for(NodeStatus nodeStatus : environmentStatus.getNodeStatusList()) {
+            if(!nodeStatus.isInfoPageUnavailable() && nodeStatus.isUp()) {
+                populateAggregatedNodeStatusForVersion(nodeStatus, aggregatedNodeStatusMap);
+
+            } else if(nodeStatus.isUp()) {
+                environmentStatus.addToUnknownVersionNodes(nodeStatus);
+
+            } else {
+                environmentStatus.incrementNodesDown();
+                environmentStatus.addToUnhealthyNodes(nodeStatus);
+            }
+        }
+
+        environmentStatus.setVersionToNodeStatusMap(aggregatedNodeStatusMap);
+    }
+
+    private void populateAggregatedNodeStatusForVersion(NodeStatus nodeStatus, Map<String, AggregatedNodeStatus> aggregatedNodeStatusMap) {
+        AggregatedNodeStatus aggregatedNodeStatus = aggregatedNodeStatusMap.get(nodeStatus.getVersion());
+        if(aggregatedNodeStatus == null) {
+            aggregatedNodeStatus = new AggregatedNodeStatus();
+            aggregatedNodeStatusMap.put(nodeStatus.getVersion(), aggregatedNodeStatus);
+        }
+
+        aggregatedNodeStatus.incrementNodeCount();
+
+        for(DependencyStatus dependencyStatus : nodeStatus.getDependencyStatus()) {
+            if(dependencyStatus.getStatus().equals("DOWN")) {
+                aggregatedNodeStatus.addToUnhealthyDependencies(dependencyStatus);
+                nodeStatus.addToDownDependencies(dependencyStatus);
+            } else if(dependencyStatus.getStatus().equals("DISABLED")){
+                aggregatedNodeStatus.addToDisabledDependencies(dependencyStatus);
+                nodeStatus.addToDisabledDependencies(dependencyStatus);
+            }
+        }
+
+        aggregatedNodeStatus.addToNodesForVersion(nodeStatus);
     }
 
     @SuppressWarnings("unchecked")

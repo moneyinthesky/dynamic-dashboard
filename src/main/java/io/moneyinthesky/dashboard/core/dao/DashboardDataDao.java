@@ -10,12 +10,12 @@ import io.moneyinthesky.dashboard.nodediscovery.NodeDiscoveryMethod;
 import io.moneyinthesky.dashboard.nodediscovery.aws.AwsDiscoveryMethod;
 import io.moneyinthesky.dashboard.nodediscovery.fleet.FleetDiscoveryMethod;
 import io.moneyinthesky.dashboard.nodediscovery.urlpattern.UrlPatternDiscoveryMethod;
+import io.moneyinthesky.dashboard.statuspopulation.NodeStatusPopulation;
 
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +33,7 @@ public class DashboardDataDao {
 
 	private SettingsDao settingsDao;
 	private NodeStatusRetrieval nodeStatusRetrieval;
+	private NodeStatusPopulation nodeStatusPopulation;
 
 	private List<NodeStatus> nodeStatusList;
 	private Settings settings;
@@ -40,9 +41,10 @@ public class DashboardDataDao {
 	@Inject
 	public DashboardDataDao(SettingsDao settingsDao, NodeStatusRetrieval nodeStatusRetrieval,
 							UrlPatternDiscoveryMethod urlPatternDiscoveryMethod, FleetDiscoveryMethod fleetDiscoveryMethod,
-							AwsDiscoveryMethod awsDiscoveryMethod) throws IOException {
+							AwsDiscoveryMethod awsDiscoveryMethod, NodeStatusPopulation nodeStatusPopulation) throws IOException {
 		this.settingsDao = settingsDao;
 		this.nodeStatusRetrieval = nodeStatusRetrieval;
+		this.nodeStatusPopulation = nodeStatusPopulation;
 
 		discoveryMethodMap = ImmutableMap.of(
 				"urlPattern", urlPatternDiscoveryMethod,
@@ -128,46 +130,8 @@ public class DashboardDataDao {
 				.forEach(dataCenterStatus -> dataCenterStatus.getApplications()
 						.forEach(applicationStatus -> {
 							applicationStatus.getEnvironmentStatusMap().entrySet()
-									.forEach(environmentStatusEntry -> addAggregatedEnvironmentNodeData(environmentStatusEntry.getValue()));
+									.forEach(environmentStatusEntry -> nodeStatusPopulation.addAggregatedEnvironmentNodeStatusData(environmentStatusEntry.getValue()));
 						}));
-	}
-
-	private void addAggregatedEnvironmentNodeData(EnvironmentStatus environmentStatus) {
-		Map<String, AggregatedNodeStatus> aggregatedNodeStatusMap = new HashMap<>();
-
-		for(NodeStatus nodeStatus : environmentStatus.getNodeStatusList()) {
-			if(!nodeStatus.isInfoPageUnavailable() && nodeStatus.isUp()) {
-				AggregatedNodeStatus aggregatedNodeStatus = aggregatedNodeStatusMap.get(nodeStatus.getVersion());
-				if(aggregatedNodeStatus == null) {
-					aggregatedNodeStatus = new AggregatedNodeStatus();
-					aggregatedNodeStatusMap.put(nodeStatus.getVersion(), aggregatedNodeStatus);
-				}
-
-				if(nodeStatus.isUp())
-					aggregatedNodeStatus.incrementNodeCount();
-
-				for(DependencyStatus dependencyStatus : nodeStatus.getDependencyStatus()) {
-					if(dependencyStatus.getStatus().equals("DOWN")) {
-						aggregatedNodeStatus.addToUnhealthyDependencies(dependencyStatus);
-						nodeStatus.addToDownDependencies(dependencyStatus);
-					} else if(dependencyStatus.getStatus().equals("DISABLED")){
-						aggregatedNodeStatus.addToDisabledDependencies(dependencyStatus);
-						nodeStatus.addToDisabledDependencies(dependencyStatus);
-					}
-				}
-
-				aggregatedNodeStatus.addToNodesForVersion(nodeStatus);
-
-			} else if(nodeStatus.isUp()) {
-				environmentStatus.addToUnknownVersionNodes(nodeStatus);
-
-			} else {
-				environmentStatus.incrementNodesDown();
-				environmentStatus.addToUnhealthyNodes(nodeStatus);
-			}
-		}
-
-		environmentStatus.setVersionToNodeStatusMap(aggregatedNodeStatusMap);
 	}
 
 	private List<String> getEnvironmentNames(DataCenter dataCenter) {
