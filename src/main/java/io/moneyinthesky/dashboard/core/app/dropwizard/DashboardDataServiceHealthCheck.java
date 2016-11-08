@@ -1,4 +1,4 @@
-package io.moneyinthesky.dashboard.core.app;
+package io.moneyinthesky.dashboard.core.app.dropwizard;
 
 import com.codahale.metrics.health.HealthCheck;
 import com.google.inject.Inject;

@@ -1,11 +1,14 @@
+settingsFile: ./src/test/output/persisted/settings.json
+awsResponseFile: ./src/test/output/persisted/aws-response.json
+
 server:
   requestLog:
     appenders:
       - type: file
-        currentLogFilename: ./output/logs/access.log
+        currentLogFilename: ./src/test/output/logs/access.log
         threshold: ALL
         archive: true
-        archivedLogFilenamePattern: /output/logs/access.%d.log.gz
+        archivedLogFilenamePattern: /src/test/output/logs/access.%d.log.gz
         archivedFileCount: 2
         timeZone: UTC
 
@@ -13,8 +16,8 @@ logging:
   level: INFO
   appenders:
     - type: file
-      currentLogFilename: ./output/logs/dynamic-dashboard.log
+      currentLogFilename: ./src/test/output/logs/dynamic-dashboard.log
       archive: true
-      archivedLogFilenamePattern: ./output/logs/dynamic-dashboard-%d.log.gz
+      archivedLogFilenamePattern: ./src/test/output/logs/dynamic-dashboard-%d.log.gz
       archivedFileCount: 2
       timeZone: UTC

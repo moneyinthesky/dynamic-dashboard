@@ -2,6 +2,7 @@ package io.moneyinthesky.dashboard.core.dao;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
+import io.moneyinthesky.dashboard.core.app.guice.SettingsFile;
 import io.moneyinthesky.dashboard.core.data.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,30 +16,31 @@ import static com.google.common.io.Files.createParentDirs;
 public class SettingsDao {
 
 	private static final Logger logger = LoggerFactory.getLogger(SettingsDao.class);
-	private static final String PERSISTED_SETTINGS_JSON = "output/persisted/settings.json";
 	private ObjectMapper objectMapper;
+	private String settingsFile;
 
 	@Inject
-	public SettingsDao(ObjectMapper objectMapper) {
+	public SettingsDao(ObjectMapper objectMapper, @SettingsFile String settingsFile) {
 		this.objectMapper = objectMapper;
+		this.settingsFile = settingsFile;
 	}
 
 	public Settings readSettings() throws IOException {
 		Settings settings;
 		try {
-			settings = objectMapper.readValue(new File(PERSISTED_SETTINGS_JSON), Settings.class);
+			settings = objectMapper.readValue(new File(settingsFile), Settings.class);
 
 		} catch(FileNotFoundException e) {
 			logger.warn("A settings.json file could not be found - creating one");
 			settings = new Settings();
-			createParentDirs(new File(PERSISTED_SETTINGS_JSON));
-			objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(PERSISTED_SETTINGS_JSON), settings);
+			createParentDirs(new File(settingsFile));
+			objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(settingsFile), settings);
 		}
 
 		return settings;
 	}
 
 	public void writeSettings(Settings settings) throws IOException {
-		objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(PERSISTED_SETTINGS_JSON), settings);
+		objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(settingsFile), settings);
 	}
 }

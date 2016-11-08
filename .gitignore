@@ -7,3 +7,4 @@ target/**
 /persisted/*
 /logs/*
 /output/*
+/src/test/output/*

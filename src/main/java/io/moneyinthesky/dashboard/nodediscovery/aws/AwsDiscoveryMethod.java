@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
+import io.moneyinthesky.dashboard.core.app.guice.AwsResponseFile;
 import io.moneyinthesky.dashboard.core.dao.SettingsDao;
 import io.moneyinthesky.dashboard.core.data.settings.Settings;
 import io.moneyinthesky.dashboard.nodediscovery.NodeDiscoveryMethod;
@@ -30,16 +31,17 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class AwsDiscoveryMethod implements NodeDiscoveryMethod {
 
 	private static final Logger logger = getLogger(AwsDiscoveryMethod.class);
-	private static final String PERSISTED_AWS_RESPONSE_JSON = "output/persisted/aws-response.json";
 
 	private SettingsDao settingsDao;
 	private ObjectMapper objectMapper;
+	private String awsResponseFile;
 	private Cache<String, List<String>> cache;
 
 	@Inject
-	public AwsDiscoveryMethod(SettingsDao settingsDao, ObjectMapper objectMapper) {
+	public AwsDiscoveryMethod(SettingsDao settingsDao, ObjectMapper objectMapper, @AwsResponseFile String awsResponseFile) {
 		this.settingsDao = settingsDao;
 		this.objectMapper = objectMapper;
+		this.awsResponseFile = awsResponseFile;
 		this.cache = CacheBuilder.newBuilder()
 				.expireAfterWrite(1, HOURS)
 				.build();
@@ -122,7 +124,7 @@ public class AwsDiscoveryMethod implements NodeDiscoveryMethod {
 	@SuppressWarnings("unchecked")
 	private void initializeCache() {
 		try {
-			Map<String, List<String>> persistedAwsResponses = objectMapper.readValue(new File(PERSISTED_AWS_RESPONSE_JSON), Map.class);
+			Map<String, List<String>> persistedAwsResponses = objectMapper.readValue(new File(awsResponseFile), Map.class);
 			cache.putAll(persistedAwsResponses);
 		} catch (IOException e) {
 			logger.warn("Unable to read persisted AWS responses");
@@ -131,7 +133,7 @@ public class AwsDiscoveryMethod implements NodeDiscoveryMethod {
 
 	private void persistCache() {
 		try {
-			objectMapper.writeValue(new File(PERSISTED_AWS_RESPONSE_JSON), cache.asMap());
+			objectMapper.writeValue(new File(awsResponseFile), cache.asMap());
 		} catch (IOException e) {
 			logger.error("Unable to persist AWS response to file", e);
 		}

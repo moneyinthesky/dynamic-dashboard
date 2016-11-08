@@ -1,9 +1,10 @@
-package io.moneyinthesky.dashboard.core.app;
+package io.moneyinthesky.dashboard.core.app.dropwizard;
 
 import com.google.inject.Injector;
 import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import io.moneyinthesky.dashboard.core.app.guice.DashboardModule;
 import io.moneyinthesky.dashboard.core.resources.DashboardResource;
 import io.moneyinthesky.dashboard.core.resources.SettingsResource;
 
@@ -16,7 +17,7 @@ public class Application extends io.dropwizard.Application<ApplicationConfigurat
     }
 
     public void run(ApplicationConfiguration configuration, Environment environment) throws Exception {
-        Injector injector = createInjector(new DashboardModule());
+        Injector injector = createInjector(new DashboardModule(configuration));
 
         environment.healthChecks().register("application", injector.getInstance(ApplicationHealthCheck.class));
         environment.healthChecks().register("dashboardDataService", injector.getInstance(DashboardDataServiceHealthCheck.class));

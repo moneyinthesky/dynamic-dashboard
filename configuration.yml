@@ -1,3 +1,6 @@
+settingsFile: ./output/persisted/settings.json
+awsResponseFile: ./output/persisted/aws-response.json
+
 server:
   requestLog:
     appenders:
