@@ -9,6 +9,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
 import io.moneyinthesky.dashboard.core.app.guice.AwsResponseFile;
+import io.moneyinthesky.dashboard.core.aspects.LogExecutionTime;
 import io.moneyinthesky.dashboard.core.dao.SettingsDao;
 import io.moneyinthesky.dashboard.core.data.settings.Settings;
 import io.moneyinthesky.dashboard.nodediscovery.NodeDiscoveryMethod;
@@ -21,7 +22,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.stream;
 import static java.util.concurrent.TimeUnit.HOURS;
 import static java.util.stream.Collectors.joining;
@@ -77,7 +77,7 @@ public class AwsDiscoveryMethod implements NodeDiscoveryMethod {
 		List<String> nodeUrls = cache.getIfPresent(key);
 		if(nodeUrls == null) {
 			nodeUrls = getNodeUrls(credentials, region, configuration,
-					hostedZoneName, appPrefix, loadBalancer);
+					hostedZoneName, appPrefix);
 			cache.put(key, nodeUrls);
 
 			persistCache();
@@ -86,9 +86,9 @@ public class AwsDiscoveryMethod implements NodeDiscoveryMethod {
 		return nodeUrls;
 	}
 
-	private List<String> getNodeUrls(AWSCredentials credentials, Regions region, Map<String, String> configuration,
-									 String hostedZoneName, String appPrefix, String loadBalancer) {
-		long start = currentTimeMillis();
+	@LogExecutionTime
+	List<String> getNodeUrls(AWSCredentials credentials, Regions region, Map<String, String> configuration,
+									 String hostedZoneName, String appPrefix) {
 		ELBClient elbClient = new ELBClient(credentials, region);
 		EC2Client ec2Client = new EC2Client(credentials, region);
 		Route53Client route53Client = new Route53Client(configuration, credentials, region);
@@ -106,7 +106,6 @@ public class AwsDiscoveryMethod implements NodeDiscoveryMethod {
 					return false;
 				});
 
-		logger.info("Time to query AWS for {}: {}", loadBalancer, (currentTimeMillis() - start) / 1000d);
 		return instanceResources.stream()
 				.filter(instanceResource -> instanceResource.getName().startsWith(appPrefix))
 				.map(instanceResource -> "http://" + instanceResource.getName().substring(0, instanceResource.getName().length()-1))

@@ -67,7 +67,7 @@ class FleetRestClient {
     }
 
     @SuppressWarnings("unchecked")
-    @LogExecutionTime(value="Time taken to query Fleet: %f")
+    @LogExecutionTime
     protected void getAndPopulateFleetResponses(Map<String, Map<String, Object>> fleetResponses, Set<String> fleetRestApiUrls) {
         logger.info("Retrieving hosts from Fleet on " + fleetRestApiUrls);
         fleetRestApiUrls.forEach(fleetRestUrl -> {
