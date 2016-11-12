@@ -1,10 +1,11 @@
 # Dynamic Dashboard
 
-One line description.
-Screenshot.
+A generic, flexible and extensible dashboard for monitoring clustered applications across environments and data centers.
+![screenshot](/screenshot.png?raw=true)
 
 ## Building & Running
 ### Pre-requisites
+Java 8 and Maven.  That's it.
 ### Building
 ### Running
 
@@ -13,3 +14,4 @@ Screenshot.
 ## Development
 ### Technologies Used
 ### Architectural Overview
+    
