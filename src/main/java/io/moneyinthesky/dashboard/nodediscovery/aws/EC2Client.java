@@ -11,15 +11,15 @@ import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EC2Client {
+class EC2Client {
 
 	private AmazonEC2 amazonEC2;
 
-	public EC2Client(AWSCredentials credentials, Regions region) {
+	EC2Client(AWSCredentials credentials, Regions region) {
 		this.amazonEC2 = getEC2Client(credentials, region);
 	}
 
-	public List<String> getPrivateIpsFromInstances(List<String> instanceIds) {
+	List<String> getPrivateIpsFromInstances(List<String> instanceIds) {
 		List<String> privateIps = new ArrayList<>();
 
 		DescribeInstancesRequest ec2Request = new DescribeInstancesRequest().withInstanceIds(instanceIds);

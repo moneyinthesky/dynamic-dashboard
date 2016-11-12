@@ -13,14 +13,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toList;
 
-public class Route53Client {
+class Route53Client {
 
 	private Map<String, String> configuration;
 	private AmazonRoute53 amazonRoute53;
 
-	public Route53Client(Map<String, String> configuration, AWSCredentials credentials, Regions region) {
+	Route53Client(Map<String, String> configuration, AWSCredentials credentials, Regions region) {
 		this.amazonRoute53 = getRoute53Client(credentials, region);
 		this.configuration = configuration;
 	}
@@ -36,10 +37,10 @@ public class Route53Client {
 			}
 		}
 
-		return Optional.empty();
+		return empty();
 	}
 
-	public Optional<String> getLoadBalancerDNS(String hostedZoneId) {
+	Optional<String> getLoadBalancerDNS(String hostedZoneId) {
 		String loadBalancerName = configuration.get("loadBalancer");
 
 		Optional<ResourceRecord> loadBalancer = getResourceRecordByNameRecursively(hostedZoneId, loadBalancerName);
@@ -47,11 +48,11 @@ public class Route53Client {
 			return Optional.of(loadBalancer.get().getValue());
 		}
 
-		return Optional.empty();
+		return empty();
 	}
 
-	public List<ResourceRecordSet> getResourceRecordSets(String hostedZoneId,
-														 Predicate<ResourceRecordSet> resourceFilter) {
+	List<ResourceRecordSet> getResourceRecordSets(String hostedZoneId,
+												  Predicate<ResourceRecordSet> resourceFilter) {
 		List<ResourceRecordSet> resourceRecordSets = new ArrayList<>();
 
 		ListResourceRecordSetsRequest resourceRecordSetsRequest;
@@ -68,7 +69,7 @@ public class Route53Client {
 
 			List<ResourceRecordSet> allResourceRecordSets = resourceRecordSetsResult.getResourceRecordSets();
 			resourceRecordSets.addAll(allResourceRecordSets.stream()
-					.filter(resourceRecordSet -> resourceFilter.test(resourceRecordSet))
+					.filter(resourceFilter)
 					.collect(toList()));
 
 		} while(resourceRecordSetsResult.isTruncated());
@@ -88,12 +89,12 @@ public class Route53Client {
 			}
 		}
 
-		return Optional.empty();
+		return empty();
 	}
 
 	private Optional<ResourceRecordSet> getHighestWeightedResourceRecordSetByName(String hostedZoneId,
 																				  String resourceRecordSetName) {
-		Optional<ResourceRecordSet> highestWeightedResourceRecordSet = Optional.empty();
+		Optional<ResourceRecordSet> highestWeightedResourceRecordSet = empty();
 		List<ResourceRecordSet> resourceRecordSets = getResourceRecordSets(hostedZoneId,
 				resourceRecordSet -> resourceRecordSet.getName().equals(resourceRecordSetName));
 

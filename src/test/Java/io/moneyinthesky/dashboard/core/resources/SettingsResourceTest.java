@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
+import static java.lang.String.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class SettingsResourceTest {
@@ -26,11 +27,11 @@ public class SettingsResourceTest {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    public void testGetSettings() throws IOException {
+    public void testGetSettingsInitialCall() throws IOException {
         Client client = new JerseyClientBuilder(RULE.getEnvironment()).build("test client");
 
         Response response = client.target(
-                String.format("http://localhost:%d/api/settings", RULE.getLocalPort()))
+                format("http://localhost:%d/api/settings", RULE.getLocalPort()))
                 .request()
                 .get();
 

@@ -6,6 +6,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing;
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancingClientBuilder;
 import com.amazonaws.services.elasticloadbalancing.model.DescribeLoadBalancersResult;
+import com.amazonaws.services.elasticloadbalancing.model.Instance;
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription;
 
 import java.util.List;
@@ -14,15 +15,15 @@ import java.util.Optional;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 
-public class ELBClient {
+class ELBClient {
 
 	private AmazonElasticLoadBalancing elasticLoadBalancing;
 
-	public ELBClient(AWSCredentials credentials, Regions region) {
+	ELBClient(AWSCredentials credentials, Regions region) {
 		this.elasticLoadBalancing = getElbClient(credentials, region);
 	}
 
-	public List<String> getInstanceIds(String loadBalancerDNS) {
+	List<String> getInstanceIds(String loadBalancerDNS) {
 		DescribeLoadBalancersResult elbResult = elasticLoadBalancing.describeLoadBalancers();
 		Optional<LoadBalancerDescription> elbDescription = elbResult.getLoadBalancerDescriptions()
 				.stream()
@@ -32,7 +33,7 @@ public class ELBClient {
 		if(elbDescription.isPresent()) {
 			return elbDescription.get().getInstances()
 					.stream()
-					.map(instance -> instance.getInstanceId())
+					.map(Instance::getInstanceId)
 					.collect(toList());
 		}
 

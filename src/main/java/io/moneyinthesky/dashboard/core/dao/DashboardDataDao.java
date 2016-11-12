@@ -110,19 +110,21 @@ public class DashboardDataDao {
 
 			environmentStatus.setNodeStatusList(urls
 					.stream()
-					.map(url -> {
-						NodeStatus unpopulatedNodeStatus = new NodeStatus();
-						unpopulatedNodeStatus.setUrl(url);
-						unpopulatedNodeStatus.setStatusUrl(url + settings.getApplicationConfig().get(application).get("statusUri"));
-						unpopulatedNodeStatus.setInfoUrl(url + settings.getApplicationConfig().get(application).get("infoUri"));
-						unpopulatedNodeStatus.setIdentifier(url.replace("http://", ""));
-						nodeStatusList.add(unpopulatedNodeStatus);
-						return unpopulatedNodeStatus;
-					})
+					.map(url -> generateUnpopulatedNodeStatus(application, url))
 					.collect(toList()));
 		}
 
 		return environmentStatus;
+	}
+
+	private NodeStatus generateUnpopulatedNodeStatus(String application, String url) {
+		NodeStatus unpopulatedNodeStatus = new NodeStatus();
+		unpopulatedNodeStatus.setUrl(url);
+		unpopulatedNodeStatus.setStatusUrl(url + settings.getApplicationConfig().get(application).get("statusUri"));
+		unpopulatedNodeStatus.setInfoUrl(url + settings.getApplicationConfig().get(application).get("infoUri"));
+		unpopulatedNodeStatus.setIdentifier(url.replace("http://", ""));
+		nodeStatusList.add(unpopulatedNodeStatus);
+		return unpopulatedNodeStatus;
 	}
 
 	private void aggregateNodeData(DashboardData data) {
