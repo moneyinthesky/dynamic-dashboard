@@ -1,7 +1,7 @@
 # Dynamic Dashboard
 
 A generic, flexible and extensible dashboard for monitoring clustered applications across environments and data centers.
-![screenshot](/screenshot.png?raw=true)
+![screenshot](/screenshot.jpg?raw=true)
 
 ## Building & Running
 ### Pre-requisites
