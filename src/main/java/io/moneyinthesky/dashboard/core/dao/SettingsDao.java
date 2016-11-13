@@ -2,7 +2,7 @@ package io.moneyinthesky.dashboard.core.dao;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
-import io.moneyinthesky.dashboard.core.app.guice.SettingsFile;
+import io.moneyinthesky.dashboard.core.app.guice.annotations.SettingsFile;
 import io.moneyinthesky.dashboard.core.data.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

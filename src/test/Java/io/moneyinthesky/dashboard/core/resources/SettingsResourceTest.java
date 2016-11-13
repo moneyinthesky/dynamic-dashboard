@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import io.moneyinthesky.dashboard.core.app.dropwizard.Application;
-import io.moneyinthesky.dashboard.core.app.dropwizard.ApplicationConfiguration;
+import io.moneyinthesky.dashboard.core.app.dropwizard.configuration.ApplicationConfiguration;
 import io.moneyinthesky.dashboard.core.data.settings.Settings;
 import org.junit.ClassRule;
 import org.junit.Test;

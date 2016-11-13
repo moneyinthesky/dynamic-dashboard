@@ -1,4 +1,4 @@
-package io.moneyinthesky.dashboard.core.app.guice;
+package io.moneyinthesky.dashboard.core.app.guice.annotations;
 
 import com.google.inject.BindingAnnotation;
 

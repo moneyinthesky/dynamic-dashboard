@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
-import io.moneyinthesky.dashboard.core.app.guice.AwsResponseFile;
+import io.moneyinthesky.dashboard.core.app.guice.annotations.AwsResponseFile;
 import io.moneyinthesky.dashboard.core.aspects.LogExecutionTime;
 import io.moneyinthesky.dashboard.core.dao.SettingsDao;
 import io.moneyinthesky.dashboard.core.data.settings.Settings;

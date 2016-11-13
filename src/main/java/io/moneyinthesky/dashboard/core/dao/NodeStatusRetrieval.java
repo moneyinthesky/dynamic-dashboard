@@ -3,7 +3,7 @@ package io.moneyinthesky.dashboard.core.dao;
 import com.google.inject.Inject;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import io.moneyinthesky.dashboard.core.app.guice.ForkJoinPoolSize;
+import io.moneyinthesky.dashboard.core.app.guice.annotations.ForkJoinPoolSize;
 import io.moneyinthesky.dashboard.core.aspects.LogExecutionTime;
 import io.moneyinthesky.dashboard.core.data.dashboard.NodeStatus;
 import io.moneyinthesky.dashboard.statuspopulation.NodeStatusPopulation;

@@ -1,4 +1,4 @@
-package io.moneyinthesky.dashboard.core.app.dropwizard;
+package io.moneyinthesky.dashboard.core.app.dropwizard.configuration;
 
 public class ConnectivityConfiguration {
     private long connectionTimeout;
