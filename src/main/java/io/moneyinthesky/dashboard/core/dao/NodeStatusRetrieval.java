@@ -3,6 +3,7 @@ package io.moneyinthesky.dashboard.core.dao;
 import com.google.inject.Inject;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import io.moneyinthesky.dashboard.core.app.guice.ForkJoinPoolSize;
 import io.moneyinthesky.dashboard.core.aspects.LogExecutionTime;
 import io.moneyinthesky.dashboard.core.data.dashboard.NodeStatus;
 import io.moneyinthesky.dashboard.statuspopulation.NodeStatusPopulation;
@@ -20,11 +21,12 @@ class NodeStatusRetrieval {
     private static final Logger logger = getLogger(NodeStatusRetrieval.class);
 
     private NodeStatusPopulation nodeStatusPopulation;
-    private ForkJoinPool forkJoinPool = new ForkJoinPool(32);
+    private ForkJoinPool forkJoinPool;
 
     @Inject
-    public NodeStatusRetrieval(NodeStatusPopulation nodeStatusPopulation) {
+    public NodeStatusRetrieval(NodeStatusPopulation nodeStatusPopulation, @ForkJoinPoolSize int forkJoinPoolSize) {
         this.nodeStatusPopulation = nodeStatusPopulation;
+        this.forkJoinPool = new ForkJoinPool(forkJoinPoolSize);
     }
 
     @LogExecutionTime

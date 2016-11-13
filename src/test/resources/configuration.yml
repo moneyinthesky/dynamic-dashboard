@@ -1,6 +1,13 @@
 settingsFile: ./src/test/output/persisted/settings.json
 awsResponseFile: ./src/test/output/persisted/aws-response.json
 
+connectivityConfiguration:
+  connectionTimeout: 2000
+  socketTimeout: 5000
+
+nodeStatusRetrievalConfiguration:
+  forkJoinPoolSize: 32
+
 server:
   requestLog:
     appenders:

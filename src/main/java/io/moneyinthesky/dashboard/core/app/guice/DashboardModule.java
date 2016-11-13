@@ -23,6 +23,8 @@ public class DashboardModule extends AbstractModule {
 	protected void configure() {
 		bind(String.class).annotatedWith(SettingsFile.class).toInstance(configuration.getSettingsFile());
 		bind(String.class).annotatedWith(AwsResponseFile.class).toInstance(configuration.getAwsResponseFile());
+		bind(Integer.class).annotatedWith(ForkJoinPoolSize.class)
+				.toInstance(configuration.getNodeStatusRetrievalConfiguration().getForkJoinPoolSize());
 
 		bindInterceptor(any(), annotatedWith(LogExecutionTime.class), new LogExecutionTimeInterceptor());
 
@@ -31,6 +33,7 @@ public class DashboardModule extends AbstractModule {
 
 		bind(ObjectMapper.class).toInstance(new ObjectMapper());
 
-		Unirest.setTimeouts(2000, 5000);
+		Unirest.setTimeouts(configuration.getConnectivityConfiguration().getConnectionTimeout(),
+				configuration.getConnectivityConfiguration().getSocketTimeout());
 	}
 }
