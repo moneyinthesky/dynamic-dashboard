@@ -22,7 +22,7 @@ import static java.util.stream.Collectors.toList;
 public class DefaultNodeStatusPopulation implements NodeStatusPopulation {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultNodeStatusPopulation.class);
-    private static final Set IGNORED_DEPENDENCY_KEYS = newHashSet("version", "environment", "buildTimestamp");
+    private static final Set IGNORED_DEPENDENCY_KEYS = newHashSet("version", "environment", "buildTimestamp", "dependencies");
 
     private ObjectMapper objectMapper;
 
@@ -128,6 +128,19 @@ public class DefaultNodeStatusPopulation implements NodeStatusPopulation {
                             getDependencyStatus(dependencyInfo));
                 })
                 .collect(toList());
+
+        // Support alternate info page structure
+        if(responseBody.get("dependencies") != null) {
+            Map<String, Object> alternateDependencyMap = (Map<String, Object>) responseBody.get("dependencies");
+            alternateDependencyMap.entrySet()
+                    .forEach(entry -> {
+                        Map<String, Object> dependencyInfo = (Map<String, Object>) entry.getValue();
+                        dependencyStatusList.add(new DependencyStatus(
+                                entry.getKey(),
+                                null,
+                                getDependencyStatus(dependencyInfo)));
+                    });
+        }
 
         if(dependencyStatusList != null)
             nodeStatus.setDependencyStatus(dependencyStatusList);

@@ -29,7 +29,7 @@ public class DashboardResource {
 	}
 
 	@GET
-    public String getData() throws IOException {;
+    public String getData() throws IOException {
 		DashboardData dashboardData = dashboardDataService.getDashboardData();
 
 		if (dashboardData != null) {
