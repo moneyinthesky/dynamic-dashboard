@@ -127,9 +127,7 @@ public class DashboardDataDao {
 		data.getDataCenters()
 				.forEach(dataCenterStatus -> dataCenterStatus.getApplications()
 						.forEach(applicationStatus -> {
-							applicationStatus.getEnvironmentStatusMap().entrySet()
-									.stream()
-									.map(Map.Entry::getValue)
+							applicationStatus.getEnvironmentStatusMap().values()
 									.forEach(nodeStatusPopulation::addAggregatedEnvironmentNodeStatusData);
 						}));
 	}

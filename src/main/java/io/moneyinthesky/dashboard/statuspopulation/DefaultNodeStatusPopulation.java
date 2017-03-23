@@ -62,28 +62,27 @@ public class DefaultNodeStatusPopulation implements NodeStatusPopulation {
     public void addAggregatedEnvironmentNodeStatusData(EnvironmentStatus environmentStatus) {
         Map<String, AggregatedNodeStatus> aggregatedNodeStatusMap = new HashMap<>();
 
-        for(NodeStatus nodeStatus : environmentStatus.getNodeStatusList()) {
-            if(!nodeStatus.isInfoPageUnavailable() && nodeStatus.isUp()) {
-                populateAggregatedNodeStatusForVersion(nodeStatus, aggregatedNodeStatusMap);
 
-            } else if(nodeStatus.isUp()) {
-                environmentStatus.addToUnknownVersionNodes(nodeStatus);
+        environmentStatus.getNodeStatusList()
+                .forEach(nodeStatus -> {
+                    if(!nodeStatus.isInfoPageUnavailable() && nodeStatus.isUp()) {
+                        populateAggregatedNodeStatusForVersion(nodeStatus, aggregatedNodeStatusMap);
 
-            } else {
-                environmentStatus.incrementNodesDown();
-                environmentStatus.addToUnhealthyNodes(nodeStatus);
-            }
-        }
+                    } else if(nodeStatus.isUp()) {
+                        environmentStatus.addToUnknownVersionNodes(nodeStatus);
+
+                    } else {
+                        environmentStatus.incrementNodesDown();
+                        environmentStatus.addToUnhealthyNodes(nodeStatus);
+                    }
+                });
 
         environmentStatus.setVersionToNodeStatusMap(aggregatedNodeStatusMap);
     }
 
     private void populateAggregatedNodeStatusForVersion(NodeStatus nodeStatus, Map<String, AggregatedNodeStatus> aggregatedNodeStatusMap) {
-        AggregatedNodeStatus aggregatedNodeStatus = aggregatedNodeStatusMap.get(nodeStatus.getVersion());
-        if(aggregatedNodeStatus == null) {
-            aggregatedNodeStatus = new AggregatedNodeStatus();
-            aggregatedNodeStatusMap.put(nodeStatus.getVersion(), aggregatedNodeStatus);
-        }
+        AggregatedNodeStatus aggregatedNodeStatus = aggregatedNodeStatusMap
+                .computeIfAbsent(nodeStatus.getVersion(), key -> new AggregatedNodeStatus());
 
         aggregatedNodeStatus.incrementNodeCount();
 
@@ -132,14 +131,9 @@ public class DefaultNodeStatusPopulation implements NodeStatusPopulation {
         // Support alternate info page structure
         if(responseBody.get("dependencies") != null) {
             Map<String, Object> alternateDependencyMap = (Map<String, Object>) responseBody.get("dependencies");
-            alternateDependencyMap.entrySet()
-                    .forEach(entry -> {
-                        Map<String, Object> dependencyInfo = (Map<String, Object>) entry.getValue();
-                        dependencyStatusList.add(new DependencyStatus(
-                                entry.getKey(),
-                                null,
-                                getDependencyStatus(dependencyInfo)));
-                    });
+            alternateDependencyMap
+                    .forEach((key, value) ->
+                            dependencyStatusList.add(new DependencyStatus(key, null, getDependencyStatus((Map<String, Object>) value))));
         }
 
         if(dependencyStatusList != null)
@@ -147,11 +141,7 @@ public class DefaultNodeStatusPopulation implements NodeStatusPopulation {
     }
 
     private String getDependencyStatus(Map<String, Object> dependencyInfo) {
-        if(dependencyInfo.get("status") != null) {
-            return (String) dependencyInfo.get("status");
-        } else {
-            return (Boolean) dependencyInfo.get("running") ? "UP" : "DOWN";
-        }
+        return (String) dependencyInfo.getOrDefault("status", ((Boolean) dependencyInfo.get("running")) ? "UP" : "DOWN");
     }
 
     private boolean isNodeUp(HttpResponse<String> statusResponse) {
