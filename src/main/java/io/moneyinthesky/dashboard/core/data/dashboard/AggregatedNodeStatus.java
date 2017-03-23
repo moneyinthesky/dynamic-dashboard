@@ -1,9 +1,8 @@
 package io.moneyinthesky.dashboard.core.data.dashboard;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static java.util.Comparator.comparing;
 
 public class AggregatedNodeStatus {
     private Integer nodeCount = 0;
@@ -28,7 +27,8 @@ public class AggregatedNodeStatus {
     }
 
     public void addToNodesForVersion(NodeStatus nodeStatus) {
-        addToListInOrder(nodesForVersion, nodeStatus);
+        nodesForVersion.add(nodeStatus);
+        nodesForVersion.sort(comparing(NodeStatus::getUrl));
     }
 
     public List<NodeStatus> getNodesForVersion() {
@@ -41,22 +41,5 @@ public class AggregatedNodeStatus {
 
     public Map<String, DependencyStatus> getDisabledDependencies() {
         return disabledDependencies;
-    }
-
-    private List<NodeStatus> addToListInOrder(List<NodeStatus> list, NodeStatus nodeStatus) {
-        //TODO make this less ugly
-        if(list.isEmpty())
-            list.add(nodeStatus);
-        else {
-            int initialSize = list.size();
-            for(int i = 0; i < initialSize; i++) {
-                if(nodeStatus.getUrl().compareTo(list.get(i).getUrl()) < 0) {
-                    list.add(i, nodeStatus);
-                    return list;
-                }
-            }
-            list.add(initialSize, nodeStatus);
-        }
-        return list;
     }
 }

@@ -1,15 +1,11 @@
 package io.moneyinthesky.dashboard.core.dao;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import io.moneyinthesky.dashboard.core.data.dashboard.*;
 import io.moneyinthesky.dashboard.core.data.settings.DataCenter;
 import io.moneyinthesky.dashboard.core.data.settings.Environment;
 import io.moneyinthesky.dashboard.core.data.settings.Settings;
 import io.moneyinthesky.dashboard.nodediscovery.NodeDiscoveryMethod;
-import io.moneyinthesky.dashboard.nodediscovery.aws.AwsDiscoveryMethod;
-import io.moneyinthesky.dashboard.nodediscovery.fleet.FleetDiscoveryMethod;
-import io.moneyinthesky.dashboard.nodediscovery.urlpattern.UrlPatternDiscoveryMethod;
 import io.moneyinthesky.dashboard.statuspopulation.NodeStatusPopulation;
 
 import java.io.IOException;
@@ -18,38 +14,36 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.time.LocalDateTime.now;
 import static java.time.format.DateTimeFormatter.ofLocalizedDateTime;
 import static java.time.format.FormatStyle.LONG;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 public class DashboardDataDao {
 
 	private static final ZoneId TIMEZONE = ZoneId.of("Europe/London");
-	private static Map<String, NodeDiscoveryMethod> discoveryMethodMap;
 
-	private SettingsDao settingsDao;
-	private NodeStatusRetrieval nodeStatusRetrieval;
-	private NodeStatusPopulation nodeStatusPopulation;
+	private final SettingsDao settingsDao;
+	private final NodeStatusRetrieval nodeStatusRetrieval;
+	private final NodeStatusPopulation nodeStatusPopulation;
+	private final Map<String, NodeDiscoveryMethod> nodeDiscoveryMethodMap;
 
 	private List<NodeStatus> nodeStatusList;
 	private Settings settings;
 
 	@Inject
 	public DashboardDataDao(SettingsDao settingsDao, NodeStatusRetrieval nodeStatusRetrieval,
-							UrlPatternDiscoveryMethod urlPatternDiscoveryMethod, FleetDiscoveryMethod fleetDiscoveryMethod,
-							AwsDiscoveryMethod awsDiscoveryMethod, NodeStatusPopulation nodeStatusPopulation) throws IOException {
+							Map<String, NodeDiscoveryMethod> nodeDiscoveryMethodMap,
+							NodeStatusPopulation nodeStatusPopulation) throws IOException {
 		this.settingsDao = settingsDao;
 		this.nodeStatusRetrieval = nodeStatusRetrieval;
 		this.nodeStatusPopulation = nodeStatusPopulation;
-
-		discoveryMethodMap = ImmutableMap.of(
-				"urlPattern", urlPatternDiscoveryMethod,
-				"fleet", fleetDiscoveryMethod,
-				"aws", awsDiscoveryMethod);
+		this.nodeDiscoveryMethodMap = nodeDiscoveryMethodMap;
 	}
 
 	public DashboardData populateDashboardData() throws IOException {
@@ -103,10 +97,12 @@ public class DashboardDataDao {
 		environmentStatus.setName(environment.getName());
 
 		if(environment.getNodeDiscoveryMethod() != null && environment.getApplicationConfig() != null ) {
-			NodeDiscoveryMethod discoveryMethod = discoveryMethodMap.get(environment.getNodeDiscoveryMethod());
+			NodeDiscoveryMethod discoveryMethod = nodeDiscoveryMethodMap.get(environment.getNodeDiscoveryMethod());
 
-			Map<String, String> applicationConfig = environment.getApplicationConfig().get(application);
-			List<String> urls = applicationConfig != null ? discoveryMethod.generateNodeUrls(applicationConfig) : newArrayList();
+			Optional<Map<String, String>> applicationConfig = ofNullable(environment.getApplicationConfig().get(application));
+			List<String> urls = applicationConfig
+					.map(discoveryMethod::generateNodeUrls)
+					.orElse(newArrayList());
 
 			environmentStatus.setNodeStatusList(urls
 					.stream()
@@ -132,7 +128,9 @@ public class DashboardDataDao {
 				.forEach(dataCenterStatus -> dataCenterStatus.getApplications()
 						.forEach(applicationStatus -> {
 							applicationStatus.getEnvironmentStatusMap().entrySet()
-									.forEach(environmentStatusEntry -> nodeStatusPopulation.addAggregatedEnvironmentNodeStatusData(environmentStatusEntry.getValue()));
+									.stream()
+									.map(Map.Entry::getValue)
+									.forEach(nodeStatusPopulation::addAggregatedEnvironmentNodeStatusData);
 						}));
 	}
 

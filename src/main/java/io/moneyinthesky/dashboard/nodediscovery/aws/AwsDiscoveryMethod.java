@@ -99,12 +99,9 @@ public class AwsDiscoveryMethod implements NodeDiscoveryMethod {
 
 		List<String> privateIps = ec2Client.getPrivateIpsFromInstances(instanceIds);
 		List<ResourceRecordSet> instanceResources = route53Client.getResourceRecordSets(hostedZoneId.get(),
-				resourceRecordSet -> {
-					if (resourceRecordSet.getResourceRecords().size() > 0) {
-						return privateIps.contains(resourceRecordSet.getResourceRecords().get(0).getValue());
-					}
-					return false;
-				});
+				resourceRecordSet ->
+					resourceRecordSet.getResourceRecords().size() > 0 &&
+						privateIps.contains(resourceRecordSet.getResourceRecords().get(0).getValue()));
 
 		return instanceResources.stream()
 				.filter(instanceResource -> instanceResource.getName().startsWith(appPrefix))
