@@ -44,13 +44,13 @@ public class PatternExploder {
 
         List<String> tokens = patternExploderToken.explode();
         if (!variations.isEmpty() && !tokens.isEmpty()) {
-            tokens.stream().forEach(variable -> variations.stream().forEach(variation -> explodedList.add(variation + variable)));
+            tokens.forEach(variable -> variations.forEach(variation -> explodedList.add(variation + variable)));
 
         } else if (!variations.isEmpty()) {
             explodedList.addAll(variations);
 
         } else {
-            tokens.stream().forEach(variable -> explodedList.add(variable));
+            explodedList.addAll(tokens);
         }
 
         return explodedList;

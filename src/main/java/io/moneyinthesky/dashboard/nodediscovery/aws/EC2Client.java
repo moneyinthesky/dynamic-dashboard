@@ -6,10 +6,11 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.Instance;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 class EC2Client {
 
@@ -20,16 +21,15 @@ class EC2Client {
 	}
 
 	List<String> getPrivateIpsFromInstances(List<String> instanceIds) {
-		List<String> privateIps = new ArrayList<>();
-
 		DescribeInstancesRequest ec2Request = new DescribeInstancesRequest().withInstanceIds(instanceIds);
-		DescribeInstancesResult result = amazonEC2.describeInstances(ec2Request);
 
-		result.getReservations().forEach(reservation ->
-				reservation.getInstances()
-						.forEach(instance -> privateIps.add(instance.getPrivateIpAddress())));
-
-		return privateIps;
+		return amazonEC2.describeInstances(ec2Request).getReservations()
+				.stream()
+				.flatMap(reservation ->
+						reservation.getInstances()
+								.stream()
+								.map(Instance::getPrivateIpAddress))
+				.collect(toList());
 	}
 
 	private AmazonEC2 getEC2Client(AWSCredentials credentials, Regions region) {

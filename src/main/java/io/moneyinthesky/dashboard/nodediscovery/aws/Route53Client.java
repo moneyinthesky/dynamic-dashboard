@@ -26,7 +26,7 @@ class Route53Client {
 		this.configuration = configuration;
 	}
 
-	public Optional<String> getHostedZoneIdByName(String hostedZoneName) {
+	Optional<String> getHostedZoneIdByName(String hostedZoneName) {
 		ListHostedZonesByNameRequest hostedZonesByNameRequest = new ListHostedZonesByNameRequest().withDNSName(hostedZoneName);
 		List<HostedZone> hostedZones = amazonRoute53.listHostedZonesByName(hostedZonesByNameRequest).getHostedZones();
 
@@ -43,12 +43,10 @@ class Route53Client {
 	Optional<String> getLoadBalancerDNS(String hostedZoneId) {
 		String loadBalancerName = configuration.get("loadBalancer");
 
-		Optional<ResourceRecord> loadBalancer = getResourceRecordByNameRecursively(hostedZoneId, loadBalancerName);
-		if(loadBalancer.isPresent()) {
-			return Optional.of(loadBalancer.get().getValue());
-		}
-
-		return empty();
+		return getResourceRecordByNameRecursively(hostedZoneId, loadBalancerName)
+				.map(ResourceRecord::getValue)
+				.map(Optional::of)
+				.orElse(empty());
 	}
 
 	List<ResourceRecordSet> getResourceRecordSets(String hostedZoneId,

@@ -22,7 +22,7 @@ public class LogExecutionTimeInterceptor implements MethodInterceptor {
         return object;
     }
 
-    private String buildLogMessage(MethodInvocation methodInvocation, double totalTime) {
+    private static String buildLogMessage(MethodInvocation methodInvocation, double totalTime) {
         String declaringClass = methodInvocation.getMethod().getDeclaringClass().getSimpleName();
         String method = methodInvocation.getMethod().getName();
 

@@ -6,35 +6,34 @@ import java.util.List;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
-public class PatternExploderToken {
+class PatternExploderToken {
 
     private static final String VARIATION_SEPARATOR = ",";
     private static final String RANGE_SEPARATOR = "-";
     private List<String> tokenVariations;
 
-    protected PatternExploderToken(String rawToken) {
+    PatternExploderToken(String rawToken) {
         if(rawToken == null || rawToken.isEmpty()) {
-            tokenVariations = asList("");
+            tokenVariations = singletonList("");
 
         } else if(containsVariableCharacter(rawToken)) {
             generateVariations(rawToken.substring(1, rawToken.length()-1));
 
         } else {
-            tokenVariations = asList(rawToken);
+            tokenVariations = singletonList(rawToken);
         }
     }
 
-    protected List<String> explode() {
+    List<String> explode() {
         return tokenVariations;
     }
 
-    private List<String> generateVariations(String token) {
+    private void generateVariations(String token) {
         tokenVariations = new ArrayList<>();
         List<String> subTokens = asList(token.split(VARIATION_SEPARATOR));
-        subTokens.stream().forEach(subToken -> addToVariations(subToken));
-
-        return tokenVariations;
+        subTokens.forEach(this::addToVariations);
     }
 
     private void addToVariations(String subToken) {
