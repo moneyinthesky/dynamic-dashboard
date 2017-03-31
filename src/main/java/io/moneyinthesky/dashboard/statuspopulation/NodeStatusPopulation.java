@@ -8,7 +8,7 @@ public interface NodeStatusPopulation {
 
     boolean populateNodeStatus(NodeStatus nodeStatus, HttpResponse<String> response);
 
-    void populateNodeInfo(NodeStatus nodeStatus, HttpResponse<String> response);
+    boolean populateNodeInfo(NodeStatus nodeStatus, HttpResponse<String> response);
 
     void addAggregatedEnvironmentNodeStatusData(EnvironmentStatus environmentStatus);
 }

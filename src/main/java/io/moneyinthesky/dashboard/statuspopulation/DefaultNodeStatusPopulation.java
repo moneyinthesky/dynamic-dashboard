@@ -1,5 +1,6 @@
 package io.moneyinthesky.dashboard.statuspopulation;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.mashape.unirest.http.HttpResponse;
@@ -46,15 +47,17 @@ public class DefaultNodeStatusPopulation implements NodeStatusPopulation {
     }
 
     @Override
-    public void populateNodeInfo(NodeStatus nodeStatus, HttpResponse<String> response) {
+    public boolean populateNodeInfo(NodeStatus nodeStatus, HttpResponse<String> response) {
         if(is2XXResponse(response)) {
             populateNodeStatusBasedOnInfoResponse(response, nodeStatus);
+            return true;
 
         } else {
             nodeStatus.setVersion("???");
             nodeStatus.setInfoPageUnavailable(true);
             nodeStatus.setErrorMessage("HTTP status code: " + response.getStatus() + " from info page");
             logger.info("Status code: {} from {}", response.getStatus(), nodeStatus.getInfoUrl());
+            return false;
         }
     }
 
@@ -99,10 +102,9 @@ public class DefaultNodeStatusPopulation implements NodeStatusPopulation {
         aggregatedNodeStatus.addToNodesForVersion(nodeStatus);
     }
 
-    @SuppressWarnings("unchecked")
     private void populateNodeStatusBasedOnInfoResponse(HttpResponse<String> infoResponse, NodeStatus nodeStatus) {
         try {
-            Map<String, Object> responseBody = objectMapper.readValue(infoResponse.getBody(), Map.class);
+            Map<String, Object> responseBody = objectMapper.readValue(infoResponse.getBody(), new TypeReference<Map<String, Object>>(){});
             nodeStatus.setVersion((String) responseBody.get("version"));
 
             populateDependencyStatusInfo(nodeStatus, responseBody);
