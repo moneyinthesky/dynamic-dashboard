@@ -46,14 +46,13 @@ class NodeStatusRetrieval {
 
     private void getAndProcessNodeStatus(NodeStatus nodeStatus) {
         try {
-            boolean infoPagePopulated = getAndProcessInfoPage(nodeStatus);
+            HttpResponse<String> statusResponse = get(nodeStatus.getStatusUrl()).asString();
 
-            if(infoPagePopulated) {
-                nodeStatus.up(true);
-            } else {
-                HttpResponse<String> statusResponse = get(nodeStatus.getStatusUrl()).asString();
-                nodeStatusPopulation.populateNodeStatus(nodeStatus, statusResponse);
+            boolean nodeIsUp = nodeStatusPopulation.populateNodeStatus(nodeStatus, statusResponse);
+            if(nodeIsUp) {
+                getAndProcessInfoPage(nodeStatus);
             }
+
         } catch (UnirestException e) {
             nodeStatus.up(false);
             nodeStatus.setErrorMessage("Error calling node: " + e.getMessage());
@@ -61,8 +60,8 @@ class NodeStatusRetrieval {
         }
     }
 
-    private boolean getAndProcessInfoPage(NodeStatus nodeStatus) throws UnirestException {
+    private void getAndProcessInfoPage(NodeStatus nodeStatus) throws UnirestException {
         HttpResponse<String> infoResponse = get(nodeStatus.getInfoUrl()).asString();
-        return nodeStatusPopulation.populateNodeInfo(nodeStatus, infoResponse);
+        nodeStatusPopulation.populateNodeInfo(nodeStatus, infoResponse);
     }
 }
